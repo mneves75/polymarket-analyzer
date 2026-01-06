@@ -13,94 +13,40 @@
 
 **Analogia: REST vs WebSocket**
 
-```
-REST (POLLING)
-────────────────────────────────────────────────────────────
-Cliente                    Servidor
-   │                           │
-   ├───── "Tem dados novos?" ──▶│
-   │◀──── "Não" ────────────────┤
-   │                           │
-   [espera 1 segundo...]
-   │                           │
-   ├───── "E agora?" ──────────▶│
-   │◀──── "Não" ────────────────┤
-   │                           │
-   [espera 1 segundo...]
-   │                           │
-   ├───── "E agora?" ──────────▶│
-   │◀──── "SIM! Aqui estão" ────┤
-   │                           │
+```mermaid
+sequenceDiagram
+    participant C as Cliente
+    participant S as Servidor
 
-Problemas:
-- Muitas requisições vazias
-- Latência (até 1 segundo para saber de mudanças)
-- Gasta banda e processamento
+    Note over C,S: REST POLLING
+    C->>S: Tem dados novos?
+    S-->>C: Não
+    Note over C: espera 1 segundo...
+    C->>S: E agora?
+    S-->>C: Não
+    Note over C: espera 1 segundo...
+    C->>S: E agora?
+    S-->>C: SIM! Aqui estão
 
-WEBSOCKET
-────────────────────────────────────────────────────────────
-Cliente                    Servidor
-   │                           │
-   ├───── HANDSHAKE HTTP ──────▶│
-   │◀──── "Conectado!" ─────────┤
-   │                           │
-   │      ═══ CONEXÃO ABERTA ═══│
-   │                           │
-   │◀──── "Dado novo!" ─────────┤  (Servidor push!)
-   │◀──── "Mais dados!" ────────┤  (Servidor push!)
-   │◀──── "Mais dados!" ────────┤  (Servidor push!)
-   │                           │
-
-Vantagens:
-- Uma única conexão
-- Latência mínima (milissegundos)
-- Servidor envia quando tiver dados
+    Note over C,S: WEBSOCKET
+    C->>S: HANDSHAKE HTTP
+    S-->>C: Conectado!
+    Note over C,S: ═══ CONEXÃO ABERTA ═══
+    S-->>C: Dado novo! (Servidor push!)
+    S-->>C: Mais dados! (Servidor push!)
+    S-->>C: Mais dados! (Servidor push!)
 ```
 
 ### 1.2 Ciclo de Vida de uma Conexão WebSocket
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  1. HANDSHAKE INICIAL (HTTP Upgrade)                       │
-│                                                              │
-│  GET ws://server.com/ws HTTP/1.1                            │
-│  Upgrade: websocket                                         │
-│  Connection: Upgrade                                        │
-│  Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==               │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│  2. HANDSHAKE ACEITO                                       │
-│                                                              │
-│  HTTP/1.1 101 Switching Protocols                           │
-│  Upgrade: websocket                                         │
-│  Connection: Upgrade                                        │
-│  Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=         │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│  3. CONEXÃO ESTABELECIDA (WebSocket)                       │
-│                                                              │
-│  ┌────────────────────────────────────────────────────┐    │
-│  │  FRAME 1: {"type":"hello","data":"..."}            │    │
-│  │  FRAME 2: {"type":"update","price":0.65}           │    │
-│  │  FRAME 3: {"type":"update","price":0.66}           │    │
-│  │  FRAME 4: {"type":"ping"}                          │    │
-│  │  ...                                               │    │
-│  └────────────────────────────────────────────────────┘    │
-│                                                              │
-│  [Conexão permanece aberta indefinidamente]                 │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│  4. FECHAMENTO (Close Frame)                               │
-│                                                              │
-│  Cliente ou servidor envia frame CLOSE                      │
-│  Conexão TCP é encerrada                                    │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+stateDiagram-v2
+    [*] --> HandshakeInicial: 1. HANDSHAKE INICIAL HTTP Upgrade
+    HandshakeInicial --> HandshakeAceito: 2. HANDSHAKE ACEITO
+    HandshakeAceito --> ConexaoEstabelecida: 3. CONEXÃO ESTABELECIDA
+    ConexaoEstabelecida --> ConexaoEstabelecida: Frames de dados<br/>(hello, update, ping, ...)
+    ConexaoEstabelecida --> Fechamento: 4. FECHAMENTO
+    Fechamento --> [*]
 ```
 
 ---
@@ -411,32 +357,49 @@ const scheduleReconnect = () => {
 
 **Timeline de Reconexão:**
 
-```
-Tentativa 1:  500ms  + jitter(0-200ms) = ~500-700ms
-Tentativa 2:  1000ms + jitter(0-200ms) = ~1000-1200ms
-Tentativa 3:  2000ms + jitter(0-200ms) = ~2000-2200ms
-Tentativa 4:  4000ms + jitter(0-200ms) = ~4000-4200ms
-Tentativa 5:  8000ms + jitter(0-200ms) = ~8000-8200ms
-Tentativa 6:  16000ms + jitter(0-200ms) = ~16000-16200ms
-Tentativa 7+: 30000ms + jitter(0-200ms) = ~30000-30200ms (cap)
+```mermaid
+graph LR
+    T1["Tentativa 1: 500ms + jitter 0-200ms = ~500-700ms"]
+    T2["Tentativa 2: 1000ms + jitter 0-200ms = ~1000-1200ms"]
+    T3["Tentativa 3: 2000ms + jitter 0-200ms = ~2000-2200ms"]
+    T4["Tentativa 4: 4000ms + jitter 0-200ms = ~4000-4200ms"]
+    T5["Tentativa 5: 8000ms + jitter 0-200ms = ~8000-8200ms"]
+    T6["Tentativa 6: 16000ms + jitter 0-200ms = ~16000-16200ms"]
+    T7["Tentativa 7+: 30000ms + jitter 0-200ms = ~30000-30200ms cap"]
+
+    T1 --> T2
+    T2 --> T3
+    T3 --> T4
+    T4 --> T5
+    T5 --> T6
+    T6 --> T7
 ```
 
 **Por que Jitter?**
 
-```
-SEM JITTER:
-────────────────────────────────────────────────────────────
-100 clientes desconectados simultaneamente
-├─ Todos tentam reconectar em 500ms
-└─ Servidor sobrecarregado (thundering herd)
+```mermaid
+graph TB
+    subgraph SemJitter["SEM JITTER"]
+        S1["100 clientes desconectados simultaneamente"]
+        S2["Todos tentam reconectar em 500ms"]
+        S3["Servidor sobrecarregado<br/>thundering herd"]
+        S1 --> S2
+        S2 --> S3
+    end
 
-COM JITTER:
-────────────────────────────────────────────────────────────
-100 clientes desconectados simultaneamente
-├─ Cliente 1: 500ms + 50ms = 550ms
-├─ Cliente 2: 500ms + 120ms = 620ms
-├─ Cliente 3: 500ms + 180ms = 680ms
-└─ Load distribuído uniformemente
+    subgraph ComJitter["COM JITTER"]
+        C1["100 clientes desconectados simultaneamente"]
+        C2["Cliente 1: 500ms + 50ms = 550ms"]
+        C3["Cliente 2: 500ms + 120ms = 620ms"]
+        C4["Cliente 3: 500ms + 180ms = 680ms"]
+        C5["Load distribuído uniformemente"]
+        C1 --> C2
+        C1 --> C3
+        C1 --> C4
+        C2 --> C5
+        C3 --> C5
+        C4 --> C5
+    end
 ```
 
 ### 4.2 Detecção de Conexão Stale
@@ -462,20 +425,22 @@ const startHeartbeat = () => {
 
 **Por que detectar stale?**
 
-```
-Conexão pode parecer "aberta" mas estar quebrada:
-────────────────────────────────────────────────────────────
-Servidor sofre crash de rede
-  ↓
-Conexão TCP permanece "aberta" (não detectou crash)
-  ↓
-Cliente para de receber mensagens
-  ↓
-[15 segundos sem mensagens]
-  ↓
-Cliente detecta: "Stale!"
-  ↓
-Cliente fecha e reconecta
+```mermaid
+graph TD
+    Start["Conexão pode parecer aberta mas estar quebrada"]
+    Crash["Servidor sofre crash de rede"]
+    TCP["Conexão TCP permanece aberta<br/>não detectou crash"]
+    Stop["Cliente para de receber mensagens"]
+    Wait["15 segundos sem mensagens"]
+    Detect["Cliente detecta: Stale!"]
+    Reconnect["Cliente fecha e reconecta"]
+
+    Start --> Crash
+    Crash --> TCP
+    TCP --> Stop
+    Stop --> Wait
+    Wait --> Detect
+    Detect --> Reconnect
 ```
 
 ---
@@ -484,25 +449,16 @@ Cliente fecha e reconecta
 
 ### 5.1 Estratégia Híbrida
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                  ESTRATÉGIA HÍBRIDA                          │
-│                                                              │
-│  WebSocket (tempo real)        REST (baseline)              │
-│  ┌──────────────────┐         ┌──────────────────┐         │
-│  │ best_bid_ask     │         │ order book full  │         │
-│  │ last_trade_price │         │ price history    │         │
-│  │ price_change     │         │ holders          │         │
-│  └──────────────────┘         └──────────────────┘         │
-│         │                              │                     │
-│         ▼                              ▼                     │
-│  ┌────────────────────────────────────────────────────┐    │
-│  │              MERGE & ESTADO                         │    │
-│  │  - WS atualiza preços em tempo real                 │    │
-│  │  - REST fornece contexto adicional                  │    │
-│  │  - Se WS falhar, REST é fallback                    │    │
-│  └────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph Hybrid["ESTRATÉGIA HÍBRIDA"]
+        WS["WebSocket tempo real<br/>best_bid_ask<br/>last_trade_price<br/>price_change"]
+        REST["REST baseline<br/>order book full<br/>price history<br/>holders"]
+        Merge["MERGE e ESTADO<br/>- WS atualiza preços em tempo real<br/>- REST fornece contexto adicional<br/>- Se WS falhar REST é fallback"]
+    end
+
+    WS --> Merge
+    REST --> Merge
 ```
 
 ### 5.2 Implementação Híbrida no Código
@@ -842,6 +798,151 @@ class AdaptiveReconnect {
 - **RFC 6455** (WebSocket Protocol): https://datatracker.ietf.org/doc/html/rfc6455
 - **WebSocket API**: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
 - **Real-time Web**: Real-Time Web Apps with WebSockets (Jason Giangrande)
+
+---
+
+## 🎓 Design Decisions
+
+### Decisão 1: Por que estratégia híbrida (WS + REST)?
+
+**Alternativas Consideradas:**
+1. **Apenas WebSocket** - Tudo via tempo real
+2. **Apenas REST** - Polling contínuo
+3. **Híbrido** - WS para tempo real + REST para contexto ✅ **ESCOLHIDO**
+
+**Trade-offs:**
+
+| Critério | Apenas WS | Apenas REST | Híbrido |
+|----------|-----------|-------------|---------|
+| Latência | ⭐⭐⭐⭐⭐ Mínima | ⭐⭐ Alta | ⭐⭐⭐⭐⭐ Mínima (WS) |
+| Dados disponíveis | ⭐⭐⭐ Limitados | ⭐⭐⭐⭐⭐ Completos | ⭐⭐⭐⭐⭐ Completos (REST) |
+| Resiliência | ⭐⭐ Frágil (queda = nada) | ⭐⭐⭐ Robusto | ⭐⭐⭐⭐⭐ Muito robusto |
+| Complexidade | ⭐⭐ Baixa | ⭐⭐⭐ Média | ⭐⭐⭐⭐ Alta |
+| Uso de rede | ⭐⭐⭐ Médio | ⭐⭐ Alto (polling) | ⭐⭐⭐⭐ Otimizado |
+
+**Por que híbrido foi escolhido:**
+- ✅ **Melhor dos dois mundos**: Latência WS + completude REST
+- ✅ **Graceful degradation**: Se WS cai, REST mantém baseline
+- ✅ **Dados complementares**: Historico, holders não vem no WS
+- ✅ **Redundância**: Dados críticos (preços) chegam por ambos canais
+
+**Exemplo de complementaridade:**
+```typescript
+// WebSocket fornece:
+- best_bid_ask (preços em tempo real)
+- last_trade_price (última negociação)
+- price_change (mudanças no order book)
+
+// REST fornece:
+- order book completo (todos os níveis)
+- price history (30+ dias)
+- holders (top detentores)
+```
+
+**Referência no código:** `src/tui.ts` - Uso simultâneo de WS e REST
+
+---
+
+### Decisão 2: Por que exponential backoff com jitter?
+
+**Alternativas Consideradas:**
+1. **Backoff fixo** - Espera sempre 1 segundo
+2. **Exponential backoff** - Espera progressivamente mais
+3. **Exponential + jitter** - Progressivo + aleatório ✅ **ESCOLHIDO**
+
+**Por que exponential + jitter foi escolhido:**
+- ✅ **Evita thundering herd**: Se 1000 clientes caem, não reconectam todos ao mesmo tempo
+- ✅ **Balanceado**: Tenta rápido primeiro (falhas transitórias), espera mais se persiste
+- ✅ **Cap de 30s**: Não espera para sempre
+
+**Exemplo sem jitter (ruim):**
+```
+1000 clientes desconectam simultaneamente
+↓
+Todos tentam reconectar em 500ms
+↓
+Servidor sobrecarregado (thundering herd)
+```
+
+**Exemplo com jitter (bom):**
+```
+1000 clientes desconectam simultaneamente
+↓
+Cliente 1: 500ms + 50ms = 550ms
+Cliente 2: 500ms + 120ms = 620ms
+Cliente 3: 500ms + 180ms = 680ms
+...
+↓
+Load distribuído uniformemente no tempo
+```
+
+**Referência no código:** `src/ws.ts:197-204` - `scheduleReconnect()`
+
+---
+
+### Decisão 3: Por que heartbeat de 15 segundos?
+
+**Alternativas Consideradas:**
+1. **Sem heartbeat** - Confia que conexão está viva
+2. **Heartbeat 5s** - Detecta rápido, mas usa rede
+3. **Heartbeat 15s** - Balanceado ✅ **ESCOLHIDO**
+4. **Heartbeat 60s** - Econômico, mas lento
+
+**Por que 15 segundos foi escolhido:**
+- ✅ **Detecta stale**: Servidor pode "morrer" silenciosamente
+- ✅ **Não spam**: 5s seria agressivo para rede
+- ✅ **Janela tolerável**: 15s sem dados é aceitável para este caso de uso
+
+**Exemplo de detecção de stale:**
+```typescript
+// Conexão TCP pode parecer "aberta" mas estar morta:
+// 1. Servidor crash de rede
+// 2. Roteador morre
+// 3. Firewall silencioso
+// → TCP não detecta!
+// → Nós detectamos: 15s sem mensagens = stale
+```
+
+**Referência no código:** `src/config.ts:17` - `wsStaleMs: 15000`
+
+---
+
+## 📚 Recursos Externos
+
+### Aprender Mais Sobre:
+
+**WebSocket Protocol:**
+- [RFC 6455](https://datatracker.ietf.org/doc/html/rfc6455) - Especificação oficial
+- [WebSocket MDN](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) - MDN Web Docs
+- [Deep Dive: WS](https://www.youtube.com/watch?v=1BfC6rIVxSg) - YouTube (30 min)
+
+**Real-time Communication:**
+- [Polling vs SSE vs WebSocket](https://ably.com/topic/websocket-vs-sse-vs-polling) - Ably
+- [Real-time Architecture](https://www.youtube.com/watch?v=M7bYnJg9zXk) - YouTube (45 min)
+- [WebSocket Security](https://www.youtube.com/watch?v=xMzgCQ5it1U) - YouTube (20 min)
+
+**Exponential Backoff:**
+- [Backoff Strategies](https://cloud.google.com/architecture/rate-limiting-strategies-techniques) - Google Cloud
+- [Jitter Explained](https://www.awsarchitectureblog.com/2015/03/backoff.html) - AWS Blog
+- [Exponential Backoff Algorithm](https://en.wikipedia.org/wiki/Exponential_backoff) - Wikipedia
+
+### Vídeos Recomendados:
+
+- [WebSocket Explained in 5 Minutes](https://www.youtube.com/watch?v=MO8qGzJYXqk) - YouTube (5 min)
+- [Building Real-time Apps](https://www.youtube.com/watch?v=2ZadWq5RqF4) - YouTube (1 hora)
+- [Understanding Exponential Backoff](https://www.youtube.com/watch?v=h9JHSugV2gU) - YouTube (10 min)
+
+### Ferramentas Úteis:
+
+- [wscat](https://github.com/websockets/wscat) - CLI para testar WebSockets
+- [WebSocket King](https://www.websocketking.com/) - Teste WS no browser
+- [Postman](https://www.postman.com/) - Suporta WebSocket
+
+### Artigos Recomendados:
+
+- [When to Use WebSockets](https://ably.com/blog/when-to-use-websockets) - Ably Blog
+- [WebSocket vs REST](https://www.diffen.com/difference/WebSocket_vs_REST) - Diffen
+- [Real-time Best Practices](https://www.ably.io/blog/7-best-practices-realtime-event-delivery) - Ably
 
 ---
 

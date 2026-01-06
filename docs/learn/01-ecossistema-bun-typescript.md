@@ -32,13 +32,21 @@ Bun é escrito em **Zig**, uma linguagem de programação de sistemas focada em 
 
 **Comparativo de Arquitetura:**
 
-```
-Node.js                          Bun
-─────────────────────────────────────────────────────
-Escrito em C++                  Escrito em Zig
-V8 (motor JavaScript)           JavaScriptCore (motor JavaScript)
-Loop de eventos libuv           Loop de eventos próprio
-Múltiplas abstrações            Minimalista, direto ao sistema
+```mermaid
+graph LR
+    subgraph Node["Node.js"]
+        N1["Escrito em C++"]
+        N2["V8 motor JavaScript"]
+        N3["Loop de eventos libuv"]
+        N4["Múltiplas abstrações"]
+    end
+
+    subgraph Bun["Bun"]
+        B1["Escrito em Zig"]
+        B2["JavaScriptCore motor"]
+        B3["Loop de eventos próprio"]
+        B4["Minimalista, direto ao sistema"]
+    end
 ```
 
 **Benchmarks (instalação de dependências):**
@@ -96,19 +104,15 @@ bun completions        # Gera autocompletar para shell
 
 **Diagrama de Venn:**
 
-```
-┌────────────────────────────────────────┐
-│         TypeScript                     │
-│  ┌─────────────────────────────────┐  │
-│  │      JavaScript                 │  │
-│  │  (tudo que JS tem, TS também tem) │  │
-│  │                                 │  │
-│  └─────────────────────────────────┘  │
-│  + Tipos                              │
-│  + Interfaces                         │
-│  + Generics                           │
-│  + Decorators                         │
-└────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph TypeScript["TypeScript"]
+        JavaScript["JavaScript<br/>(tudo que JS tem, TS também tem)"]
+        Extras["<b>+</b> Tipos<br/><b>+</b> Interfaces<br/><b>+</b> Generics<br/><b>+</b> Decorators"]
+    end
+
+    TypeScript --> JavaScript
+    TypeScript --> Extras
 ```
 
 ### 2.2 Por Que Usar TypeScript?
@@ -1042,6 +1046,371 @@ function calcularTotal(carrinho: Carrinho): number {
 **Exercício Final: Refatoração**
 
 Encontre 3 lugares no código do projeto (em `src/`) onde você poderia melhorar os tipos. Faça as melhorias e explique por que elas tornam o código mais seguro.
+
+---
+
+## ✅ Check Your Understanding
+
+Teste seu conhecimento de TypeScript e Bun respondendo às perguntas abaixo.
+
+### Pergunta 1: Tipos Básicos
+
+**Qual o resultado deste código?**
+
+```typescript
+let x: string | number = "hello";
+x = 42;
+console.log(typeof x);
+```
+
+<details>
+<summary>Erro de Compilação (Resposta)</summary>
+
+Erro! TypeScript infere que `x` pode ser `string` ou `number` inicialmente como `"hello"` (string), mas depois tenta atribuir `42` (number).
+
+**Na verdade:** O código compila porque `x` foi declarado explicitamente como `string | number`, então ambos são permitidos. `typeof x` seria `"number"`.
+
+**Lição:** Union types permitem múltiplos tipos, mas você precisa lidar com ambos em runtime.
+</details>
+
+---
+
+### Pergunta 2: Type Guards
+
+**O que está errado neste código?**
+
+```typescript
+function processar(data: unknown) {
+  console.log(data.toUpperCase());  // ← Erro aqui!
+}
+```
+
+<details>
+<summary>Resposta</summary>
+
+`unknown` não permite acessar propriedades diretamente! Você precisa usar type guard:
+
+```typescript
+// ✅ Corrigido
+function processar(data: unknown) {
+  if (typeof data === "string") {
+    console.log(data.toUpperCase());  // OK - TypeScript sabe que é string
+  }
+}
+```
+
+**Lição:** Sempre verifique o tipo de `unknown` antes de usar.
+</details>
+
+---
+
+### Pergunta 3: Generics
+
+**O que esta função faz?**
+
+```typescript
+function getFirst<T>(arr: T[]): T | undefined {
+  return arr[0];
+}
+```
+
+<details>
+<summary>Resposta</summary>
+
+Retorna o primeiro elemento de um array, ou `undefined` se o array estiver vazio.
+
+**O `<T>` é um generic** - significa que a função funciona com qualquer tipo de array, e o tipo de retorno será o mesmo tipo dos elementos do array.
+
+**Exemplos:**
+```typescript
+getFirst<number>([1, 2, 3]);      // Retorna: number | undefined
+getFirst<string>(["a", "b", "c"]); // Retorna: string | undefined
+getFirst([true, false]);           // TypeScript infere: boolean | undefined
+```
+</details>
+
+---
+
+### Pergunta 4: Strict Mode
+
+**Por que usar `"strict": true` no tsconfig.json?**
+
+<details>
+<summary>Resposta</summary>
+
+O strict mode habilita TODAS as verificações de tipo do TypeScript:
+
+1. **noImplicitAny** - Proíbe `any` implícito
+2. **strictNullChecks** - Verifica null/undefined explicitamente
+3. **strictFunctionTypes** - Verifica tipos de função estritamente
+4. **strictPropertyInitialization** - Verifica se propriedades foram inicializadas
+
+**Benefício:** Captura mais erros em tempo de compilação em vez de runtime.
+
+**Custo:** Mais verbosidade, mas vale a pena para projetos sérios.
+</details>
+
+---
+
+## ⚠️ Common Pitfalls
+
+### Pitfall: Usar `any` Tipo
+
+**❌ RUIM:**
+```typescript
+function process(data: any) {
+  return data.value;  // Sem type checking
+}
+```
+
+**Por que é ruim?**
+- Desativa TypeScript completamente para aquele valor
+- Perde todos os benefícios de type safety
+- Erros só aparecem em runtime
+
+**✅ BOM:**
+```typescript
+// Opção 1: Use unknown com type guard
+function process(data: unknown) {
+  if (data && typeof data === "object" && "value" in data) {
+    return (data as { value: string }).value;
+  }
+}
+
+// Opção 2: Use generics
+function process<T extends Record<string, unknown>>(data: T) {
+  return data.value;
+}
+```
+
+---
+
+### Pitfall: Esquecer `await` em `forEach`
+
+**❌ RUIM:**
+```typescript
+items.forEach(async (item) => {
+  await process(item);  // ❌ forEach NÃO espera!
+});
+console.log("Todos processados!");  // Executa ANTES de processar
+```
+
+**Problema:**
+`forEach` ignora o valor retornado pelo callback, incluindo promises.
+
+**✅ BOM - Opção 1:**
+```typescript
+for (const item of items) {
+  await process(item);  // ✅ Aguarda cada um
+}
+console.log("Todos processados!");  // Executa DEPOIS
+```
+
+**✅ BOM - Opção 2 (Paralelo):**
+```typescript
+await Promise.all(items.map(item => process(item)));
+console.log("Todos processados!");
+```
+
+---
+
+### Pitfall: Type Assertion Inseguro
+
+**❌ RUIM:**
+```typescript
+const data = getFromAPI();
+const user = data as User;  // ❌ Força tipo sem verificar
+console.log(user.name);     // Pode falhar em runtime se não for User
+```
+
+**✅ BOM:**
+```typescript
+const data = getFromAPI();
+
+// Verifique antes
+function isUser(data: unknown): data is User {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "name" in data &&
+    "email" in data
+  );
+}
+
+if (isUser(data)) {
+  console.log(data.name);  // ✅ Type safe
+}
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### Problema: "Cannot find module 'blessed'"
+
+**Erro:**
+```
+error: Cannot find module "blessed" from "$PATH/src/tui.ts"
+```
+
+**Causa:**
+Você esqueceu de instalar as dependências.
+
+**Solução:**
+```bash
+# 1. Delete node_modules e lock
+rm -rf node_modules bun.lockb
+
+# 2. Reinstall dependencies
+bun install
+
+# 3. Verify
+ls node_modules/blessed  # Deve existir
+```
+
+**Prevenção:**
+Sempre execute `bun install` após:
+- `git clone` de um projeto novo
+- `git pull` com mudanças no package.json
+- `bun add` de nova dependência
+
+---
+
+### Problema: "TS2307: Cannot find module"
+
+**Erro:**
+```
+src/api.ts:1:25 - error TS2307: Cannot find module './utils' or its corresponding type declarations
+```
+
+**Causa:**
+TypeScript não consegue encontrar o módulo relativo.
+
+**Solução:**
+```bash
+# 1. Verifique se o arquivo existe
+ls -la src/utils.ts
+
+# 2. Verifique o nome (case sensitive!)
+# utils.ts ≠ Utils.ts ≠ util.ts
+
+# 3. Verifique a import
+# Se arquivo é utils.ts:
+import { algo } from './utils';     // ✅ (sem .ts)
+import { algo } from './utils.ts';  // ✅ (com .ts)
+import { algo } from './Utils';     // ❌ (case errado)
+```
+
+---
+
+## 🎯 Milestone Completado
+
+Após completar este capítulo, você deve ser capaz de:
+
+- [ ] Explicar a diferença entre `any` e `unknown`
+- [ ] Escrever tipos TypeScript básicos
+- [ ] Criar e usar generics
+- [ ] Implementar type guards
+- [ ] Entender e configurar tsconfig.json
+- [ ] Usar features do Bun (test runner, package manager)
+- [ ] Evitar pitfalls comuns de TypeScript
+
+**Exercício Prático:**
+Antes de avançar, crie um arquivo `test.ts` com:
+- 3 tipos diferentes (interface, type, enum)
+- 1 função genérica
+- 1 type guard
+- Execute com `bun run test.ts` e verifique sem erros
+
+---
+
+## 🎓 Design Decisions
+
+### Decisão 1: Por que `strict: true` no tsconfig?
+
+**Alternativas Consideradas:**
+1. **strict: false** - TypeScript mais permissivo
+2. **strict: true** - TypeScript mais rigoroso ✅ **ESCOLHIDO**
+
+**Trade-offs:**
+
+| Modo | Desenvolvimento | Bugs em Produção | Curva de Aprendizado |
+|------|-----------------|------------------|---------------------|
+| strict: false | ⭐⭐⭐ Rápido | ❌ Muitos bugs | Baixa |
+| strict: true | ⭐⭐ Lento no início | ✅ Poucos bugs | Alta |
+
+**Por que strict mode foi escolhido:**
+- ✅ **Catches bugs em compile-time**: `null`, `undefined`, tipos errados
+- ✅ **Melhor autocompletar**: IDE sabe exatamente quais tipos usar
+- ✅ **Refactoring mais seguro**: Mudanças quebram build imediatamente
+- ✅ **Documentação viva**: Tipos funcionam como docs
+
+**Exemplo de bug evitado:**
+```typescript
+// ❌ SEM STRICT (compila mas quebra em runtime!)
+function saudacao(nome: string | null) {
+  return "Olá, " + nome.toUpperCase();  // Crasha se nome for null!
+}
+
+// ✅ COM STRICT (não compila!)
+function saudacao(nome: string | null) {
+  // Error: Object is possibly 'null'
+  return "Olá, " + nome.toUpperCase();
+}
+```
+
+**Referência no código:** `tsconfig.json:3` - `"strict": true`
+
+---
+
+### Decisão 2: Por que `moduleResolution: "bundler"`?
+
+**Alternativas Consideradas:**
+1. **node** - Resolução estilo Node.js tradicional
+2. **node16** - Resolução Node.js com ESM
+3. **bundler** - Resolução estilo bundler ✅ **ESCOLHIDO**
+
+**Por que bundler foi escolhido:**
+- ✅ **Compatível com Bun**: Bun usa resolução similar
+- ✅ **Sem extensões obrigatórias**: `import { foo } from './bar'` funciona
+- ✅ **Suporta TypeScript exports**: Arquivos `.ts` sem problemas
+
+**Referência no código:** `tsconfig.json:5` - `"moduleResolution": "bundler"`
+
+---
+
+## 📚 Recursos Externos
+
+### Aprender Mais Sobre:
+
+**Bun:**
+- [Bun Documentation](https://bun.sh/docs) - Documentação oficial completa
+- [Bun Runtime](https://github.com/oven-sh/bun) - Repositório GitHub
+- [Bun vs Node Comparison](https://bun.sh/#bun-vs-node) - Benchmarks
+
+**TypeScript:**
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html) - Guia oficial
+- [TypeScript Deep Dive](https://basarat.gitbook.io/typescript/) - Livro gratuito
+- [Effective TypeScript](https://effectivetypescript.com/) - 62 dicas práticas
+
+**Generics:**
+- [TypeScript Generics Guide](https://www.typescriptlang.org/docs/handbook/2/generics.html) - Oficial
+- [Understanding TypeScript Generics](https://www.totaltypescript.com/typescript-generics) - Tutorial
+
+**Type Guards:**
+- [Type Narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html) - Oficial
+- [Type Guards Explained](https://mariusschulz.com/blog/type-guards-in-typescript) - Blog post
+
+### Vídeos Recomendados:
+
+- [TypeScript in 50 Minutes](https://www.youtube.com/watch?v=B7xa5mKR6JE) - YouTube (50 min)
+- [Understanding Generics](https://www.youtube.com/watch?v=6N5IjOYg_-E) - YouTube (15 min)
+- [Advanced TypeScript Patterns](https://www.youtube.com/watch?v=kYKX7_UEvzA) - YouTube (30 min)
+
+### Ferramentas Úteis:
+
+- [TypeScript Playground](https://www.typescriptlang.org/play) - Teste TS online
+- [bun.sh](https://bun.sh) - Instalação e docs do Bun
 
 ---
 

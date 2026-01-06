@@ -49,28 +49,20 @@ O Polymarket Analyzer:
 
 A aplicação segue esta arquitetura simples:
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Polymarket Analyzer                       │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐      │
-│  │ Gamma API    │    │ CLOB API     │    │ Data API     │      │
-│  │ (Descoberta) │    │ (Preços)     │    │ (Detentores) │      │
-│  └──────┬───────┘    └──────┬───────┘    └──────┬───────┘      │
-│         │                   │                    │              │
-│         └───────────────────┼────────────────────┘              │
-│                             ▼                                    │
-│                  ┌────────────────────┐                         │
-│                  │   Motor de Dados   │                         │
-│                  │   (api.ts, ws.ts)  │                         │
-│                  └─────────┬──────────┘                         │
-│                            ▼                                     │
-│                  ┌────────────────────┐                         │
-│                  │  Interface Terminal│                         │
-│                  │   (blessed/tui.ts) │                         │
-│                  └────────────────────┘                         │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph Polymarket_Analyzer["Polymarket Analyzer"]
+        Gamma["Gamma API<br/>(Descoberta)"]
+        CLOB["CLOB API<br/>(Preços)"]
+        Data["Data API<br/>(Detentores)"]
+        Motor["Motor de Dados<br/>(api.ts, ws.ts)"]
+        Interface["Interface Terminal<br/>(blessed/tui.ts)"]
+
+        Gamma --> Motor
+        CLOB --> Motor
+        Data --> Motor
+        Motor --> Interface
+    end
 ```
 
 ### Fluxo de Dados Simplificado
@@ -166,14 +158,12 @@ O **livro de ofertas** é como uma lista de todas as pessoas querendo comprar ou
 
 Imagine que você quer comprar um token "Sim" do mercado "O Brasil vai ganhar a Copa?". O livro de ofertas mostra:
 
-```
-COMPRADORES (BIDS)        VENDEDORES (ASKS)
-─────────────────────────────────────────────
-65¢ - 100 tokens          67¢ - 50 tokens
-64¢ - 200 tokens          68¢ - 100 tokens
-63¢ - 150 tokens          69¢ - 75 tokens
-62¢ - 300 tokens          70¢ - 200 tokens
-61¢ - 50 tokens           71¢ - 150 tokens
+```mermaid
+graph LR
+    subgraph Order_Book["Order Book"]
+        BIDS["BIDS (Compras)<br/>65¢ × 100 tokens<br/>64¢ × 200 tokens<br/>63¢ × 150 tokens<br/>62¢ × 300 tokens<br/>61¢ × 50 tokens"]
+        ASKS["ASKS (Vendas)<br/>67¢ × 50 tokens<br/>68¢ × 100 tokens<br/>69¢ × 75 tokens<br/>70¢ × 200 tokens<br/>71¢ × 150 tokens"]
+    end
 ```
 
 - **Best Bid**: 65¢ (o maior preço que alguém quer pagar)
@@ -191,27 +181,13 @@ No código, isso é processado em `src/api.ts` na função `getOrderbook()`.
 
 **Exemplo de TUI:**
 
-```
-┌────────────────────────────────────────────────────────────┐
-│  Polymarket TUI Demo                    [12:34:56] [WS: ●] │
-├────────────────────────────────────────────────────────────┤
-│  RADAR                                                      │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │ 🔴 Trump vence eleição 2024?      Sim   65¢  +2.3%   │  │
-│  │ 🔴 Brasil Copa do Mundo 2026?     Não  72¢  -1.1%   │  │
-│  │ 🟢 BTC > $100k até fim 2025?      Sim   45¢  +0.5%   │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                                                             │
-│  MARKET DETAILS                                             │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │ Event:   Eleições EUA 2024                           │  │
-│  │ Question: Trump vence a eleição presidencial?        │  │
-│  │ Condition ID: 0x1234...abcd                          │  │
-│  │                                                         │  │
-│  │ PREÇO ATUAL: 65¢                                      │  │
-│  │ Bid: 64¢  Ask: 66¢  Spread: 2¢  Last: 65¢            │  │
-│  └──────────────────────────────────────────────────────┘  │
-└────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph TUI["Polymarket TUI Demo 12:34:56 WS:●"]
+        Header["RADAR"]
+        Radar["🔴 Trump vence eleição 2024? Sim 65¢ +2.3%<br/>🔴 Brasil Copa do Mundo 2026? Não 72¢ -1.1%<br/>🟢 BTC > $100k até fim 2025? Sim 45¢ +0.5%"]
+        Details["MARKET DETAILS<br/>Event: Eleições EUA 2024<br/>Question: Trump vence a eleição presidencial?<br/>Condition ID: 0x1234...abcd<br/><br/>PREÇO ATUAL: 65¢<br/>Bid: 64¢ Ask: 66¢ Spread: 2¢ Last: 65¢"]
+    end
 ```
 
 **Vantagens do TUI:**
@@ -227,33 +203,57 @@ Este projeto usa a biblioteca **blessed** (`src/tui.ts`) para criar a interface.
 
 ## 5. Estrutura do Projeto
 
-```
-polymarket-analyzer/
-├── src/                    # Código fonte
-│   ├── index.ts           # Ponto de entrada da CLI
-│   ├── config.ts          # Configurações e constantes
-│   ├── api.ts             # Cliente REST (todas as APIs)
-│   ├── ws.ts              # Cliente WebSocket
-│   ├── http.ts            # Cliente HTTP com rate limiting
-│   ├── tui.ts             # Interface de terminal
-│   ├── market.ts          # Lógica de mercados
-│   ├── parsers.ts         # Utilitários de parsing
-│   ├── utils.ts           # Funções auxiliares
-│   ├── logger.ts          # Sistema de logging
-│   └── rateLimiter.ts     # Controle de rate limit
-│
-├── tests/                 # Testes
-│   ├── api.test.ts
-│   ├── cli.test.ts
-│   ├── parsers.test.ts
-│   └── ws.test.ts
-│
-├── docs/                  # Documentação
-│   └── learn/            # ← Você está aqui!
-│
-├── package.json           # Dependências e scripts
-├── tsconfig.json          # Configuração TypeScript
-└── README.md              # Documentação rápida
+```mermaid
+graph TD
+    Root["polymarket-analyzer/"]
+    src["src/<br/>Código fonte"]
+    index["index.ts<br/>Ponto de entrada CLI"]
+    config["config.ts<br/>Configurações"]
+    api["api.ts<br/>Cliente REST"]
+    ws["ws.ts<br/>Cliente WebSocket"]
+    http["http.ts<br/>HTTP + rate limit"]
+    tui["tui.ts<br/>Interface terminal"]
+    market["market.ts<br/>Lógica mercados"]
+    parsers["parsers.ts<br/>Parsing"]
+    utils["utils.ts<br/>Utilitários"]
+    logger["logger.ts<br/>Logging"]
+    rate["rateLimiter.ts<br/>Rate limit"]
+    tests["tests/<br/>Testes"]
+    api_test["api.test.ts"]
+    cli_test["cli.test.ts"]
+    parsers_test["parsers.test.ts"]
+    ws_test["ws.test.ts"]
+    docs["docs/<br/>Documentação"]
+    learn["learn/<br/>← Você está aqui!"]
+    package["package.json<br/>Dependências"]
+    tsconfig["tsconfig.json<br/>TypeScript"]
+    readme["README.md<br/>Documentação"]
+
+    Root --> src
+    src --> index
+    src --> config
+    src --> api
+    src --> ws
+    src --> http
+    src --> tui
+    src --> market
+    src --> parsers
+    src --> utils
+    src --> logger
+    src --> rate
+
+    Root --> tests
+    tests --> api_test
+    tests --> cli_test
+    tests --> parsers_test
+    tests --> ws_test
+
+    Root --> docs
+    docs --> learn
+
+    Root --> package
+    Root --> tsconfig
+    Root --> readme
 ```
 
 ---
@@ -564,6 +564,421 @@ bun run dev
 1. Quantos mercados você consegue ver na lista?
 2. Qual é o mercado com maior volume de negociação?
 3. Como o preço muda quando você troca entre outcomes?
+
+---
+
+## ✅ Check Your Understanding
+
+Verifique seu entendimento dos conceitos deste capítulo respondendo às perguntas abaixo.
+
+### Pergunta 1: O Que é uma API?
+
+**Qual a analogia correta para uma API?**
+
+<details>
+<summary>A</summary>
+
+a) Um livro de receitas
+</details>
+
+<details>
+<summary>B (Correta)</summary>
+
+b) Um garçom em um restaurante que leva pedidos entre clientes e cozinha
+</details>
+
+<details>
+<summary>C</summary>
+
+c) Um tradutor simultâneo
+</details>
+
+**Por que a analogia do garçom está correta?**
+- Cliente não entra na cozinha (você não acessa o sistema diretamente)
+- Garçom leva pedido (API recebe requisição)
+- Cozinha prepara (sistema processa)
+- Garçom traz resposta (API retorna dados)
+
+---
+
+### Pergunta 2: REST vs WebSocket
+
+**Qual a diferença fundamental entre REST e WebSocket?**
+
+<details>
+<summary>Resposta</summary>
+
+**REST (Polling):**
+- Cliente pergunta "Tem dados novos?" a cada X segundos
+- Servidor responde "Sim" ou "Não"
+- Muitas requisições vazias
+
+**WebSocket:**
+- Conexão permanente (como chamada telefônica)
+- Servidor envia dados quando tiver (push)
+- Comunicação bidirecional em tempo real
+</details>
+
+**Qual é melhor para monitorar preços em tempo real?**
+<details>
+<summary>Resposta</summary>
+
+WebSocket! Porque os preços mudam constantemente e você quer saber instantaneamente quando mudar, não esperar 3 segundos para a próxima pergunta.
+</details>
+
+---
+
+### Pergunta 3: Order Book
+
+**Dado este order book, qual o spread?**
+
+```
+BIDS              ASKS
+0.65 × 1000    0.67 × 500
+0.64 × 2000    0.68 × 750
+```
+
+<details>
+<summary>Resposta</summary>
+
+Spread = Ask - Bid = 0.67 - 0.65 = 0.02 (2¢)
+
+Spread % = (0.02 / 0.67) × 100 = 2.99%
+</details>
+
+---
+
+### Pergunta 4: Componentes da Arquitetura
+
+**Qual API é usada para cada propósito?**
+
+Match a coluna da esquerda com a direita:
+
+| API | Propósito |
+|-----|-----------|
+| Gamma API | [?] |
+| CLOB API | [?] |
+| CLOB WebSocket | [?] |
+| Data API | [?] |
+
+<details>
+<summary>Resposta</summary>
+
+Gamma API → Descoberta de mercados
+CLOB API → Preços e order book
+CLOB WebSocket → Atualizações em tempo real
+Data API → Detentores e trades
+</details>
+
+---
+
+## ⚠️ Common Pitfalls
+
+### Pitfall: Confundir REST com WebSocket
+
+**Erro Comum:**
+Achar que REST pode fazer tudo que WebSocket faz.
+
+**Problema:**
+REST é **unidirecional** (cliente pergunta, servidor responde).
+WebSocket é **bidirecional** (qualquer lado pode enviar a qualquer momento).
+
+**Quando usar REST:**
+- Dados que mudam raramente
+- Requisição única (buscar um usuário, salvar dados)
+- Operações CRUD simples
+
+**Quando usar WebSocket:**
+- Dados em tempo real (preços, chat, notificações)
+- Atualizações frequentes (segundos ou milissegundos)
+- Comunicação bidirecional
+
+---
+
+### Pitfall: Ignorar Rate Limits
+
+**Erro Comum:**
+Fazer requisições sem limite até a API bloquear.
+
+**Problema:**
+A Polymarket vai bloquear seu IP por excesso de requisições.
+
+**Solução:**
+```typescript
+// ❌ RUIM - Sem rate limiting
+for (let i = 0; i < 1000; i++) {
+  await fetch(url);  // Vai ser bloqueado!
+}
+
+// ✅ BOM - Com rate limiting
+const rateLimiter = new TokenBucket(10, 10000); // 10 req por 10s
+for (let i = 0; i < 1000; i++) {
+  await rateLimiter.consume();  // Aguarda se necessário
+  await fetch(url);
+}
+```
+
+---
+
+### Pitfall: Não Entender "Condition ID"
+
+**Erro Comum:**
+Confundir market ID, condition ID, e slug.
+
+**Diferença:**
+- **Market ID**: Identificador interno do mercado (pode mudar)
+- **Condition ID**: Identificador único imutável (usado em CLOB)
+- **Slug**: URL amigável para humanos ("trump-wins-2024")
+
+**Importante:**
+Sempre use **Condition ID** para operações de trading (CLOB API).
+Use **Slug** para buscar mercados (Gamma API).
+
+---
+
+## 🔧 Troubleshooting
+
+### Problema: "Cannot connect to Polymarket API"
+
+**Sintoma:**
+Erro de conexão ao executar `bun run dev`
+
+**Causas Possíveis:**
+1. Sem conexão com internet
+2. API Polymarket fora do ar
+3. Firewall bloqueando
+
+**Solução:**
+```bash
+# 1. Teste conexão
+curl https://gamma-api.polymarket.com/events?limit=1
+
+# 2. Se falhar, verifique sua internet
+ping google.com
+
+# 3. Verifique se API está online
+# https://status.polymarket.com (se existir)
+```
+
+---
+
+### Problema: "WebSocket not connecting"
+
+**Sintoma:**
+Status mostra "WS: ○" (círculo vazio)
+
+**Diagnóstico:**
+```bash
+# Teste WebSocket manualmente
+wscat -c wss://ws-subscriptions-clob.polymarket.com/ws/
+
+# Se wscat não estiver instalado:
+bun install -g wscat
+```
+
+**Solução:**
+- Se wscat conectar, problema é no código
+- Se wscat falhar, problema é conexão de rede
+
+---
+
+## 🎯 Milestone Completado
+
+Após completar este capítulo, você deve ser capaz de:
+
+- [ ] Explicar o que é um mercado de previsão
+- [ ] Diferenciar REST de WebSocket
+- [ ] Entender o que é order book
+- [ ] Identificar as APIs da Polymarket
+- [ ] Executar o projeto pela primeira vez
+- [ ] Navegar pela interface do terminal
+
+**Se não conseguir completar algum item, reveja o capítulo antes de avançar.**
+
+---
+
+## 🎓 Design Decisions
+
+### Decisão 1: Por que TUI (Terminal UI) em vez de GUI?
+
+**Alternativas Consideradas:**
+1. **Web App (React/Next.js)** - Interface web moderna
+2. **Desktop App (Electron)** - Aplicação desktop nativa
+3. **CLI Simples** - Apenas comandos sem interface visual
+4. **TUI (Blessed)** - Interface no terminal ✅ **ESCOLHIDO**
+
+**Trade-offs:**
+
+| Critério | Web App | Desktop | CLI Simples | TUI |
+|----------|---------|---------|-------------|-----|
+| Velocidade de desenvolvimento | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| Leveza | ❌ Pesado | ❌ Muito pesado | ✅ Leve | ✅ Muito leve |
+| Acessibilidade via SSH | ❌ Não | ❌ Não | ✅ Sim | ✅ Sim |
+| Interatividade | ✅ Alta | ✅ Alta | ❌ Nenhuma | ✅ Média |
+| Distribuição | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Curva de aprendizado | Média | Alta | Baixa | Média |
+
+**Por que TUI foi escolhido:**
+- ✅ **Foco em servidores**: Muito uso em ambientes remotos via SSH
+- ✅ **Leveza**: Sem overhead de navegador/Electron
+- ✅ **Distribuição**: Single binary, fácil de instalar
+- ✅ **Estética**: Aparência "hacker profissional"
+- ✅ **Performance**: Renderização instantânea
+
+**Quando reconsiderar:**
+- Se precisar de gráficos complexos (dashboards visuais)
+- Se precisar de suporte a mouse/Touch
+- Se target audience não for técnica
+
+**Referência no código:** `src/tui.ts` (682 linhas de interface)
+
+---
+
+### Decisão 2: Por que usar Bun em vez de Node.js?
+
+**Alternativas Consideradas:**
+1. **Node.js + npm** - Runtime JavaScript tradicional
+2. **Deno** - Runtime TypeScript seguro
+3. **Bun** - Runtime moderno tudo-em-um ✅ **ESCOLHIDO**
+
+**Trade-offs:**
+
+| Critério | Node.js | Deno | Bun |
+|----------|---------|------|-----|
+| Velocidade (install) | 1x | 2x | 28x |
+| Velocidade (execução) | 1x | 1.2x | 3x |
+| Compatibilidade npm | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ |
+| TypeScript nativo | ❌ | ✅ | ✅ |
+| Test runner built-in | ❌ | ❌ | ✅ |
+| Estabilidade | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
+| Tamanho do projeto | Pequeno | Qualquer | Pequeno/Médio |
+
+**Por que Bun foi escolhido:**
+- ✅ **Velocidade**: 28x mais rápido para instalar deps
+- ✅ **TypeScript nativo**: Sem build step
+- ✅ **All-in-one**: Test runner, bundler embutidos
+- ✅ **Compatibilidade**: Funciona com maioria dos packages npm
+
+**Riscos mitigados:**
+- ⚠️ Bun é jovem → **Mitigação**: API estável, issues respondem rápido
+- ⚠️ Ecossistema menor → **Mitigação**: Usamos apenas packages populares
+- ⚠️ Bugs em edge cases → **Mitigação**: Testes abrangentes
+
+**Referência no código:** Shebang `#!/usr/bin/env bun` em `src/index.ts:1`
+
+---
+
+### Decisão 3: Por que múltiplas APIs Polymarket separadas?
+
+**Alternativas Consideradas:**
+1. **Usar apenas Gamma API** - Simplificação
+2. **Usar apenas CLOB API** - Foco em preços
+3. **Usar todas as APIs** - Completude ✅ **ESCOLHIDO**
+
+**Trade-offs:**
+
+| API | Dados Únicos | Complexidade | Necessidade |
+|-----|--------------|--------------|-------------|
+| Gamma | Descoberta de mercados | Baixa | ⭐⭐⭐⭐⭐ Essencial |
+| CLOB REST | Order book completo | Média | ⭐⭐⭐⭐⭐ Essencial |
+| CLOB WebSocket | Updates em tempo real | Alta | ⭐⭐⭐⭐ Muito útil |
+| Data API | Detentores e trades | Baixa | ⭐⭐⭐ Nice-to-have |
+
+**Por que todas foram escolhidas:**
+- **Gamma API**: Impossível descobrir mercados sem ela
+- **CLOB REST**: Necessário para order book completo
+- **CLOB WebSocket**: Crucial para updates em tempo real
+- **Data API**: Útil para análise de position/trading
+
+**Arquitetura resultante:**
+```
+Γ (Gamma) → Descoberta
+C (CLOB)   → Preços + Tempo Real
+D (Data)   → Contexto adicional
+```
+
+**Referência no código:** `src/api.ts` integra todas as 3 APIs
+
+---
+
+### Decisão 4: Por que async/await em vez de callbacks?
+
+**Alternativas Consideradas:**
+1. **Callbacks** - Estilo Node.js tradicional
+2. **Promises (then/catch)** - Estilo ES6
+3. **async/await** - Estilo ES2017 ✅ **ESCOLHIDO**
+
+**Trade-offs:**
+
+| Estilo | Legibilidade | Error Handling | Debugging | Performance |
+|--------|--------------|-----------------|------------|--------------|
+| Callbacks | ❌ Pyramid of doom | Difícil | Muito difícil | Igual |
+| then/catch | ⭐⭐ Média | ⭐⭐ Média | Difícil | Igual |
+| async/await | ✅ Como sync | ✅ Try/catch | ✅ Fácil | Igual |
+
+**Por que async/await foi escolhido:**
+- ✅ **Legibilidade**: Código parece síncrono
+- ✅ **Error handling**: try/catch funciona naturalmente
+- ✅ **Composição**: Fácil de combinar múltiplas operações
+- ✅ **Debugging**: Stack traces preservados
+
+**Exemplo comparativo:**
+```typescript
+// ❌ CALLBACK HELL (não usado!)
+fetchData((err, data) => {
+  if (err) return handleError(err);
+  parseData(data, (err, parsed) => {
+    if (err) return handleError(err);
+    renderData(parsed, (err) => {
+      if (err) return handleError(err);
+      // ...
+    });
+  });
+});
+
+// ✅ ASYNC/AWAIT (usado!)
+try {
+  const data = await fetchData();
+  const parsed = await parseData(data);
+  await renderData(parsed);
+} catch (err) {
+  handleError(err);
+}
+```
+
+**Referência no código:** Todo `src/` usa async/await consistentemente
+
+---
+
+## 📚 Recursos Externos
+
+### Aprender Mais Sobre:
+
+**Mercados de Previsão:**
+- [Prediction Markets Theory](https://en.wikipedia.org/wiki/Prediction_market) - Wikipedia
+- [Efficient Market Hypothesis](https://www.investopedia.com/terms/e/efficientmarkethypothesis.asp) - Investopedia
+- [Rational Expectations](https://en.wikipedia.org/wiki/Rational_expectations) - Wikipedia
+
+**TUI (Terminal UI):**
+- [Blessed Documentation](https://github.com/chjj/blessed) - GitHub
+- [ncurses Programming Guide](https://tldp.org/HOWTO/NCURSES-Programming-HOWTO/) - TLDP
+- [Terminal Escape Codes](https://en.wikipedia.org/wiki/ANSI_escape_code) - Wikipedia
+
+**Bun Runtime:**
+- [Bun Official Docs](https://bun.sh/docs) - Documentação oficial
+- [Bun GitHub](https://github.com/oven-sh/bun) - Repositório
+- [Bun vs Node Benchmarks](https://bun.sh/#benchmarks) - Comparações
+
+**TypeScript:**
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html) - Oficial
+- [TypeScript Deep Dive](https://basarat.gitbook.io/typescript/) - Basarat Ali Syed
+- [Effective TypeScript](https://effectivetypescript.com/) - Dan Vanderkam
+
+### Vídeos Recomendados:
+
+- [What are Prediction Markets?](https://www.youtube.com/watch?v=PR1dGZTjFME) - YouTube (5 min)
+- [Bun.js - The Future of JavaScript?](https://www.youtube.com/watch?v=U7kqeTxsQtA) - YouTube (15 min)
+- [TypeScript in 100 Seconds](https://www.youtube.com/watch?v=U3IPqMdR-mM) - YouTube (2 min)
 
 ---
 

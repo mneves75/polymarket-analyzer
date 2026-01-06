@@ -15,82 +15,64 @@
 
 Imagine que você está construindo um restaurante:
 
-```
-ARQUITETURA RUIM:
-─────────────────────────────────────────────
-┌─────────────────────────────────────────┐
-│  Cozinha  │  Mesa  │  Banheiro  │ Mesa  │
-│    └──────────────────────────────────┘ │
-│         Tudo em um cômodo gigante       │
-└─────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph Bad["ARQUITETURA RUIM"]
+        BadRoom["┌─────────────────────────────────────────┐<br/>│  Cozinha  │  Mesa  │  Banheiro  │ Mesa  │<br/>│    └──────────────────────────────────┘ │<br/>│         Tudo em um cômodo gigante       │<br/>└─────────────────────────────────────────┘<br/><br/>Problemas:<br/>- Os clientes precisam passar pela cozinha<br/>- O chefe não consegue gerenciar<br/>- Barulho de todo lado<br/>- Impossível expandir"]
+    end
 
-Problemas:
-- Os clientes precisam passar pela cozinha
-- O chefe não consegue gerenciar
-- Barulho de todo lado
-- Impossível expandir
+    subgraph Good["ARQUITETURA BOA"]
+        Cozinha["Cozinha (privado)"]
+        Salao["Salão (público)"]
+        Banheiro["Banheiro (privado)"]
+        Vantagens["Vantagens:<br/>- Separação clara de responsabilidades<br/>- Fácil de gerenciar<br/>- Pode expandir cada parte independentemente"]
+    end
 
-ARQUITETURA BOA:
-─────────────────────────────────────────────
-┌────────────┬────────────┬────────────┐
-│  Cozinha   │   Salão    │  Banheiro  │
-│  (privado) │  (público) │  (privado) │
-└────────────┴────────────┴────────────┘
-
-Vantagens:
-- Separação clara de responsabilidades
-- Fácil de gerenciar
-- Pode expandir cada parte independentemente
+    Cozinha --- Salao --- Banheiro
+    Salao --- Vantagens
 ```
 
 ### 1.2 Arquitetura do Polymarket Analyzer
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         Camada de Apresentação                      │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │                     index.ts (CLI)                           │  │
-│  │  - Parse argumentos                                          │  │
-│  │  - Despacha para modo apropriado                            │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-│                                  │                                  │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │                    tui.ts (Interface)                        │  │
-│  │  - Renderiza terminal UI                                     │  │
-│  │  - Gerencia interação do usuário                            │  │
-│  │  - Atualiza display em tempo real                           │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────┘
-                                  ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                          Camada de Domínio                          │
-│  ┌────────────────┐  ┌────────────────┐  ┌────────────────────┐    │
-│  │  market.ts     │  │  parsers.ts    │  │    utils.ts        │    │
-│  │  - Resolução   │  │  - Normaliza   │  │  - Formatação      │    │
-│  │    de mercado  │  │    dados       │  │  - Sparklines      │    │
-│  └────────────────┘  └────────────────┘  └────────────────────┘    │
-└─────────────────────────────────────────────────────────────────────┘
-                                  ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                           Camada de Dados                           │
-│  ┌────────────────┐  ┌────────────────┐  ┌────────────────────┐    │
-│  │   api.ts       │  │    ws.ts       │  │    http.ts         │    │
-│  │  - Cliente REST│  │  - Cliente WS  │  │  - HTTP + Rate     │    │
-│  │    (Polymarket)│  │    (Tempo real)│  │    Limit           │    │
-│  └────────────────┘  └────────────────┘  └────────────────────┘    │
-│                                  │                                  │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │              rateLimiter.ts (Controle de Fluxo)              │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────┘
-                                  ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      APIs Externas (Polymarket)                     │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │
-│  │ Gamma API    │  │ CLOB API     │  │ Data API                 │  │
-│  │ (Descoberta) │  │ (Preços/WS)  │  │ (Detentores/Trades)      │  │
-│  └──────────────┘  └──────────────┘  └──────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph Apresentacao["Camada de Apresentação"]
+        index["index.ts CLI<br/>- Parse argumentos<br/>- Despacha para modo apropriado"]
+        tui["tui.ts Interface<br/>- Renderiza terminal UI<br/>- Gerencia interação do usuário<br/>- Atualiza display em tempo real"]
+    end
+
+    subgraph Dominio["Camada de Domínio"]
+        market["market.ts<br/>- Resolução de mercado"]
+        parsers["parsers.ts<br/>- Normaliza dados"]
+        utils["utils.ts<br/>- Formatação<br/>- Sparklines"]
+    end
+
+    subgraph Dados["Camada de Dados"]
+        api["api.ts<br/>- Cliente REST Polymarket"]
+        ws["ws.ts<br/>- Cliente WS Tempo real"]
+        http["http.ts<br/>- HTTP + Rate Limit"]
+        rate["rateLimiter.ts<br/>Controle de Fluxo"]
+    end
+
+    subgraph APIs["APIs Externas Polymarket"]
+        Gamma["Gamma API<br/>Descoberta"]
+        CLOB["CLOB API<br/>Preços WS"]
+        Data["Data API<br/>Detentores Trades"]
+    end
+
+    index --> tui
+    tui --> market
+    tui --> parsers
+    tui --> utils
+    market --> api
+    market --> ws
+    parsers --> http
+    utils --> http
+    api --> rate
+    ws --> rate
+    rate --> Gamma
+    rate --> CLOB
+    rate --> Data
 ```
 
 ---
@@ -99,44 +81,65 @@ Vantagens:
 
 ### 2.1 Mapa Completo do Projeto
 
-```
-polymarket-analyzer/
-│
-├── src/                          # ← Todo o código fonte (lógica)
-│   ├── index.ts                  # Ponto de entrada CLI
-│   ├── config.ts                 # Configurações centralizadas
-│   │
-│   │  # ─── Camada de Dados ───
-│   ├── api.ts                    # Cliente REST (todas APIs)
-│   ├── ws.ts                     # Cliente WebSocket
-│   ├── http.ts                   # HTTP + rate limiting
-│   │
-│   │  # ─── Camada de Domínio ───
-│   ├── market.ts                 # Lógica de mercados
-│   ├── parsers.ts                # Normalização de dados
-│   ├── utils.ts                  # Utilitários de formatação
-│   ├── logger.ts                 # Sistema de logging
-│   ├── rateLimiter.ts            # Algoritmo token bucket
-│   │
-│   │  # ─── Camada de Apresentação ───
-│   ├── tui.ts                    # Interface terminal (682 linhas!)
-│   └── demo.ts                   # Modos snapshot/list
-│
-├── tests/                        # ← Testes automatizados
-│   ├── api.test.ts               # Testes de API
-│   ├── cli.test.ts               # Testes de CLI
-│   ├── parsers.test.ts           # Testes de parsing
-│   └── ws.test.ts                # Testes de WebSocket
-│
-├── docs/                         # ← Documentação
-│   └── learn/                    # ← Você está aqui!
-│
-├── snapshots/                    # ← Snapshots exportados
-│
-├── package.json                  # Metadados e scripts
-├── tsconfig.json                 # Configuração TypeScript
-├── bun.lockb                     # Lock file de dependências
-└── README.md                     # Documentação rápida
+```mermaid
+graph TD
+    Root["polymarket-analyzer/"]
+
+    subgraph src["src/ - Código fonte"]
+        index["index.ts<br/>Ponto de entrada CLI"]
+        config["config.ts<br/>Configurações"]
+
+        subgraph dados["Camada de Dados"]
+            api["api.ts<br/>Cliente REST"]
+            ws["ws.ts<br/>WebSocket"]
+            http["http.ts<br/>HTTP + rate limit"]
+        end
+
+        subgraph dominio["Camada de Domínio"]
+            market["market.ts<br/>Lógica de mercados"]
+            parsers["parsers.ts<br/>Normalização"]
+            utils["utils.ts<br/>Formatação"]
+            logger["logger.ts<br/>Logging"]
+            rate["rateLimiter.ts<br/>Token bucket"]
+        end
+
+        subgraph apresentacao["Camada de Apresentação"]
+            tui["tui.ts<br/>Interface terminal<br/>682 linhas"]
+            demo["demo.ts<br/>Modos snapshot/list"]
+        end
+    end
+
+    subgraph tests["tests/ - Testes"]
+        api_test["api.test.ts"]
+        cli_test["cli.test.ts"]
+        parsers_test["parsers.test.ts"]
+        ws_test["ws.test.ts"]
+    end
+
+    subgraph docs["docs/ - Documentação"]
+        learn["learn/<br/>← Você está aqui!"]
+    end
+
+    snapshots["snapshots/<br/>Snapshots exportados"]
+    package["package.json<br/>Metadados e scripts"]
+    tsconfig["tsconfig.json<br/>Configuração TS"]
+    lock["bun.lockb<br/>Lock file"]
+    readme["README.md<br/>Documentação rápida"]
+
+    Root --> src
+    Root --> tests
+    Root --> docs
+    Root --> snapshots
+    Root --> package
+    Root --> tsconfig
+    Root --> lock
+    Root --> readme
+
+    src --> index
+    src --> config
+    src --> dados
+    src --> dominio
+    src --> apresentacao
 ```
 
 ### 2.2 Por Que Essa Estrutura?
@@ -279,34 +282,18 @@ await runDashboard({ ... });
 
 **Fluxo de Execução:**
 
-```
-Usuário executa: bun run src/index.ts --tui --market 123
-                        │
-                        ▼
-              ┌─────────────────────┐
-              │  parseArgs()        │
-              │  Processa argv      │
-              └─────────┬───────────┘
-                        │
-                        ▼
-              ┌─────────────────────┐
-              │  opts = {           │
-              │    market: "123",   │
-              │    ws: true,        │
-              │    ...              │
-              │  }                  │
-              └─────────┬───────────┘
-                        │
-                        ▼
-              ┌─────────────────────┐
-              │  Verifica modo      │
-              │  (tui/snapshot/etc) │
-              └─────────┬───────────┘
-                        │
-                        ▼
-              ┌─────────────────────┐
-              │  runDashboard()     │
-              └─────────────────────┘
+```mermaid
+graph TD
+    A["Usuário executa:<br/>bun run src/index.ts --tui --market 123"]
+    B["parseArgs()<br/>Processa argv"]
+    C["opts = {<br/>market: 123,<br/>ws: true,<br/>... }"]
+    D["Verifica modo<br/>tui/snapshot/etc"]
+    E["runDashboard()"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
 ```
 
 ### 3.3 http.ts - Cliente HTTP Inteligente
@@ -367,41 +354,26 @@ export async function fetchJson<T>(
 
 **Fluxo de uma Requisição:**
 
-```
-fetchJson(url)
-    │
-    ▼
-┌─────────────────────────────────────┐
-│ 1. Match rate limit rule            │
-│    - Encontra endpoint específico   │
-│    - Ou fallback para host          │
-└─────────────┬───────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────┐
-│ 2. Aguarda se necessário            │
-│    - Token bucket                   │
-│    - Respeita limites da API        │
-└─────────────┬───────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────┐
-│ 3. Faz requisição HTTP              │
-│    - Com timeout                     │
-│    - Com headers apropriados         │
-└─────────────┬───────────────────────┘
-              │
-              ▼
-          Sucesso? ──Não──▶  Retry?
-              │                   │
-             Sim                  Sim
-              │                   │
-              ▼                   ▼
-    ┌──────────────┐      ┌──────────────┐
-    │  Return data │      │  Backoff +   │
-    │              │      │  Tentar de   │
-    └──────────────┘      │  novo        │
-                          └──────────────┘
+```mermaid
+graph TD
+    Start["fetchJson url"]
+    Match["1. Match rate limit rule<br/>- Encontra endpoint específico<br/>- Ou fallback para host"]
+    Wait["2. Aguarda se necessário<br/>- Token bucket<br/>- Respeita limites da API"]
+    Fetch["3. Faz requisição HTTP<br/>- Com timeout<br/>- Com headers apropriados"]
+    Check{Sucesso?}
+    Retry{Retry?}
+    Success["Return data"]
+    Backoff["Backoff +<br/>Tentar de novo"]
+
+    Start --> Match
+    Match --> Wait
+    Wait --> Fetch
+    Fetch --> Check
+    Check -- Não --> Retry
+    Check -- Sim --> Success
+    Retry -- Sim --> Backoff
+    Backoff --> Fetch
+    Retry -- Não --> Fail["Falha"]
 ```
 
 ### 3.4 rateLimiter.ts - Token Bucket
@@ -438,30 +410,15 @@ export class RateLimiter {
 
 **Analogia do Token Bucket:**
 
-```
-Imagine um balde (bucket) que pode conter tokens:
+```mermaid
+graph TB
+    subgraph Bucket["TOKEN BUCKET"]
+        Top["╔═══════════════════╗<br/>║   TOKEN BUCKET    ║<br/>║  limit: 1000      ║<br/>║  ╔══════════════╗ ║<br/>║  ║██████████████║ ║  ← Tokens disponíveis<br/>║  ╚══════════════╝ ║<br/>║    ↓ 1 token     ║  ← Cada requisição gasta 1 token<br/>╚═══════════════════╝<br/><br/>Se o balde está cheio: requisição passa imediatamente<br/>Se o balde está vazio: aguarda até resetar"]
+    end
 
-     ╔═══════════════════╗
-     ║   TOKEN BUCKET    ║
-     ║  [limit: 1000]    ║
-     ║  ╔══════════════╗ ║
-     ║  ║██████████████║ ║  ← Tokens disponíveis
-     ║  ╚══════════════╝ ║
-     ║    ↓ 1 token     ║  ← Cada requisição gasta 1 token
-     ╚═══════════════════╝
-
-Se o balde está cheio: requisição passa imediatamente
-Se o balde está vazio: aguarda até resetar
-
-┌─────────────────────────────────────────────────────┐
-│  timeline (10 segundos window)                     │
-│                                                     │
-│  │█│█│█│█│█│█│█│█│█│                              │
-│  0 1 2 3 4 5 6 7 8 9                              (segundos)
-│                                                     │
-│  Cada █ é uma requisição que consumiu 1 token      │
-│  Após 10 segundos, o balde recarrega               │
-└─────────────────────────────────────────────────────┘
+    subgraph Timeline["timeline 10 segundos window"]
+        Tokens["│█│█│█│█│█│█│█│█│█│                              │<br/>0 1 2 3 4 5 6 7 8 9                              segundos<br/><br/>Cada █ é uma requisição que consumiu 1 token<br/>Após 10 segundos, o balde recarrega"]
+    end
 ```
 
 **Por que Jitter?**
@@ -529,39 +486,22 @@ export function normalizeLevels(levels: unknown[]): OrderbookLevel[] {
 
 **Fluxo de Normalização:**
 
-```
-┌─────────────────────────────────────────────────────────┐
-│  DADO BRUTO (vários formatos possíveis)                 │
-│                                                         │
-│  {                                                      │
-│    "bids": [[0.65, 100], [0.64, 200]]                  │
-│  }                                                      │
-│                                                         │
-│  OU                                                     │
-│                                                         │
-│  {                                                      │
-│    "buys": [{"price": 0.65, "size": 100}]              │
-│  }                                                      │
-└─────────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────┐
-│  normalizeLevels()                                      │
-│  - Detecta formato (array ou objeto)                    │
-│  - Extrai preço e tamanho                              │
-│  - Usa fallback para diferentes nomes                  │
-│  - Filtra valores inválidos                            │
-└─────────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────┐
-│  DADO NORMALIZADO (formato consistente)                 │
-│                                                         │
-│  [                                                      │
-│    { price: 0.65, size: 100 },                         │
-│    { price: 0.64, size: 200 }                          │
-│  ]                                                      │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph Raw["DADO BRUTO - vários formatos possíveis"]
+        Format1["{<br/>bids: 0.65, 100, 0.64, 200<br/>}"]
+        Format2["OU<br/><br/>{<br/>buys: price: 0.65, size: 100<br/>}"]
+    end
+
+    Normalize["normalizeLevels<br/>- Detecta formato array ou objeto<br/>- Extrai preço e tamanho<br/>- Usa fallback para diferentes nomes<br/>- Filtra valores inválidos"]
+
+    subgraph Normalized["DADO NORMALIZADO - formato consistente"]
+        Result["[<br/>price: 0.65, size: 100,<br/>price: 0.64, size: 200<br/>]"]
+    end
+
+    Format1 --> Normalize
+    Format2 --> Normalize
+    Normalize --> Result
 ```
 
 ### 3.6 market.ts - Resolução de Mercados
@@ -612,33 +552,23 @@ export async function resolveMarket(
 
 **Estratégia de Resolução:**
 
-```
-Usuário especifica: --slug "eleicoes-usa-2024"
-                        │
-                        ▼
-              ┌─────────────────────────┐
-              │ É um mercado?           │
-              └─────┬───────────────┬───┘
-                    │ Sim           │ Não
-                    ▼               ▼
-          ┌──────────────┐   ┌──────────────┐
-          │ fetchMarket  │   │ fetchEvent   │
-          │   BySlug()   │   │   BySlug()   │
-          └──────┬───────┘   └──────┬───────┘
-                 │                   │
-                 ▼                   ▼
-          ┌──────────────┐   ┌──────────────┐
-          │ Normalize    │   │ Primeiro     │
-          │   market     │   │ mercado do   │
-          │              │   │   evento     │
-          └──────┬───────┘   └──────┬───────┘
-                 │                   │
-                 └─────────┬─────────┘
-                           │
-                           ▼
-                 ┌──────────────────┐
-                 │ Retornar mercado │
-                 └──────────────────┘
+```mermaid
+graph TD
+    Start["Usuário especifica:<br/>--slug eleicoes-usa-2024"]
+    Check{"É um mercado?"}
+    Market["fetchMarket<br/>BySlug()"]
+    Event["fetchEvent<br/>BySlug()"]
+    NormalizeMarket["Normalize<br/>market"]
+    FirstMarket["Primeiro<br/>mercado do<br/>evento"]
+    Return["Retornar<br/>mercado"]
+
+    Start --> Check
+    Check -- Sim --> Market
+    Check -- Não --> Event
+    Market --> NormalizeMarket
+    Event --> FirstMarket
+    NormalizeMarket --> Return
+    FirstMarket --> Return
 ```
 
 ---
@@ -752,16 +682,18 @@ while (true) {
 
 **Exponential Backoff:**
 
-```
-Tentativa 1: falha → espera 200ms
-Tentativa 2: falha → espera 400ms (2x)
-Tentativa 3: falha → espera 800ms (2x)
-Tentativa 4: desiste
+```mermaid
+graph LR
+    T1["Tentativa 1: falha<br/>→ espera 200ms"]
+    T2["Tentativa 2: falha<br/>→ espera 400ms 2x"]
+    T3["Tentativa 3: falha<br/>→ espera 800ms 2x"]
+    T4["Tentativa 4: desiste"]
 
-Por que exponencial?
-- Tenta rápido primeiro (falhas transitórias)
-- Aumenta espera se persiste (não sobrecarrega servidor)
-- Desiste eventualmente (não trava para sempre)
+    T1 --> T2
+    T2 --> T3
+    T3 --> T4
+
+    Note["Por que exponencial?<br/>- Tenta rápido primeiro falhas transitórias<br/>- Aumenta espera se persiste não sobrecarrega servidor<br/>- Desiste eventualmente não trava para sempre"]
 ```
 
 ---
@@ -770,95 +702,27 @@ Por que exponencial?
 
 ### 5.1 Cadeia de Dados: Do Usuário à Tela
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  1. USUÁRIO EXECUTA COMANDO                                     │
-│                                                                  │
-│  $ bun run src/index.ts --tui --market 12345                    │
-└─────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  2. CLI PARSE ARGUMENTOS (index.ts)                             │
-│                                                                  │
-│  parseArgs() → opts = { market: "12345", ws: true, ... }       │
-└─────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  3. CARREGA RADAR DE MERCADOS (market.ts + api.ts)             │
-│                                                                  │
-│  loadRadar(10) → fetchEvents() → normalizeMarket()             │
-│                                                                  │
-│  Resultado: MarketInfo[] (10 mercados)                         │
-└─────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  4. RESOLVE MERCADO ESPECÍFICO (market.ts)                     │
-│                                                                  │
-│  resolveMarket({ market: "12345" }, radar)                     │
-│    → fetchMarketByConditionId("12345")                         │
-│    → normalizeMarket()                                          │
-│                                                                  │
-│  Resultado: MarketInfo (mercado "12345")                       │
-└─────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  5. CONECTA WEBSOCKET (ws.ts)                                   │
-│                                                                  │
-│  connectMarketWs([tokenIds], handlers)                         │
-│    → Abre conexão WebSocket                                     │
-│    → Envia subscription message                                 │
-│    → Recebe atualizações em tempo real                          │
-└─────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  6. BUSCA DADOS ADICIONAIS (api.ts + http.ts)                  │
-│                                                                  │
-│  getOrderbook() → fetchJson() → normalizeOrderbook()           │
-│  getPrices() → fetchJson() → extractPrice()                    │
-│  getPriceHistory() → fetchJson() → extractHistory()            │
-│  getHolders() → fetchJson() → normalizeHolders()               │
-└─────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  7. ATUALIZA ESTADO (tui.ts)                                    │
-│                                                                  │
-│  Toda vez que chega dado novo (WS ou REST):                    │
-│    - Atualiza variáveis de estado                               │
-│    - Recalcula derivados (spread, midpoint)                     │
-│    - Verifica staleness                                         │
-└─────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  8. RENDERIZA INTERFACE (tui.ts)                                │
-│                                                                  │
-│  screen.render() → blessed renderiza todos os componentes:     │
-│    - Header (status, relógio, WS status)                        │
-│    - Radar table (lista de mercados)                            │
-│    - Market box (detalhes do mercado)                           │
-│    - Pulse panel (preços em tempo real)                         │
-│    - Orderbook table (livro de ofertas)                         │
-│    - History panel (sparkline)                                  │
-│    - Holders table (top detentores)                             │
-│    - Alerts & Status (warnings, erros)                          │
-└─────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  9. LOOP DE REFRESH (tui.ts)                                    │
-│                                                                  │
-│  setInterval(refreshMs):                                        │
-│    - Busca dados REST                                           │
-│    - Atualiza estado                                            │
-│    - Renderiza                                                  │
-│    - Repete                                                     │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    S1["1. USUÁRIO EXECUTA COMANDO<br/>bun run src/index.ts --tui --market 12345"]
+    S2["2. CLI PARSE ARGUMENTOS index.ts<br/>parseArgs → opts = market: 12345, ws: true"]
+    S3["3. CARREGA RADAR DE MERCADOS<br/>market.ts + api.ts<br/><br/>loadRadar 10 → fetchEvents → normalizeMarket<br/><br/>Resultado: MarketInfo 10 mercados"]
+    S4["4. RESOLVE MERCADO ESPECÍFICO<br/>market.ts<br/><br/>resolveMarket { market: 12345 }, radar<br/>→ fetchMarketByConditionId 12345<br/>→ normalizeMarket<br/><br/>Resultado: MarketInfo mercado 12345"]
+    S5["5. CONECTA WEBSOCKET ws.ts<br/><br/>connectMarketWs tokenIds, handlers<br/>→ Abre conexão WebSocket<br/>→ Envia subscription message<br/>→ Recebe atualizações em tempo real"]
+    S6["6. BUSCA DADOS ADICIONAIS<br/>api.ts + http.ts<br/><br/>getOrderbook → fetchJson → normalizeOrderbook<br/>getPrices → fetchJson → extractPrice<br/>getPriceHistory → fetchJson → extractHistory<br/>getHolders → fetchJson → normalizeHolders"]
+    S7["7. ATUALIZA ESTADO tui.ts<br/><br/>Toda vez que chega dado novo WS ou REST:<br/>- Atualiza variáveis de estado<br/>- Recalcula derivados spread, midpoint<br/>- Verifica staleness"]
+    S8["8. RENDERIZA INTERFACE tui.ts<br/><br/>screen.render → blessed renderiza todos os componentes:<br/>- Header status, relógio, WS status<br/>- Radar table lista de mercados<br/>- Market box detalhes do mercado<br/>- Pulse panel preços em tempo real<br/>- Orderbook table livro de ofertas<br/>- History panel sparkline<br/>- Holders table top detentores<br/>- Alerts and Status warnings, erros"]
+    S9["9. LOOP DE REFRESH tui.ts<br/><br/>setInterval refreshMs:<br/>- Busca dados REST<br/>- Atualiza estado<br/>- Renderiza<br/>- Repete"]
+
+    S1 --> S2
+    S2 --> S3
+    S3 --> S4
+    S4 --> S5
+    S5 --> S6
+    S6 --> S7
+    S7 --> S8
+    S8 --> S9
+    S9 --> S6
 ```
 
 ### 5.2 Estado Global da Aplicação
@@ -879,44 +743,19 @@ let lastError = "";                        // Último erro
 
 **Fluxo de Atualização de Estado:**
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Estado Inicial                                              │
-│  radar = []                                                  │
-│  currentMarket = null                                        │
-│  wsConnected = false                                         │
-└─────────────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Dados chegam (REST ou WebSocket)                           │
-└─────────────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Atualiza variáveis de estado                                │
-│  - radar = novos dados                                       │
-│  - currentMarket = mercado resolvido                         │
-│  - orderbook = livro normalizado                             │
-│  - prices = preços extraídos                                 │
-│  - priceHistory = histórico                                  │
-└─────────────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Deriva estado computado                                     │
-│  - spread = bestAsk - bestBid                                │
-│  - midpoint = (bestBid + bestAsk) / 2                        │
-│  - stale = Date.now() - lastUpdate > staleMs                │
-└─────────────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Renderiza interface                                         │
-│  - Atualiza conteúdo de cada componente                      │
-│  - Altera cores baseado em estado                            │
-│  - Mostra alerts se necessário                               │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    Initial["Estado Inicial<br/>radar = []<br/>currentMarket = null<br/>wsConnected = false"]
+    DataArrive["Dados chegam<br/>REST ou WebSocket"]
+    UpdateState["Atualiza variáveis de estado<br/>- radar = novos dados<br/>- currentMarket = mercado resolvido<br/>- orderbook = livro normalizado<br/>- prices = preços extraídos<br/>- priceHistory = histórico"]
+    ComputeState["Deriva estado computado<br/>- spread = bestAsk - bestBid<br/>- midpoint = bestBid + bestAsk / 2<br/>- stale = Date.now - lastUpdate > staleMs"]
+    RenderInterface["Renderiza interface<br/>- Atualiza conteúdo de cada componente<br/>- Altera cores baseado em estado<br/>- Mostra alerts se necessário"]
+
+    Initial --> DataArrive
+    DataArrive --> UpdateState
+    UpdateState --> ComputeState
+    ComputeState --> RenderInterface
+    RenderInterface --> DataArrive
 ```
 
 ---
@@ -1081,15 +920,328 @@ Encontre um lugar no código onde DRY está sendo violado e refatore:
 
 ---
 
-**Exercício Final: Desenhe a Arquitetura**
+## ✅ Check Your Understanding
 
-Desenhe um diagrama da arquitetura do projeto incluindo:
-- Todos os arquivos em `src/`
-- As dependências entre eles
-- O fluxo de dados
-- Onde cada padrão de design é usado
+### Pergunta 1: Separação de Responsabilidades
 
-Compare com o diagrama deste capítulo e discuta as diferenças.
+**Qual arquivo NÃO deve ter responsabilidade por:**
+
+<details>
+<summary>A) api.ts - Dados de mercado</summary>
+
+❌ Não - api.ts DEVE ter responsabilidade por buscar dados de mercado
+</details>
+
+<details>
+<summary>B) tui.ts - Interface de terminal</summary>
+
+❌ Não - tui.ts DEVE ter responsabilidade por renderizar a interface
+</details>
+
+<details>
+<summary>C) http.ts - Rate limiting (PARCIALMENTE CORRETA)</summary>
+
+⚠️ Parcialmente correta - http.ts IMPLEMENTA rate limiting, mas a configuração de limits está nele.
+A responsabilidade de DEFINIR os rate limits poderia estar em config.ts.
+</details>
+
+**Princípio:** Cada módulo deve ter UMA responsabilidade clara.
+
+---
+
+### Pergunta 2: Fluxo de Dados
+
+**Coloque em ordem o fluxo de dados quando o usuário executa `bun run dev`:**
+
+<details>
+<summary>Resposta</summary>
+
+1. index.ts → Parse argumentos CLI
+2. market.ts → Resolve mercado (por slug/ID)
+3. api.ts → Busca dados da Gamma API
+4. ws.ts → Conecta WebSocket
+5. api.ts → Busca order book/preços REST
+6. parsers.ts → Normaliza dados
+7. tui.ts → Renderiza interface
+8. Loop → Atualiza com WebSocket + polling REST
+</details>
+
+---
+
+### Pergunta 3: Singleton Pattern
+
+**Por que usar Singleton para RateLimiter?**
+
+<details>
+<summary>Resposta</summary>
+
+**Por que:**
+- Precisamos de UMA única instância compartilhada
+- Cada função fetchJson deve usar o MESMO rate limiter
+- Assim respeitamos limites GLOBAIS da API
+
+**Sem Singleton:**
+```typescript
+// ❌ Cada chamada cria seu próprio limiter
+fetchJson(url1);  // limiter A (10 tokens)
+fetchJson(url2);  // limiter B (10 tokens)
+// Total: 20 requisições em 10 segundos → PODE EXCEDER LIMITE!
+```
+
+**Com Singleton:**
+```typescript
+// ✅ Todas chamadas compartilham o mesmo limiter
+fetchJson(url1);  // limiter (10 tokens)
+fetchJson(url2);  // limiter (9 tokens restantes)
+// Total: 19 requisições em 10 segundos → RESPEITA LIMITE
+```
+</details>
+
+---
+
+## ⚠️ Common Pitfalls
+
+### Pitfall: Acoplamento Alto
+
+**❌ RUIM:**
+```typescript
+// tui.ts depende diretamente de implementação de API
+import { fetchEvents } from "./api";
+
+async function render() {
+  const events = await fetchEvents(10);  // Acoplado!
+  // ...
+}
+```
+
+**Problema:**
+Se `fetchEvents` mudar, `tui.ts` quebra. Difícil testar.
+
+**✅ BOM:**
+```typescript
+// Interface (contrato)
+interface MarketSource {
+  getEvents(limit: number): Promise<Event[]>;
+}
+
+// tui.ts depende de interface, não implementação
+async function render(source: MarketSource) {
+  const events = await source.getEvents(10);
+  // ...
+}
+
+// Uso
+const api = new PolymarketAPI();
+await render(api);  // Funciona com qualquer implementação de MarketSource
+```
+
+---
+
+### Pitfall: Não Separar Camadas
+
+**❌ RUIM - Tudo misturado:**
+```typescript
+// main.ts
+async function main() {
+  const response = await fetch("https://api.com/data");
+  const data = await response.json();
+  const normalized = normalizeData(data);
+  const screen = blessed.screen({ /* ... */ });
+  const box = blessed.box({ /* ... */ });
+  box.setContent(JSON.stringify(normalized));
+  screen.append(box);
+  screen.render();
+}
+```
+
+**✅ BOM - Camadas separadas:**
+```typescript
+// api.ts
+async function fetchData() { /* ... */ }
+
+// parsers.ts
+function normalizeData(data) { /* ... */ }
+
+// tui.ts
+function renderData(data) { /* ... */ }
+
+// main.ts (orquestração)
+async function main() {
+  const rawData = await fetchData();
+  const normalized = normalizeData(rawData);
+  renderData(normalized);
+}
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### Problema: "Circular Dependency"
+
+**Erro:**
+```
+Error: Circular dependency detected
+src/api.ts → src/market.ts → src/api.ts
+```
+
+**Causa:**
+api.ts importa market.ts e market.ts importa api.ts.
+
+**Solução:**
+```typescript
+// ✅ Opção 1: Mover funções compartilhadas para terceiro módulo
+// src/types.ts - Define tipos que ambos usam
+// src/utils.ts - Define funções utilitárias que ambos usam
+
+// ✅ Opção 2: Inverter dependência
+// Em vez de api.ts importar market.ts, faça market.ts receber market como parâmetro
+```
+
+**Prevenção:**
+Desenhe o grafo de dependências antes de codificar. Evite ciclos.
+
+---
+
+## 🎯 Milestone Completado
+
+Após completar este capítulo, você deve ser capaz de:
+
+- [ ] Identificar as camadas da arquitetura
+- [ ] Entender o fluxo de dados completo
+- [ ] Localizar cada arquivo no projeto
+- [ ] Explicar padrões de design usados
+- [ ] Evitar acoplamento alto
+- [ ] Separar responsabilidades corretamente
+
+**Exercício Prático:**
+Desenhe em papel o fluxo completo quando:
+1. Usuário executa `--market 12345`
+2. WebSocket recebe atualização de preço
+3. Usuário pressiona 'n' (próximo mercado)
+
+Compare com o diagrama do capítulo e discuta as diferenças.
+
+---
+
+## 🎓 Design Decisions
+
+### Decisão 1: Por que arquitetura em 3 camadas?
+
+**Alternativas Consideradas:**
+1. **Monolito único** - Tudo em um arquivo
+2. **2 camadas** - Apenas dados e apresentação
+3. **3 camadas** - Apresentação, domínio, dados ✅ **ESCOLHIDO**
+4. **Microserviços** - Serviços separados
+
+**Trade-offs:**
+
+| Arquitetura | Complexidade | Manutenibilidade | Testabilidade | Escalabilidade |
+|-------------|--------------|-------------------|----------------|----------------|
+| Monolito | ⭐ Muito baixa | ⭐ Muito baixa | ⭐ Muito baixa | ⭐ Muito baixa |
+| 2 Camadas | ⭐⭐ Baixa | ⭐⭐ Baixa | ⭐⭐ Baixa | ⭐⭐ Baixa |
+| 3 Camadas | ⭐⭐⭐ Média | ⭐⭐⭐⭐ Alta | ⭐⭐⭐⭐ Alta | ⭐⭐⭐ Média |
+| Microserviços | ⭐⭐⭐⭐⭐ Muito alta | ⭐⭐⭐ Média | ⭐⭐⭐⭐ Alta | ⭐⭐⭐⭐⭐ Muito alta |
+
+**Por que 3 camadas foi escolhido:**
+- ✅ **Separação clara**: Cada camada tem responsabilidade única
+- ✅ **Testabilidade**: Camadas podem ser testadas independentemente
+- ✅ **Manutenibilidade**: Mudanças em uma camada não afetam outras
+- ✅ **Flexibilidade**: Fácil trocar implementação de uma camada
+
+**Exemplo de flexibilidade:**
+```typescript
+// Camada de dados pode ser trocada:
+// De: api.ts (HTTP)
+// Para: api-mock.ts (Dados mockados para testes)
+// Camadas acima não precisam mudar!
+```
+
+**Referência no código:**
+- `src/tui.ts` (Apresentação)
+- `src/market.ts` (Domínio)
+- `src/api.ts` (Dados)
+
+---
+
+### Decisão 2: Por que Singleton para Rate Limiter?
+
+**Alternativas Consideradas:**
+1. **Instância única global** - Variável global
+2. **Singleton Pattern** - Classe com getInstance() ✅ **ESCOLHIDO**
+3. **Dependency Injection** - Injetado como parâmetro
+
+**Por que Singleton foi escolhido:**
+- ✅ **Estado compartilhado**: Rate limiting precisa de contador global
+- ✅ **Thread-safe**: Uma instância evita race conditions
+- ✅ **Simplicidade**: Fácil de usar em qualquer lugar
+
+**Risco:**
+- ❌ **Difícil de testar**: Estado global entre testes
+- **Mitigação**: Método `reset()` para limpar estado entre testes
+
+**Referência no código:** `src/rateLimiter.ts` - Implementação Singleton
+
+---
+
+### Decisão 3: Por que separar `parsers.ts` de `api.ts`?
+
+**Alternativas Consideradas:**
+1. **Tudo em api.ts** - Fetch + parse junto
+2. **Separado** - api.ts (fetch) + parsers.ts (parse) ✅ **ESCOLHIDO**
+
+**Por que separação foi escolhida:**
+- ✅ **Single Responsibility**: api.ts busca dados, parsers.ts converte
+- ✅ **Reutilizável**: Parsers podem ser usados para dados de cache
+- ✅ **Testável**: Fácil testar parsing sem fazer requisições reais
+
+**Exemplo:**
+```typescript
+// api.ts
+async function getOrderbook(tokenId) {
+  const raw = await fetchJson(url);  // Busca dados
+  return raw;  // Retorna bruto
+}
+
+// parsers.ts
+function normalizeOrderbook(raw) {  // Converte
+  // Lógica de normalização
+  return normalized;
+}
+```
+
+**Referência no código:**
+- `src/api.ts:190-200` - Fetch de dados
+- `src/parsers.ts:34-45` - Normalização
+
+---
+
+## 📚 Recursos Externos
+
+### Aprender Mais Sobre:
+
+**Arquitetura de Software:**
+- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) - Uncle Bob
+- [Layered Architecture](https://en.wikipedia.org/wiki/Multilayered_architecture) - Wikipedia
+- [Design Patterns](https://refactoring.guru/design-patterns) - Refactoring Guru
+
+**Separation of Concerns:**
+- [SOC Principle](https://en.wikipedia.org/wiki/Separation_of_concerns) - Wikipedia
+- [Single Responsibility Principle](https://en.wikipedia.org/wiki/Single-responsibility_principle) - Wikipedia
+
+**Dependency Injection:**
+- [DI Explained](https://www.youtube.com/watch?v=IKD2-MAkXyQ) - YouTube (15 min)
+- [Inversion of Control](https://martinfowler.com/articles/injection.html) - Martin Fowler
+
+**Rate Limiting:**
+- [Token Bucket Algorithm](https://en.wikipedia.org/wiki/Token_bucket) - Wikipedia
+- [Rate Limiting Best Practices](https://cloud.google.com/architecture/rate-limiting-strategies-techniques) - Google Cloud
+
+### Vídeos Recomendados:
+
+- [Software Architecture Explained](https://www.youtube.com/watch?v=8640g_jWfqg) - YouTube (30 min)
+- [Clean Code Principles](https://www.youtube.com/watch?v=7EmboKQH8lM) - YouTube (45 min)
+- [Rate Limiting Strategies](https://www.youtube.com/watch?v=M9A7oQHs8QI) - YouTube (20 min)
 
 ---
 
