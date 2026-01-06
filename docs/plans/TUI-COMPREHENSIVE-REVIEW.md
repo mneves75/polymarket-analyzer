@@ -85,6 +85,7 @@ The result is a production-quality TUI that John Carmack would approve: clear, c
 - ESC key handling must check modal state before closing
 - Extracting utilities to separate modules greatly improves testability
 - Health score calculation benefits from parameterized options pattern
+- In blessed, `setContent()` changes are not visible until `screen.render()` is called - must call after updating any element
 
 ## Context and Orientation
 
