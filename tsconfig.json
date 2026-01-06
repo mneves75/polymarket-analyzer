@@ -2,13 +2,27 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
+    "lib": ["ES2022"],
     "moduleResolution": "Bundler",
     "esModuleInterop": true,
     "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "useUnknownInCatchVariables": true,
     "noEmit": true,
     "skipLibCheck": true,
     "types": ["bun-types"],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "explainFiles": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@tests/*": ["tests/*"]
+    }
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
 }

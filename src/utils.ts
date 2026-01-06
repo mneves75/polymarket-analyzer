@@ -30,6 +30,48 @@ export function asciiSparkline(series: number[], width = 30) {
     .join("");
 }
 
+export function asciiChart(series: number[], width = 50, height = 8): string[] {
+  if (series.length === 0) return ["(no data)"];
+
+  const sliced = series.slice(-width);
+  const min = Math.min(...sliced);
+  const max = Math.max(...sliced);
+  const range = max - min || 0.01;
+
+  const lines: string[] = [];
+  const blocks = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
+
+  // Create the chart rows (top to bottom)
+  for (let row = height - 1; row >= 0; row--) {
+    const threshold = min + (range * (row + 1)) / height;
+    const rowChars: string[] = [];
+
+    for (const val of sliced) {
+      const normalized = (val - min) / range;
+      const fillLevel = normalized * height;
+
+      if (fillLevel >= row + 1) {
+        rowChars.push("█");
+      } else if (fillLevel > row) {
+        const partialIdx = Math.floor((fillLevel - row) * blocks.length);
+        rowChars.push(blocks[Math.min(partialIdx, blocks.length - 1)]);
+      } else {
+        rowChars.push(" ");
+      }
+    }
+
+    const label = row === height - 1 ? formatPrice(max) : row === 0 ? formatPrice(min) : "";
+    const paddedLabel = label.padStart(7);
+    lines.push(`${paddedLabel} │${rowChars.join("")}`);
+  }
+
+  // Add bottom axis
+  const axisLine = "─".repeat(sliced.length);
+  lines.push(`${"".padStart(7)} └${axisLine}`);
+
+  return lines;
+}
+
 export function padRight(value: string, len: number) {
   if (value.length >= len) return value.slice(0, len);
   return value + " ".repeat(len - value.length);

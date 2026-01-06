@@ -44,16 +44,23 @@
 - Add detail screen (`Enter` key) showing expanded market info with full orderbook and history.
 - Add help modal (`h` or `?` key) displaying all keyboard shortcuts.
 - Add ESC key to close modals (detail and help screens).
+- Add visual multi-line ASCII price chart with Unicode block characters in detail modal.
 
 ### Improvements
+- Clear stale chart data when navigating markets (n/p/filter) or swapping outcomes (o).
 - Detail screen now updates dynamically when navigating markets (n/p) or swapping outcomes (o).
+- Detail screen updates in real-time as async data loads (orderbook, history).
+- Fix detail modal z-ordering to appear on top of other UI elements.
+- Fix screen.render() call sequence ensuring modal displays correctly after navigation.
+- Extract modal content generation to `tui-modals.ts` (162 lines) for better modularity.
 - Truncate long token IDs in error messages for better readability.
 - Improve Radar table spacing with separate columns and increased padding.
 - Increase Event column truncation from 30 to 38 characters.
 - Change no-orderbook indicator color from gray to yellow for visibility.
 - Extract rendering utilities to `tui-render.ts` for better testability.
 - Extract type definitions to `tui-types.ts` for cleaner imports.
-- Add 45 tests for TUI rendering functions (59 total tests).
+- Add 65 tests for TUI and utility functions.
+- Update tsconfig.json with stricter TypeScript settings.
 
 ### Previous
 - Add structured HTTP errors with no-orderbook classification.
