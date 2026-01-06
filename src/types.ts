@@ -47,19 +47,23 @@ export type EventId = string & { readonly __brand: unique symbol };
  * const tokenId = asTokenId("0x1234567890abcdef...");
  */
 export function asTokenId(id: string): TokenId {
-  if (typeof id !== 'string') {
-    throw new Error(`Invalid TokenId: expected string, got ${typeof id}`);
-  }
-  // Token IDs are hex strings starting with 0x
-  if (!id.startsWith('0x')) {
-    throw new Error(`Invalid TokenId: must start with '0x', got ${id.slice(0, 10)}...`);
-  }
-  // Full token IDs are 66 characters (0x + 64 hex chars)
-  // Partial token IDs (shorter) are also valid in some contexts
-  if (id.length < 10 || id.length > 66) {
-    throw new Error(`Invalid TokenId: invalid length ${id.length}, expected 10-66`);
-  }
-  return id as TokenId;
+	if (typeof id !== "string") {
+		throw new Error(`Invalid TokenId: expected string, got ${typeof id}`);
+	}
+	// Token IDs are hex strings starting with 0x
+	if (!id.startsWith("0x")) {
+		throw new Error(
+			`Invalid TokenId: must start with '0x', got ${id.slice(0, 10)}...`,
+		);
+	}
+	// Full token IDs are 66 characters (0x + 64 hex chars)
+	// Partial token IDs (shorter) are also valid in some contexts
+	if (id.length < 10 || id.length > 66) {
+		throw new Error(
+			`Invalid TokenId: invalid length ${id.length}, expected 10-66`,
+		);
+	}
+	return id as TokenId;
 }
 
 /**
@@ -70,16 +74,20 @@ export function asTokenId(id: string): TokenId {
  * @throws Error if the ID format is invalid
  */
 export function asConditionId(id: string): ConditionId {
-  if (typeof id !== 'string') {
-    throw new Error(`Invalid ConditionId: expected string, got ${typeof id}`);
-  }
-  if (!id.startsWith('0x')) {
-    throw new Error(`Invalid ConditionId: must start with '0x', got ${id.slice(0, 10)}...`);
-  }
-  if (id.length !== 66) {
-    throw new Error(`Invalid ConditionId: invalid length ${id.length}, expected 66`);
-  }
-  return id as ConditionId;
+	if (typeof id !== "string") {
+		throw new Error(`Invalid ConditionId: expected string, got ${typeof id}`);
+	}
+	if (!id.startsWith("0x")) {
+		throw new Error(
+			`Invalid ConditionId: must start with '0x', got ${id.slice(0, 10)}...`,
+		);
+	}
+	if (id.length !== 66) {
+		throw new Error(
+			`Invalid ConditionId: invalid length ${id.length}, expected 66`,
+		);
+	}
+	return id as ConditionId;
 }
 
 /**
@@ -94,25 +102,25 @@ export function asConditionId(id: string): ConditionId {
  * @throws Error if the ID format is invalid
  */
 export function asMarketId(id: string): MarketId {
-  if (typeof id !== 'string') {
-    throw new Error(`Invalid MarketId: expected string, got ${typeof id}`);
-  }
-  if (id.length === 0) {
-    throw new Error(`Invalid MarketId: cannot be empty`);
-  }
-  // Accept either hex format or slug format
-  if (id.startsWith('0x')) {
-    // Validate as hex ID
-    if (id.length < 10 || id.length > 66) {
-      throw new Error(`Invalid MarketId: invalid hex length ${id.length}`);
-    }
-  } else {
-    // Validate as slug (alphanumeric, hyphens, underscores)
-    if (!/^[a-z0-9-_]+$/i.test(id)) {
-      throw new Error(`Invalid MarketId: invalid slug format`);
-    }
-  }
-  return id as MarketId;
+	if (typeof id !== "string") {
+		throw new Error(`Invalid MarketId: expected string, got ${typeof id}`);
+	}
+	if (id.length === 0) {
+		throw new Error(`Invalid MarketId: cannot be empty`);
+	}
+	// Accept either hex format or slug format
+	if (id.startsWith("0x")) {
+		// Validate as hex ID
+		if (id.length < 10 || id.length > 66) {
+			throw new Error(`Invalid MarketId: invalid hex length ${id.length}`);
+		}
+	} else {
+		// Validate as slug (lowercase alphanumeric, hyphens, underscores)
+		if (!/^[a-z0-9-_]+$/.test(id)) {
+			throw new Error(`Invalid MarketId: invalid slug format`);
+		}
+	}
+	return id as MarketId;
 }
 
 /**
@@ -123,11 +131,11 @@ export function asMarketId(id: string): MarketId {
  * @throws Error if the ID format is invalid
  */
 export function asEventId(id: string | number): EventId {
-  const idStr = String(id);
-  if (idStr.length === 0) {
-    throw new Error(`Invalid EventId: cannot be empty`);
-  }
-  return idStr as EventId;
+	const idStr = String(id);
+	if (idStr.length === 0) {
+		throw new Error(`Invalid EventId: cannot be empty`);
+	}
+	return idStr as EventId;
 }
 
 /**
@@ -137,7 +145,7 @@ export function asEventId(id: string | number): EventId {
  * @returns true if the string matches TokenId format
  */
 export function isTokenId(id: string): id is TokenId {
-  return id.startsWith('0x') && id.length >= 10 && id.length <= 66;
+	return id.startsWith("0x") && id.length >= 10 && id.length <= 66;
 }
 
 /**
@@ -147,7 +155,7 @@ export function isTokenId(id: string): id is TokenId {
  * @returns true if the string matches ConditionId format
  */
 export function isConditionId(id: string): id is ConditionId {
-  return id.startsWith('0x') && id.length === 66;
+	return id.startsWith("0x") && id.length === 66;
 }
 
 /**
@@ -157,9 +165,9 @@ export function isConditionId(id: string): id is ConditionId {
  * @returns true if the string matches MarketId format
  */
 export function isMarketId(id: string): id is MarketId {
-  if (id.length === 0) return false;
-  if (id.startsWith('0x')) {
-    return id.length >= 10 && id.length <= 66;
-  }
-  return /^[a-z0-9-_]+$/i.test(id);
+	if (id.length === 0) return false;
+	if (id.startsWith("0x")) {
+		return id.length >= 10 && id.length <= 66;
+	}
+	return /^[a-z0-9-_]+$/.test(id);
 }

@@ -4,16 +4,16 @@ import { RateLimiter } from "./rateLimiter";
  * Options for HTTP requests with retry and timeout support.
  */
 export type FetchOptions = {
-  /** HTTP method (currently only GET is supported) */
-  method?: "GET" | "POST";
-  /** Additional HTTP headers to include in the request */
-  headers?: Record<string, string>;
-  /** Request body to send (will be JSON.stringify'd if present) */
-  body?: unknown;
-  /** Request timeout in milliseconds (default: 10,000ms = 10 seconds) */
-  timeoutMs?: number;
-  /** Maximum number of retry attempts (default: 2, meaning 3 total attempts) */
-  retries?: number;
+	/** HTTP method (currently only GET is supported) */
+	method?: "GET" | "POST";
+	/** Additional HTTP headers to include in the request */
+	headers?: Record<string, string>;
+	/** Request body to send (will be JSON.stringify'd if present) */
+	body?: unknown;
+	/** Request timeout in milliseconds (default: 10,000ms = 10 seconds) */
+	timeoutMs?: number;
+	/** Maximum number of retry attempts (default: 2, meaning 3 total attempts) */
+	retries?: number;
 };
 
 /**
@@ -30,25 +30,25 @@ export type FetchOptions = {
  * }
  */
 export class HttpError extends Error {
-  /** HTTP status code (e.g., 404, 500, etc.) */
-  status: number;
-  /** The full URL that was requested */
-  url: string;
-  /** Parsed error response body (if available) */
-  body: unknown;
+	/** HTTP status code (e.g., 404, 500, etc.) */
+	status: number;
+	/** The full URL that was requested */
+	url: string;
+	/** Parsed error response body (if available) */
+	body: unknown;
 
-  constructor(status: number, url: string, body: unknown, message: string) {
-    super(message);
-    this.name = "HttpError";
-    this.status = status;
-    this.url = url;
-    this.body = body;
-  }
+	constructor(status: number, url: string, body: unknown, message: string) {
+		super(message);
+		this.name = "HttpError";
+		this.status = status;
+		this.url = url;
+		this.body = body;
+	}
 }
 
 // Rate limiting configuration for Polymarket APIs
 const limiter = new RateLimiter();
-const WINDOW_MS = 10_000;  // 10-second sliding window
+const WINDOW_MS = 10_000; // 10-second sliding window
 
 /**
  * Rate limit rules for specific Polymarket API endpoints.
@@ -61,19 +61,19 @@ const WINDOW_MS = 10_000;  // 10-second sliding window
  * @see https://docs.polymarket.com for official rate limit documentation
  */
 const RATE_LIMITS = [
-  { host: "clob.polymarket.com", path: "/book", limit: 1500 },
-  { host: "clob.polymarket.com", path: "/books", limit: 500 },
-  { host: "clob.polymarket.com", path: "/price", limit: 1500 },
-  { host: "clob.polymarket.com", path: "/prices", limit: 500 },
-  { host: "clob.polymarket.com", path: "/midpoint", limit: 1500 },
-  { host: "clob.polymarket.com", path: "/prices-history", limit: 1000 },
-  { host: "clob.polymarket.com", path: "/price_history", limit: 1000 },
-  { host: "clob.polymarket.com", path: "/data/trades", limit: 500 },
-  { host: "gamma-api.polymarket.com", path: "/events", limit: 500 },
-  { host: "gamma-api.polymarket.com", path: "/markets", limit: 300 },
-  { host: "data-api.polymarket.com", path: "/positions", limit: 150 },
-  { host: "data-api.polymarket.com", path: "/trades", limit: 200 },
-  { host: "data-api.polymarket.com", path: "/closed-positions", limit: 150 }
+	{ host: "clob.polymarket.com", path: "/book", limit: 1500 },
+	{ host: "clob.polymarket.com", path: "/books", limit: 500 },
+	{ host: "clob.polymarket.com", path: "/price", limit: 1500 },
+	{ host: "clob.polymarket.com", path: "/prices", limit: 500 },
+	{ host: "clob.polymarket.com", path: "/midpoint", limit: 1500 },
+	{ host: "clob.polymarket.com", path: "/prices-history", limit: 1000 },
+	{ host: "clob.polymarket.com", path: "/price_history", limit: 1000 },
+	{ host: "clob.polymarket.com", path: "/data/trades", limit: 500 },
+	{ host: "gamma-api.polymarket.com", path: "/events", limit: 500 },
+	{ host: "gamma-api.polymarket.com", path: "/markets", limit: 300 },
+	{ host: "data-api.polymarket.com", path: "/positions", limit: 150 },
+	{ host: "data-api.polymarket.com", path: "/trades", limit: 200 },
+	{ host: "data-api.polymarket.com", path: "/closed-positions", limit: 150 },
 ];
 
 /**
@@ -81,9 +81,9 @@ const RATE_LIMITS = [
  * These provide overall limits per host to prevent abuse.
  */
 const HOST_LIMITS = [
-  { host: "clob.polymarket.com", limit: 9000 },
-  { host: "gamma-api.polymarket.com", limit: 4000 },
-  { host: "data-api.polymarket.com", limit: 1000 }
+	{ host: "clob.polymarket.com", limit: 9000 },
+	{ host: "gamma-api.polymarket.com", limit: 4000 },
+	{ host: "data-api.polymarket.com", limit: 1000 },
 ];
 
 /**
@@ -127,60 +127,69 @@ const HOST_LIMITS = [
  *   retries: 3        // Try up to 4 times total
  * });
  */
-export async function fetchJson<T>(url: string, options: FetchOptions = {}): Promise<T> {
-  const { method = "GET", headers = {}, body, timeoutMs = 10_000, retries = 2 } = options;
-  const requestUrl = new URL(url);
+export async function fetchJson<T>(
+	url: string,
+	options: FetchOptions = {},
+): Promise<T> {
+	const {
+		method = "GET",
+		headers = {},
+		body,
+		timeoutMs = 10_000,
+		retries = 2,
+	} = options;
+	const requestUrl = new URL(url);
 
-  // Apply rate limiting if rule exists for this endpoint
-  const limitRule = matchRateLimit(requestUrl);
-  if (limitRule) await limiter.take(limitRule);
+	// Apply rate limiting if rule exists for this endpoint
+	const limitRule = matchRateLimit(requestUrl);
+	if (limitRule) await limiter.take(limitRule);
 
-  let attempt = 0;
-  while (true) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+	let attempt = 0;
+	while (true) {
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-    try {
-      const res = await fetch(requestUrl, {
-        method,
-        headers: {
-          "content-type": "application/json",
-          ...headers
-        },
-        body: body ? JSON.stringify(body) : undefined,
-        signal: controller.signal
-      });
+		try {
+			const res = await fetch(requestUrl, {
+				method,
+				headers: {
+					"content-type": "application/json",
+					...headers,
+				},
+				body: body ? JSON.stringify(body) : undefined,
+				signal: controller.signal,
+			});
 
-      if (!res.ok) {
-        // Retry on rate limits (429) and server errors (5xx)
-        if (shouldRetry(res.status) && attempt < retries) {
-          attempt += 1;
-          await backoff(attempt);
-          continue;
-        }
-        // For non-retryable errors, throw immediately
-        const bodyPayload = await readErrorBody(res);
-        const bodyMessage = errorBodyMessage(bodyPayload);
-        const message = bodyMessage
-          ? `HTTP ${res.status} ${res.statusText} for ${url}: ${bodyMessage}`
-          : `HTTP ${res.status} ${res.statusText} for ${url}`;
-        throw new HttpError(res.status, url, bodyPayload, message);
-      }
+			if (!res.ok) {
+				// Retry on rate limits (429) and server errors (5xx)
+				if (shouldRetry(res.status) && attempt < retries) {
+					attempt += 1;
+					await backoff(attempt);
+					continue;
+				}
+				// For non-retryable errors, throw immediately
+				const bodyPayload = await readErrorBody(res);
+				const bodyMessage = errorBodyMessage(bodyPayload);
+				const message = bodyMessage
+					? `HTTP ${res.status} ${res.statusText} for ${url}: ${bodyMessage}`
+					: `HTTP ${res.status} ${res.statusText} for ${url}`;
+				throw new HttpError(res.status, url, bodyPayload, message);
+			}
 
-      return (await res.json()) as T;
-    } catch (err) {
-      // Retry on network errors (timeouts, connection failures)
-      if (attempt < retries) {
-        attempt += 1;
-        await backoff(attempt);
-        continue;
-      }
-      // After all retries exhausted, re-throw
-      throw err;
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
+			return (await res.json()) as T;
+		} catch (err) {
+			// Retry on network errors (timeouts, connection failures)
+			if (attempt < retries) {
+				attempt += 1;
+				await backoff(attempt);
+				continue;
+			}
+			// After all retries exhausted, re-throw
+			throw err;
+		} finally {
+			clearTimeout(timeout);
+		}
+	}
 }
 
 /**
@@ -198,13 +207,16 @@ export async function fetchJson<T>(url: string, options: FetchOptions = {}): Pro
  * });
  * // → "https://api.example.com/search?q=polymarket&limit=10&active=true"
  */
-export function withQuery(base: string, params: Record<string, string | number | boolean | undefined>) {
-  const url = new URL(base);
-  for (const [key, value] of Object.entries(params)) {
-    if (value === undefined) continue;
-    url.searchParams.set(key, String(value));
-  }
-  return url.toString();
+export function withQuery(
+	base: string,
+	params: Record<string, string | number | boolean | undefined>,
+) {
+	const url = new URL(base);
+	for (const [key, value] of Object.entries(params)) {
+		if (value === undefined) continue;
+		url.searchParams.set(key, String(value));
+	}
+	return url.toString();
 }
 
 /**
@@ -219,25 +231,31 @@ export function withQuery(base: string, params: Record<string, string | number |
  * @returns Rate limit rule if found, undefined otherwise
  */
 function matchRateLimit(url: URL) {
-  const host = url.host;
-  const path = url.pathname;
-  let best: { host: string; path: string; limit: number } | undefined;
+	const host = url.host;
+	const path = url.pathname;
+	let best: { host: string; path: string; limit: number } | undefined;
 
-  // Find most specific path match (longest path wins)
-  for (const rule of RATE_LIMITS) {
-    if (rule.host !== host) continue;
-    if (path.startsWith(rule.path)) {
-      if (!best || rule.path.length > best.path.length) best = rule;
-    }
-  }
+	// Find most specific path match (longest path wins)
+	for (const rule of RATE_LIMITS) {
+		if (rule.host !== host) continue;
+		if (path.startsWith(rule.path)) {
+			if (!best || rule.path.length > best.path.length) best = rule;
+		}
+	}
 
-  if (best) return { key: `${host}${best.path}`, limit: best.limit, windowMs: WINDOW_MS };
+	if (best)
+		return {
+			key: `${host}${best.path}`,
+			limit: best.limit,
+			windowMs: WINDOW_MS,
+		};
 
-  // Fall back to host-level limit
-  const hostRule = HOST_LIMITS.find((rule) => rule.host === host);
-  if (hostRule) return { key: host, limit: hostRule.limit, windowMs: WINDOW_MS };
+	// Fall back to host-level limit
+	const hostRule = HOST_LIMITS.find((rule) => rule.host === host);
+	if (hostRule)
+		return { key: host, limit: hostRule.limit, windowMs: WINDOW_MS };
 
-  return undefined;
+	return undefined;
 }
 
 /**
@@ -263,13 +281,13 @@ function matchRateLimit(url: URL) {
  * @returns Promise that resolves after calculated delay
  */
 async function backoff(attempt: number) {
-  // Exponential: 200ms, 400ms, 800ms, 1600ms, 3200ms, ...
-  const base = 200 * Math.pow(2, attempt - 1);
+	// Exponential: 200ms, 400ms, 800ms, 1600ms, 3200ms, ...
+	const base = 200 * 2 ** (attempt - 1);
 
-  // Jitter: random 0-100ms to distribute retries
-  const jitter = Math.floor(Math.random() * 100);
+	// Jitter: random 0-100ms to distribute retries
+	const jitter = Math.floor(Math.random() * 100);
 
-  await new Promise((resolve) => setTimeout(resolve, base + jitter));
+	await new Promise((resolve) => setTimeout(resolve, base + jitter));
 }
 
 /**
@@ -284,7 +302,7 @@ async function backoff(attempt: number) {
  * @returns true if should retry, false otherwise
  */
 function shouldRetry(status: number) {
-  return status === 429 || status >= 500;
+	return status === 429 || status >= 500;
 }
 
 /**
@@ -295,11 +313,11 @@ function shouldRetry(status: number) {
  * @returns true if error is a "no orderbook" error (404 with specific message)
  */
 export function isNoOrderbookError(err: unknown) {
-  const message = extractErrorMessage(err);
-  if (!message) return false;
-  // Only 404 errors about orderbooks should be treated as "no orderbook"
-  if (err instanceof HttpError && err.status !== 404) return false;
-  return message.toLowerCase().includes("no orderbook exists");
+	const message = extractErrorMessage(err);
+	if (!message) return false;
+	// Only 404 errors about orderbooks should be treated as "no orderbook"
+	if (err instanceof HttpError && err.status !== 404) return false;
+	return message.toLowerCase().includes("no orderbook exists");
 }
 
 /**
@@ -315,18 +333,18 @@ export function isNoOrderbookError(err: unknown) {
  * @returns Extracted error message or empty string
  */
 function extractErrorMessage(err: unknown) {
-  if (!err) return "";
-  if (err instanceof HttpError) {
-    const bodyMessage = errorBodyMessage(err.body);
-    return bodyMessage || err.message;
-  }
-  if (err instanceof Error) return err.message;
-  if (typeof err === "string") return err;
-  try {
-    return JSON.stringify(err);
-  } catch {
-    return String(err);
-  }
+	if (!err) return "";
+	if (err instanceof HttpError) {
+		const bodyMessage = errorBodyMessage(err.body);
+		return bodyMessage || err.message;
+	}
+	if (err instanceof Error) return err.message;
+	if (typeof err === "string") return err;
+	try {
+		return JSON.stringify(err);
+	} catch {
+		return String(err);
+	}
 }
 
 /**
@@ -336,13 +354,13 @@ function extractErrorMessage(err: unknown) {
  * @returns Parsed error body (JSON or text)
  */
 async function readErrorBody(res: Response) {
-  const text = await res.text();
-  if (!text) return "";
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
+	const text = await res.text();
+	if (!text) return "";
+	try {
+		return JSON.parse(text);
+	} catch {
+		return text;
+	}
 }
 
 /**
@@ -357,20 +375,20 @@ async function readErrorBody(res: Response) {
  * @returns Extracted message (truncated to 200 chars) or empty string
  */
 function errorBodyMessage(body: unknown) {
-  if (!body) return "";
-  if (typeof body === "string") return body.slice(0, 200);
-  if (typeof body === "object") {
-    const record = body as Record<string, unknown>;
-    const message =
-      (typeof record['error'] === "string" && record['error']) ||
-      (typeof record['message'] === "string" && record['message']) ||
-      (typeof record['detail'] === "string" && record['detail']);
-    if (message) return message.slice(0, 200);
-    try {
-      return JSON.stringify(body).slice(0, 200);
-    } catch {
-      return "[object]";
-    }
-  }
-  return String(body).slice(0, 200);
+	if (!body) return "";
+	if (typeof body === "string") return body.slice(0, 200);
+	if (typeof body === "object") {
+		const record = body as Record<string, unknown>;
+		const message =
+			(typeof record.error === "string" && record.error) ||
+			(typeof record.message === "string" && record.message) ||
+			(typeof record.detail === "string" && record.detail);
+		if (message) return message.slice(0, 200);
+		try {
+			return JSON.stringify(body).slice(0, 200);
+		} catch {
+			return "[object]";
+		}
+	}
+	return String(body).slice(0, 200);
 }
