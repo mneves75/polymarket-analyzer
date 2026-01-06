@@ -13,6 +13,15 @@
   - Color-coded by type (error=red, warning=yellow, info=blue)
   - Replaces inline footer error messages for better visibility
 - Update help modal with scroll instructions (`j`, `k`, arrow keys)
+- **Market URL in Detail Modal** - Show direct Polymarket link for each market
+
+### Bug Fixes
+- **Fix scroll interference** - j/k keys no longer scroll radar when detail modal is open
+- **Fix graceful shutdown** - Call `screen.destroy()` on quit for proper terminal cleanup
+- **Remove emojis from alerts** - Replace emoji warning symbols with text (per coding guidelines)
+
+### Improvements
+- **Detail modal scrolling** - Add mouse wheel support and scrollbar to detail modal
 
 ### Configuration Changes
 - **Increase default radarLimit from 10 to 50** - Now fetches 50 markets by default instead of 10

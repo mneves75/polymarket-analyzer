@@ -1,8 +1,8 @@
 import type { MarketInfo } from "./api";
 import type { OrderbookState } from "./parsers";
+import { colorText, textCell } from "./tui-render";
 import type { HealthScore } from "./tui-types";
 import { THEME } from "./tui-types";
-import { colorText, textCell } from "./tui-render";
 import { asciiChart, formatNumber, formatPct, formatPrice } from "./utils";
 
 export interface DetailModalState {
@@ -25,7 +25,18 @@ export interface HelpModalState {
 }
 
 export function generateDetailContent(state: DetailModalState): string {
-  const { focusMarket, outcomeIndex, bestBid, bestAsk, midpoint, lastTrade, noOrderbook, orderbook, historySeries, healthScore } = state;
+  const {
+    focusMarket,
+    outcomeIndex,
+    bestBid,
+    bestAsk,
+    midpoint,
+    lastTrade,
+    noOrderbook,
+    orderbook,
+    historySeries,
+    healthScore,
+  } = state;
 
   if (!focusMarket) {
     return colorText("No market selected", THEME.muted);
@@ -47,6 +58,7 @@ export function generateDetailContent(state: DetailModalState): string {
     `${colorText("Condition ID:", THEME.muted)} ${textCell(focusMarket.conditionId || "-")}`,
     `${colorText("Market ID:", THEME.muted)} ${textCell(focusMarket.marketId || "-")}`,
     `${colorText("Slug:", THEME.muted)} ${textCell(focusMarket.slug || "-")}`,
+    `${colorText("URL:", THEME.muted)} ${colorText(focusMarket.slug ? `https://polymarket.com/event/${focusMarket.slug}` : "-", THEME.accent)}`,
     "",
     colorText("=== OUTCOME ===", THEME.accent),
     "",
@@ -68,7 +80,7 @@ export function generateDetailContent(state: DetailModalState): string {
     `${colorText("24hr Volume:", THEME.muted)} ${colorText(formatNumber(focusMarket.volume24hr), THEME.text)}`,
     `${colorText("24hr Change:", THEME.muted)} ${colorText(formatPct(focusMarket.priceChange24hr), (focusMarket.priceChange24hr ?? 0) >= 0 ? THEME.success : THEME.danger)}`,
     `${colorText("Has Orderbook:", THEME.muted)} ${colorText(noOrderbook ? "NO" : "YES", noOrderbook ? THEME.danger : THEME.success)}`,
-    ""
+    "",
   ];
 
   if (orderbook) {
@@ -79,21 +91,30 @@ export function generateDetailContent(state: DetailModalState): string {
     const asks = orderbook.asks ?? [];
     const maxDepth = Math.max(bids.length, asks.length, 15);
 
-    lines.push(`${colorText("BIDS", THEME.success)}                    ${colorText("ASKS", THEME.danger)}`);
-    lines.push(`${colorText("Price      Size", THEME.muted)}           ${colorText("Price      Size", THEME.muted)}`);
+    lines.push(
+      `${colorText("BIDS", THEME.success)}                    ${colorText("ASKS", THEME.danger)}`,
+    );
+    lines.push(
+      `${colorText("Price      Size", THEME.muted)}           ${colorText("Price      Size", THEME.muted)}`,
+    );
 
     for (let i = 0; i < maxDepth; i++) {
       const bid = bids[i];
       const ask = asks[i];
-      const bidStr = bid ? `${formatPrice(bid.price).padEnd(10)} ${formatNumber(bid.size).padEnd(10)}` : "".padEnd(20);
+      const bidStr = bid
+        ? `${formatPrice(bid.price).padEnd(10)} ${formatNumber(bid.size).padEnd(10)}`
+        : "".padEnd(20);
       const askStr = ask ? `${formatPrice(ask.price).padEnd(10)} ${formatNumber(ask.size)}` : "";
       lines.push(`${colorText(bidStr, THEME.success)}    ${colorText(askStr, THEME.danger)}`);
     }
 
     lines.push("");
-    if (orderbook.tickSize !== undefined) lines.push(`${colorText("Tick Size:", THEME.muted)} ${orderbook.tickSize}`);
-    if (orderbook.minOrderSize !== undefined) lines.push(`${colorText("Min Order:", THEME.muted)} ${orderbook.minOrderSize}`);
-    if (orderbook.negRisk !== undefined) lines.push(`${colorText("Neg Risk:", THEME.muted)} ${String(orderbook.negRisk)}`);
+    if (orderbook.tickSize !== undefined)
+      lines.push(`${colorText("Tick Size:", THEME.muted)} ${orderbook.tickSize}`);
+    if (orderbook.minOrderSize !== undefined)
+      lines.push(`${colorText("Min Order:", THEME.muted)} ${orderbook.minOrderSize}`);
+    if (orderbook.negRisk !== undefined)
+      lines.push(`${colorText("Neg Risk:", THEME.muted)} ${String(orderbook.negRisk)}`);
   }
 
   lines.push("");
@@ -108,7 +129,9 @@ export function generateDetailContent(state: DetailModalState): string {
     const min = Math.min(...historySeries);
     const max = Math.max(...historySeries);
     const avg = historySeries.reduce((a, b) => a + b, 0) / historySeries.length;
-    lines.push(`${colorText("Min:", THEME.muted)} ${formatPrice(min)}  ${colorText("Max:", THEME.muted)} ${formatPrice(max)}  ${colorText("Avg:", THEME.muted)} ${formatPrice(avg)}  ${colorText("Points:", THEME.muted)} ${historySeries.length}`);
+    lines.push(
+      `${colorText("Min:", THEME.muted)} ${formatPrice(min)}  ${colorText("Max:", THEME.muted)} ${formatPrice(max)}  ${colorText("Avg:", THEME.muted)} ${formatPrice(avg)}  ${colorText("Points:", THEME.muted)} ${historySeries.length}`,
+    );
   } else {
     lines.push(colorText("Loading history...", THEME.warning));
   }
@@ -161,7 +184,7 @@ export function generateHelpContent(state: HelpModalState): string {
     `  ${colorText("q", THEME.success)}        Quit application`,
     `  ${colorText("Ctrl-C", THEME.success)}   Quit application`,
     "",
-    colorText("Press h, ?, or ESC to close", THEME.muted)
+    colorText("Press h, ?, or ESC to close", THEME.muted),
   ];
 
   return lines.join("\n");
