@@ -8,44 +8,44 @@ import { fetchJson, isNoOrderbookError, withQuery } from "./http";
  * This interface captures known fields while allowing for extensibility via index signature.
  */
 export interface GammaEvent {
-  /** Unique event identifier */
-  id?: string;
-  /** URL-friendly slug for the event */
-  slug?: string;
-  /** Event display title */
-  title?: string;
-  /** Detailed event description */
-  description?: string;
-  /** Event start date (ISO string) */
-  start_date?: string;
-  startDate?: string;
-  /** Event end date (ISO string) */
-  end_date?: string;
-  endDate?: string;
-  /** Array of markets associated with this event */
-  markets?: GammaMarket[];
-  /** Event ID (alternative naming) */
-  event_id?: string;
-  eventId?: string;
-  /** Whether the event is active */
-  active?: boolean;
-  /** Whether the event is closed */
-  closed?: boolean;
-  /** Number of markets in event */
-  market_count?: number;
-  marketCount?: number;
-  /** Volume traded across all markets */
-  volume?: number | string;
-  /** Total liquidity */
-  liquidity?: number | string;
-  /** Tag/category for the event */
-  tag?: string;
-  /** Icon URL for the event */
-  icon?: string;
-  /** Image URL for the event */
-  image?: string;
-  /** Allow unknown fields for API extensibility */
-  [unknownField: string]: unknown;
+	/** Unique event identifier */
+	id?: string;
+	/** URL-friendly slug for the event */
+	slug?: string;
+	/** Event display title */
+	title?: string;
+	/** Detailed event description */
+	description?: string;
+	/** Event start date (ISO string) */
+	start_date?: string;
+	startDate?: string;
+	/** Event end date (ISO string) */
+	end_date?: string;
+	endDate?: string;
+	/** Array of markets associated with this event */
+	markets?: GammaMarket[];
+	/** Event ID (alternative naming) */
+	event_id?: string;
+	eventId?: string;
+	/** Whether the event is active */
+	active?: boolean;
+	/** Whether the event is closed */
+	closed?: boolean;
+	/** Number of markets in event */
+	market_count?: number;
+	marketCount?: number;
+	/** Volume traded across all markets */
+	volume?: number | string;
+	/** Total liquidity */
+	liquidity?: number | string;
+	/** Tag/category for the event */
+	tag?: string;
+	/** Icon URL for the event */
+	icon?: string;
+	/** Image URL for the event */
+	image?: string;
+	/** Allow unknown fields for API extensibility */
+	[unknownField: string]: unknown;
 }
 
 /**
@@ -55,61 +55,61 @@ export interface GammaEvent {
  * This interface captures known fields while allowing for extensibility.
  */
 export interface GammaMarket {
-  /** Unique market identifier */
-  id?: string;
-  /** Polymarket condition ID (critical for orders/trading) */
-  conditionId?: string;
-  condition_id?: string;
-  conditionID?: string;
-  /** Market question/title */
-  question?: string;
-  title?: string;
-  /** Market description */
-  description?: string;
-  /** URL-friendly slug */
-  slug?: string;
-  /** Possible outcomes for this market */
-  outcomes?: string[] | string;
-  outcome?: string[] | string;
-  /** CLOB token IDs for trading */
-  clobTokenIds?: string[] | string;
-  clob_token_ids?: string[] | string;
-  /** Nested token information */
-  tokens?: Array<{
-    token_id?: string;
-    id?: string;
-    outcome?: string;
-    price?: number | string;
-  }>;
-  /** 24h trading volume */
-  volume24hr?: number | string;
-  volume24h?: number | string;
-  volume24hrUsd?: number | string;
-  volumeUSD?: number | string;
-  /** 24h price change */
-  priceChange24hr?: number | string;
-  price_change_24hr?: number | string;
-  priceChange24h?: number | string;
-  /** Current best bid price */
-  bestBid?: number | string;
-  best_bid?: number | string;
-  /** Current best ask price */
-  bestAsk?: number | string;
-  best_ask?: number | string;
-  /** Associated event ID */
-  eventId?: string;
-  event_id?: string;
-  /** Event slug */
-  eventSlug?: string;
-  /** Whether market is active */
-  active?: boolean;
-  /** Whether market is closed */
-  closed?: boolean;
-  /** Market end time */
-  endTime?: string;
-  end_time?: string;
-  /** Allow unknown fields for API extensibility */
-  [unknownField: string]: unknown;
+	/** Unique market identifier */
+	id?: string;
+	/** Polymarket condition ID (critical for orders/trading) */
+	conditionId?: string;
+	condition_id?: string;
+	conditionID?: string;
+	/** Market question/title */
+	question?: string;
+	title?: string;
+	/** Market description */
+	description?: string;
+	/** URL-friendly slug */
+	slug?: string;
+	/** Possible outcomes for this market */
+	outcomes?: string[] | string;
+	outcome?: string[] | string;
+	/** CLOB token IDs for trading */
+	clobTokenIds?: string[] | string;
+	clob_token_ids?: string[] | string;
+	/** Nested token information */
+	tokens?: Array<{
+		token_id?: string;
+		id?: string;
+		outcome?: string;
+		price?: number | string;
+	}>;
+	/** 24h trading volume */
+	volume24hr?: number | string;
+	volume24h?: number | string;
+	volume24hrUsd?: number | string;
+	volumeUSD?: number | string;
+	/** 24h price change */
+	priceChange24hr?: number | string;
+	price_change_24hr?: number | string;
+	priceChange24h?: number | string;
+	/** Current best bid price */
+	bestBid?: number | string;
+	best_bid?: number | string;
+	/** Current best ask price */
+	bestAsk?: number | string;
+	best_ask?: number | string;
+	/** Associated event ID */
+	eventId?: string;
+	event_id?: string;
+	/** Event slug */
+	eventSlug?: string;
+	/** Whether market is active */
+	active?: boolean;
+	/** Whether market is closed */
+	closed?: boolean;
+	/** Market end time */
+	endTime?: string;
+	end_time?: string;
+	/** Allow unknown fields for API extensibility */
+	[unknownField: string]: unknown;
 }
 
 /**
@@ -119,30 +119,30 @@ export interface GammaMarket {
  * the underlying API response format.
  */
 export interface MarketInfo {
-  /** Associated event ID */
-  eventId?: string;
-  /** Event display title */
-  eventTitle?: string;
-  /** Market ID (internal) */
-  marketId?: string;
-  /** Market question/title */
-  question?: string;
-  /** Polymarket condition ID (required for trading) */
-  conditionId?: string;
-  /** URL-friendly slug */
-  slug?: string;
-  /** Normalized outcome names (e.g., ["YES", "NO"]) */
-  outcomes: string[];
-  /** CLOB token IDs for each outcome */
-  clobTokenIds: string[];
-  /** 24h trading volume in USD */
-  volume24hr?: number;
-  /** 24h price change percentage */
-  priceChange24hr?: number;
-  /** Current best bid price */
-  bestBid?: number;
-  /** Current best ask price */
-  bestAsk?: number;
+	/** Associated event ID */
+	eventId?: string;
+	/** Event display title */
+	eventTitle?: string;
+	/** Market ID (internal) */
+	marketId?: string;
+	/** Market question/title */
+	question?: string;
+	/** Polymarket condition ID (required for trading) */
+	conditionId?: string;
+	/** URL-friendly slug */
+	slug?: string;
+	/** Normalized outcome names (e.g., ["YES", "NO"]) */
+	outcomes: string[];
+	/** CLOB token IDs for each outcome */
+	clobTokenIds: string[];
+	/** 24h trading volume in USD */
+	volume24hr?: number;
+	/** 24h price change percentage */
+	priceChange24hr?: number;
+	/** Current best bid price */
+	bestBid?: number;
+	/** Current best ask price */
+	bestAsk?: number;
 }
 
 /**
@@ -151,17 +151,17 @@ export interface MarketInfo {
  * Represents the current state of the order book for a token.
  */
 export interface Orderbook {
-  /** Array of bid levels (price, size) */
-  bids?: Array<{ price: number | string; size: number | string }>;
-  /** Array of ask levels (price, size) */
-  asks?: Array<{ price: number | string; size: number | string }>;
-  /** Token ID */
-  token_id?: string;
-  tokenId?: string;
-  /** Timestamp of orderbook snapshot */
-  timestamp?: number | string;
-  /** Allow unknown fields */
-  [unknownField: string]: unknown;
+	/** Array of bid levels (price, size) */
+	bids?: Array<{ price: number | string; size: number | string }>;
+	/** Array of ask levels (price, size) */
+	asks?: Array<{ price: number | string; size: number | string }>;
+	/** Token ID */
+	token_id?: string;
+	tokenId?: string;
+	/** Timestamp of orderbook snapshot */
+	timestamp?: number | string;
+	/** Allow unknown fields */
+	[unknownField: string]: unknown;
 }
 
 /**
@@ -170,17 +170,17 @@ export interface Orderbook {
  * Represents the current price for a specific side (BUY/SELL).
  */
 export interface PriceResponse {
-  /** Current price */
-  price?: number | string;
-  /** Token ID */
-  token_id?: string;
-  tokenId?: string;
-  /** Side (BUY or SELL) */
-  side?: "BUY" | "SELL";
-  /** Timestamp */
-  timestamp?: number | string;
-  /** Allow unknown fields */
-  [unknownField: string]: unknown;
+	/** Current price */
+	price?: number | string;
+	/** Token ID */
+	token_id?: string;
+	tokenId?: string;
+	/** Side (BUY or SELL) */
+	side?: "BUY" | "SELL";
+	/** Timestamp */
+	timestamp?: number | string;
+	/** Allow unknown fields */
+	[unknownField: string]: unknown;
 }
 
 /**
@@ -189,15 +189,15 @@ export interface PriceResponse {
  * Represents the calculated midpoint price.
  */
 export interface MidpointResponse {
-  /** Midpoint price */
-  midpoint?: number | string;
-  /** Token ID */
-  token_id?: string;
-  tokenId?: string;
-  /** Timestamp */
-  timestamp?: number | string;
-  /** Allow unknown fields */
-  [unknownField: string]: unknown;
+	/** Midpoint price */
+	midpoint?: number | string;
+	/** Token ID */
+	token_id?: string;
+	tokenId?: string;
+	/** Timestamp */
+	timestamp?: number | string;
+	/** Allow unknown fields */
+	[unknownField: string]: unknown;
 }
 
 /**
@@ -206,19 +206,19 @@ export interface MidpointResponse {
  * Historical price data over time.
  */
 export interface PriceHistory {
-  /** Array of price data points */
-  prices?: Array<{
-    price?: number | string;
-    timestamp?: number | string;
-    side?: "BUY" | "SELL";
-  }>;
-  /** Token ID / Market */
-  market?: string;
-  token_id?: string;
-  /** Time interval between data points */
-  interval?: string;
-  /** Allow unknown fields */
-  [unknownField: string]: unknown;
+	/** Array of price data points */
+	prices?: Array<{
+		price?: number | string;
+		timestamp?: number | string;
+		side?: "BUY" | "SELL";
+	}>;
+	/** Token ID / Market */
+	market?: string;
+	token_id?: string;
+	/** Time interval between data points */
+	interval?: string;
+	/** Allow unknown fields */
+	[unknownField: string]: unknown;
 }
 
 /**
@@ -227,21 +227,21 @@ export interface PriceHistory {
  * Data about token holders and their positions.
  */
 export interface HolderInfo {
-  /** Array of holder records */
-  holders?: Array<{
-    address?: string;
-    quantity?: number | string;
-    usd_value?: number | string;
-    usdValue?: number | string;
-  }>;
-  /** Market/condition ID */
-  market?: string;
-  condition_id?: string;
-  /** Total number of holders */
-  total_holders?: number;
-  totalHolders?: number;
-  /** Allow unknown fields */
-  [unknownField: string]: unknown;
+	/** Array of holder records */
+	holders?: Array<{
+		address?: string;
+		quantity?: number | string;
+		usd_value?: number | string;
+		usdValue?: number | string;
+	}>;
+	/** Market/condition ID */
+	market?: string;
+	condition_id?: string;
+	/** Total number of holders */
+	total_holders?: number;
+	totalHolders?: number;
+	/** Allow unknown fields */
+	[unknownField: string]: unknown;
 }
 
 /**
@@ -250,22 +250,22 @@ export interface HolderInfo {
  * Recent trades for a market.
  */
 export interface TradeInfo {
-  /** Array of trade records */
-  trades?: Array<{
-    trade_id?: string;
-    tradeId?: string;
-    side?: "BUY" | "SELL";
-    price?: number | string;
-    size?: number | string;
-    timestamp?: number | string;
-    creator?: string;
-    matcher?: string;
-  }>;
-  /** Market/condition ID */
-  market?: string;
-  condition_id?: string;
-  /** Allow unknown fields */
-  [unknownField: string]: unknown;
+	/** Array of trade records */
+	trades?: Array<{
+		trade_id?: string;
+		tradeId?: string;
+		side?: "BUY" | "SELL";
+		price?: number | string;
+		size?: number | string;
+		timestamp?: number | string;
+		creator?: string;
+		matcher?: string;
+	}>;
+	/** Market/condition ID */
+	market?: string;
+	condition_id?: string;
+	/** Allow unknown fields */
+	[unknownField: string]: unknown;
 }
 
 /**
@@ -279,26 +279,29 @@ export interface TradeInfo {
  * const events = await fetchEvents(20, 0);
  * console.log(`Found ${events.length} events`);
  */
-export async function fetchEvents(limit = 10, offset = 0): Promise<GammaEvent[]> {
-  const url = withQuery(`${CONFIG.gammaBase}/events`, {
-    limit,
-    offset,
-    closed: false,
-    active: true,
-    order: "id",
-    ascending: false
-  });
-  const res = await fetchJson<unknown>(url);
+export async function fetchEvents(
+	limit = 10,
+	offset = 0,
+): Promise<GammaEvent[]> {
+	const url = withQuery(`${CONFIG.gammaBase}/events`, {
+		limit,
+		offset,
+		closed: false,
+		active: true,
+		order: "id",
+		ascending: false,
+	});
+	const res = await fetchJson<unknown>(url);
 
-  // Handle different response formats from the API
-  if (Array.isArray(res)) return res as GammaEvent[];
+	// Handle different response formats from the API
+	if (Array.isArray(res)) return res as GammaEvent[];
 
-  const record = res as Record<string, unknown>;
-  const list =
-    (record['events'] as GammaEvent[] | undefined) ||
-    (record['data'] as GammaEvent[] | undefined) ||
-    [];
-  return list;
+	const record = res as Record<string, unknown>;
+	const list =
+		(record.events as GammaEvent[] | undefined) ||
+		(record.data as GammaEvent[] | undefined) ||
+		[];
+	return list;
 }
 
 /**
@@ -312,26 +315,29 @@ export async function fetchEvents(limit = 10, offset = 0): Promise<GammaEvent[]>
  * const markets = await fetchMarkets(50, 0);
  * console.log(`Found ${markets.length} markets`);
  */
-export async function fetchMarkets(limit = 10, offset = 0): Promise<GammaMarket[]> {
-  const url = withQuery(`${CONFIG.gammaBase}/markets`, {
-    limit,
-    offset,
-    closed: false,
-    active: true,
-    order: "id",
-    ascending: false
-  });
-  const res = await fetchJson<unknown>(url);
+export async function fetchMarkets(
+	limit = 10,
+	offset = 0,
+): Promise<GammaMarket[]> {
+	const url = withQuery(`${CONFIG.gammaBase}/markets`, {
+		limit,
+		offset,
+		closed: false,
+		active: true,
+		order: "id",
+		ascending: false,
+	});
+	const res = await fetchJson<unknown>(url);
 
-  // Handle different response formats from the API
-  if (Array.isArray(res)) return res as GammaMarket[];
+	// Handle different response formats from the API
+	if (Array.isArray(res)) return res as GammaMarket[];
 
-  const record = res as Record<string, unknown>;
-  const list =
-    (record['markets'] as GammaMarket[] | undefined) ||
-    (record['data'] as GammaMarket[] | undefined) ||
-    [];
-  return list;
+	const record = res as Record<string, unknown>;
+	const list =
+		(record.markets as GammaMarket[] | undefined) ||
+		(record.data as GammaMarket[] | undefined) ||
+		[];
+	return list;
 }
 
 /**
@@ -344,13 +350,19 @@ export async function fetchMarkets(limit = 10, offset = 0): Promise<GammaMarket[
  * const market = await fetchMarketBySlug("will-trump-win-2024");
  */
 export async function fetchMarketBySlug(slug: string): Promise<GammaMarket> {
-  const res = await fetchJson<unknown>(`${CONFIG.gammaBase}/markets/slug/${slug}`);
+	const res = await fetchJson<unknown>(
+		`${CONFIG.gammaBase}/markets/slug/${slug}`,
+	);
 
-  // API may return { market: {...} } or just the market object
-  if (res && typeof res === "object" && "market" in (res as Record<string, unknown>)) {
-    return (res as Record<string, unknown>)['market'] as GammaMarket;
-  }
-  return res as GammaMarket;
+	// API may return { market: {...} } or just the market object
+	if (
+		res &&
+		typeof res === "object" &&
+		"market" in (res as Record<string, unknown>)
+	) {
+		return (res as Record<string, unknown>).market as GammaMarket;
+	}
+	return res as GammaMarket;
 }
 
 /**
@@ -363,13 +375,19 @@ export async function fetchMarketBySlug(slug: string): Promise<GammaMarket> {
  * const event = await fetchEventBySlug("us-elections-2024");
  */
 export async function fetchEventBySlug(slug: string): Promise<GammaEvent> {
-  const res = await fetchJson<unknown>(`${CONFIG.gammaBase}/events/slug/${slug}`);
+	const res = await fetchJson<unknown>(
+		`${CONFIG.gammaBase}/events/slug/${slug}`,
+	);
 
-  // API may return { event: {...} } or just the event object
-  if (res && typeof res === "object" && "event" in (res as Record<string, unknown>)) {
-    return (res as Record<string, unknown>)['event'] as GammaEvent;
-  }
-  return res as GammaEvent;
+	// API may return { event: {...} } or just the event object
+	if (
+		res &&
+		typeof res === "object" &&
+		"event" in (res as Record<string, unknown>)
+	) {
+		return (res as Record<string, unknown>).event as GammaEvent;
+	}
+	return res as GammaEvent;
 }
 
 /**
@@ -385,22 +403,22 @@ export async function fetchEventBySlug(slug: string): Promise<GammaEvent> {
  * }
  */
 export async function fetchMarketByConditionId(
-  conditionId: string
+	conditionId: string,
 ): Promise<GammaMarket | undefined> {
-  const url = withQuery(`${CONFIG.gammaBase}/markets`, {
-    condition_ids: conditionId,
-    limit: 1
-  });
-  const res = await fetchJson<unknown>(url);
+	const url = withQuery(`${CONFIG.gammaBase}/markets`, {
+		condition_ids: conditionId,
+		limit: 1,
+	});
+	const res = await fetchJson<unknown>(url);
 
-  if (Array.isArray(res)) return res[0] as GammaMarket | undefined;
+	if (Array.isArray(res)) return res[0] as GammaMarket | undefined;
 
-  const record = res as Record<string, unknown>;
-  const list =
-    (record['markets'] as GammaMarket[] | undefined) ||
-    (record['data'] as GammaMarket[] | undefined) ||
-    [];
-  return list[0];
+	const record = res as Record<string, unknown>;
+	const list =
+		(record.markets as GammaMarket[] | undefined) ||
+		(record.data as GammaMarket[] | undefined) ||
+		[];
+	return list[0];
 }
 
 /**
@@ -420,71 +438,77 @@ export async function fetchMarketByConditionId(
  *   .filter((m): m is MarketInfo => m !== null);
  */
 export function normalizeMarket(
-  market: GammaMarket,
-  event?: GammaEvent
+	market: GammaMarket,
+	event?: GammaEvent,
 ): MarketInfo | null {
-  // Extract conditionId from various possible field names
-  const conditionId =
-    (market.conditionId as string | undefined) ||
-    (market.condition_id as string | undefined) ||
-    (market.conditionID as string | undefined);
+	// Extract conditionId from various possible field names
+	const conditionId =
+		(market.conditionId as string | undefined) ||
+		(market.condition_id as string | undefined) ||
+		(market.conditionID as string | undefined);
 
-  // Extract marketId from various possible field names
-  const marketId =
-    (market.id as string | undefined) ||
-    (market['marketId'] as string | undefined) ||
-    (market['market_id'] as string | undefined);
+	// Extract marketId from various possible field names
+	const marketId =
+		(market.id as string | undefined) ||
+		(market.marketId as string | undefined) ||
+		(market.market_id as string | undefined);
 
-  // Extract question/title from various possible fields
-  const question =
-    (market.question as string | undefined) ||
-    (market.title as string | undefined) ||
-    (event?.title as string | undefined);
+	// Extract question/title from various possible fields
+	const question =
+		(market.question as string | undefined) ||
+		(market.title as string | undefined) ||
+		(event?.title as string | undefined);
 
-  // Extract and normalize outcomes
-  const outcomes = extractOutcomes(market);
-  const clobTokenIds = extractTokenIds(market);
+	// Extract and normalize outcomes
+	const outcomes = extractOutcomes(market);
+	const clobTokenIds = extractTokenIds(market);
 
-  // Parse numeric fields (handle both number and string formats)
-  const volume24hr = asNumber(
-    market.volume24hr ?? market.volume24h ?? market.volume24hrUsd ?? market.volumeUSD
-  );
-  const priceChange24hr = asNumber(
-    market.priceChange24hr ?? market.price_change_24hr ?? market.priceChange24h
-  );
-  const bestBid = asNumber(market.bestBid ?? market.best_bid);
-  const bestAsk = asNumber(market.bestAsk ?? market.best_ask);
+	// Parse numeric fields (handle both number and string formats)
+	const volume24hr = asNumber(
+		market.volume24hr ??
+			market.volume24h ??
+			market.volume24hrUsd ??
+			market.volumeUSD,
+	);
+	const priceChange24hr = asNumber(
+		market.priceChange24hr ?? market.price_change_24hr ?? market.priceChange24h,
+	);
+	const bestBid = asNumber(market.bestBid ?? market.best_bid);
+	const bestAsk = asNumber(market.bestAsk ?? market.best_ask);
 
-  // Condition ID and token IDs are required
-  if (!conditionId || clobTokenIds.length === 0) return null;
+	// Condition ID and token IDs are required
+	if (!conditionId || clobTokenIds.length === 0) return null;
 
-  // Use default outcomes if none provided
-  const resolvedOutcomes = outcomes.length > 0 ? outcomes : defaultOutcomes(clobTokenIds.length);
+	// Use default outcomes if none provided
+	const resolvedOutcomes =
+		outcomes.length > 0 ? outcomes : defaultOutcomes(clobTokenIds.length);
 
-  const result: MarketInfo = {
-    outcomes: resolvedOutcomes,
-    clobTokenIds
-  };
+	const result: MarketInfo = {
+		outcomes: resolvedOutcomes,
+		clobTokenIds,
+	};
 
-  const eventId = (event?.id as string | undefined) || (market.eventId as string | undefined);
-  if (eventId !== undefined) result.eventId = eventId;
+	const eventId =
+		(event?.id as string | undefined) || (market.eventId as string | undefined);
+	if (eventId !== undefined) result.eventId = eventId;
 
-  const eventTitle = (event?.title as string | undefined);
-  if (eventTitle !== undefined) result.eventTitle = eventTitle;
+	const eventTitle = event?.title as string | undefined;
+	if (eventTitle !== undefined) result.eventTitle = eventTitle;
 
-  if (marketId !== undefined) result.marketId = marketId;
-  if (question !== undefined) result.question = question;
-  if (conditionId !== undefined) result.conditionId = conditionId;
+	if (marketId !== undefined) result.marketId = marketId;
+	if (question !== undefined) result.question = question;
+	if (conditionId !== undefined) result.conditionId = conditionId;
 
-  const slug = (market.slug as string | undefined) || (event?.slug as string | undefined);
-  if (slug !== undefined) result.slug = slug;
+	const slug =
+		(market.slug as string | undefined) || (event?.slug as string | undefined);
+	if (slug !== undefined) result.slug = slug;
 
-  if (volume24hr !== undefined) result.volume24hr = volume24hr;
-  if (priceChange24hr !== undefined) result.priceChange24hr = priceChange24hr;
-  if (bestBid !== undefined) result.bestBid = bestBid;
-  if (bestAsk !== undefined) result.bestAsk = bestAsk;
+	if (volume24hr !== undefined) result.volume24hr = volume24hr;
+	if (priceChange24hr !== undefined) result.priceChange24hr = priceChange24hr;
+	if (bestBid !== undefined) result.bestBid = bestBid;
+	if (bestAsk !== undefined) result.bestAsk = bestAsk;
 
-  return result;
+	return result;
 }
 
 /**
@@ -499,23 +523,23 @@ export function normalizeMarket(
  * @returns Array of outcome names
  */
 function extractOutcomes(market: GammaMarket): string[] {
-  // Try direct outcomes field first
-  const raw =
-    (market.outcomes as string[] | string | undefined) ||
-    (market.outcome as string[] | string | undefined);
-  const parsed = parseMaybeJsonArray(raw);
-  if (Array.isArray(parsed) && parsed.length > 0) return parsed.map(String);
+	// Try direct outcomes field first
+	const raw =
+		(market.outcomes as string[] | string | undefined) ||
+		(market.outcome as string[] | string | undefined);
+	const parsed = parseMaybeJsonArray(raw);
+	if (Array.isArray(parsed) && parsed.length > 0) return parsed.map(String);
 
-  // Try nested in tokens array
-  const nested = market.tokens as Array<Record<string, unknown>> | undefined;
-  if (Array.isArray(nested)) {
-    const names = nested
-      .map((token) => token['outcome'] as string | undefined)
-      .filter(Boolean);
-    if (names.length > 0) return names as string[];
-  }
+	// Try nested in tokens array
+	const nested = market.tokens as Array<Record<string, unknown>> | undefined;
+	if (Array.isArray(nested)) {
+		const names = nested
+			.map((token) => token.outcome as string | undefined)
+			.filter(Boolean);
+		if (names.length > 0) return names as string[];
+	}
 
-  return [];
+	return [];
 }
 
 /**
@@ -525,8 +549,8 @@ function extractOutcomes(market: GammaMarket): string[] {
  * @returns Array of default outcome names
  */
 function defaultOutcomes(count: number): string[] {
-  if (count === 2) return ["YES", "NO"];
-  return Array.from({ length: count }, (_, idx) => `OUTCOME_${idx + 1}`);
+	if (count === 2) return ["YES", "NO"];
+	return Array.from({ length: count }, (_, idx) => `OUTCOME_${idx + 1}`);
 }
 
 /**
@@ -536,9 +560,9 @@ function defaultOutcomes(count: number): string[] {
  * @returns Number if conversion succeeded, undefined otherwise
  */
 function asNumber(value: unknown): number | undefined {
-  if (value === undefined || value === null) return undefined;
-  const num = Number(value);
-  return Number.isNaN(num) ? undefined : num;
+	if (value === undefined || value === null) return undefined;
+	const num = Number(value);
+	return Number.isNaN(num) ? undefined : num;
 }
 
 /**
@@ -553,27 +577,28 @@ function asNumber(value: unknown): number | undefined {
  * @returns Array of token IDs (hex strings)
  */
 function extractTokenIds(market: GammaMarket): string[] {
-  // Try direct clobTokenIds field (various naming conventions)
-  const direct =
-    (market.clobTokenIds as string[] | string | undefined) ||
-    (market.clob_token_ids as string[] | string | undefined) ||
-    (market.clob_token_ids as string[] | string | undefined);
-  const parsed = parseMaybeJsonArray(direct);
-  if (Array.isArray(parsed) && parsed.length > 0) return parsed.map(String);
+	// Try direct clobTokenIds field (various naming conventions)
+	const direct =
+		(market.clobTokenIds as string[] | string | undefined) ||
+		(market.clob_token_ids as string[] | string | undefined) ||
+		(market.clob_token_ids as string[] | string | undefined);
+	const parsed = parseMaybeJsonArray(direct);
+	if (Array.isArray(parsed) && parsed.length > 0) return parsed.map(String);
 
-  // Try nested in tokens array
-  const nested = market.tokens as Array<Record<string, unknown>> | undefined;
-  if (Array.isArray(nested)) {
-    const ids = nested
-      .map(
-        (token) =>
-          (token['token_id'] as string | undefined) || (token['id'] as string | undefined)
-      )
-      .filter(Boolean);
-    if (ids.length > 0) return ids as string[];
-  }
+	// Try nested in tokens array
+	const nested = market.tokens as Array<Record<string, unknown>> | undefined;
+	if (Array.isArray(nested)) {
+		const ids = nested
+			.map(
+				(token) =>
+					(token.token_id as string | undefined) ||
+					(token.id as string | undefined),
+			)
+			.filter(Boolean);
+		if (ids.length > 0) return ids as string[];
+	}
 
-  return [];
+	return [];
 }
 
 /**
@@ -583,19 +608,19 @@ function extractTokenIds(market: GammaMarket): string[] {
  * @returns Parsed array, or undefined if parsing fails
  */
 function parseMaybeJsonArray(value: string[] | string | undefined): unknown {
-  if (!value) return undefined;
-  if (Array.isArray(value)) return value;
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (!trimmed.startsWith("[")) return undefined;
-    try {
-      const parsed = JSON.parse(trimmed);
-      return Array.isArray(parsed) ? parsed : undefined;
-    } catch {
-      return undefined;
-    }
-  }
-  return undefined;
+	if (!value) return undefined;
+	if (Array.isArray(value)) return value;
+	if (typeof value === "string") {
+		const trimmed = value.trim();
+		if (!trimmed.startsWith("[")) return undefined;
+		try {
+			const parsed = JSON.parse(trimmed);
+			return Array.isArray(parsed) ? parsed : undefined;
+		} catch {
+			return undefined;
+		}
+	}
+	return undefined;
 }
 
 /**
@@ -609,7 +634,9 @@ function parseMaybeJsonArray(value: string[] | string | undefined): unknown {
  * const orderbook = await getOrderbook("0x123...");
  * console.log(`Bids: ${orderbook.bids?.length}`);
  */
-export async function getOrderbook(tokenId: string): Promise<Record<string, unknown>>;
+export async function getOrderbook(
+	tokenId: string,
+): Promise<Record<string, unknown>>;
 
 /**
  * Fetch the order book for a token, returning null if it doesn't exist.
@@ -625,8 +652,8 @@ export async function getOrderbook(tokenId: string): Promise<Record<string, unkn
  * }
  */
 export async function getOrderbook(
-  tokenId: string,
-  options: { allowNoOrderbook: true }
+	tokenId: string,
+	options: { allowNoOrderbook: true },
 ): Promise<Record<string, unknown> | null>;
 
 /**
@@ -637,18 +664,18 @@ export async function getOrderbook(
  * @returns Orderbook object or null
  */
 export async function getOrderbook(
-  tokenId: string,
-  options: { allowNoOrderbook?: boolean } = {}
+	tokenId: string,
+	options: { allowNoOrderbook?: boolean } = {},
 ): Promise<Record<string, unknown> | null> {
-  const url = withQuery(`${CONFIG.clobRestBase}/book`, { token_id: tokenId });
-  try {
-    return await fetchJson<Record<string, unknown>>(url, {
-      timeoutMs: CONFIG.restTimeoutMs
-    });
-  } catch (err) {
-    if (options.allowNoOrderbook && isNoOrderbookError(err)) return null;
-    throw err;
-  }
+	const url = withQuery(`${CONFIG.clobRestBase}/book`, { token_id: tokenId });
+	try {
+		return await fetchJson<Record<string, unknown>>(url, {
+			timeoutMs: CONFIG.restTimeoutMs,
+		});
+	} catch (err) {
+		if (options.allowNoOrderbook && isNoOrderbookError(err)) return null;
+		throw err;
+	}
 }
 
 /**
@@ -663,7 +690,7 @@ export async function getOrderbook(
  * console.log(`Buy: ${prices.buy.price}, Sell: ${prices.sell.price}`);
  */
 export async function getPrices(
-  tokenId: string
+	tokenId: string,
 ): Promise<{ buy: Record<string, unknown>; sell: Record<string, unknown> }>;
 
 /**
@@ -674,9 +701,12 @@ export async function getPrices(
  * @returns Price responses or null
  */
 export async function getPrices(
-  tokenId: string,
-  options: { allowNoOrderbook: true }
-): Promise<{ buy: Record<string, unknown>; sell: Record<string, unknown> } | null>;
+	tokenId: string,
+	options: { allowNoOrderbook: true },
+): Promise<{
+	buy: Record<string, unknown>;
+	sell: Record<string, unknown>;
+} | null>;
 
 /**
  * Fetch current buy and sell prices for a token.
@@ -686,28 +716,35 @@ export async function getPrices(
  * @returns Price responses or null
  */
 export async function getPrices(
-  tokenId: string,
-  options: { allowNoOrderbook?: boolean } = {}
-): Promise<{ buy: Record<string, unknown>; sell: Record<string, unknown> } | null> {
-  const buy = withQuery(`${CONFIG.clobRestBase}/price`, {
-    token_id: tokenId,
-    side: "BUY"
-  });
-  const sell = withQuery(`${CONFIG.clobRestBase}/price`, {
-    token_id: tokenId,
-    side: "SELL"
-  });
+	tokenId: string,
+	options: { allowNoOrderbook?: boolean } = {},
+): Promise<{
+	buy: Record<string, unknown>;
+	sell: Record<string, unknown>;
+} | null> {
+	const buy = withQuery(`${CONFIG.clobRestBase}/price`, {
+		token_id: tokenId,
+		side: "BUY",
+	});
+	const sell = withQuery(`${CONFIG.clobRestBase}/price`, {
+		token_id: tokenId,
+		side: "SELL",
+	});
 
-  try {
-    const [buyRes, sellRes] = await Promise.all([
-      fetchJson<Record<string, unknown>>(buy, { timeoutMs: CONFIG.restTimeoutMs }),
-      fetchJson<Record<string, unknown>>(sell, { timeoutMs: CONFIG.restTimeoutMs })
-    ]);
-    return { buy: buyRes, sell: sellRes };
-  } catch (err) {
-    if (options.allowNoOrderbook && isNoOrderbookError(err)) return null;
-    throw err;
-  }
+	try {
+		const [buyRes, sellRes] = await Promise.all([
+			fetchJson<Record<string, unknown>>(buy, {
+				timeoutMs: CONFIG.restTimeoutMs,
+			}),
+			fetchJson<Record<string, unknown>>(sell, {
+				timeoutMs: CONFIG.restTimeoutMs,
+			}),
+		]);
+		return { buy: buyRes, sell: sellRes };
+	} catch (err) {
+		if (options.allowNoOrderbook && isNoOrderbookError(err)) return null;
+		throw err;
+	}
 }
 
 /**
@@ -722,9 +759,15 @@ export async function getPrices(
  * const midpoint = await getMidpoint("0x123...");
  * console.log(`Midpoint: ${midpoint.midpoint}`);
  */
-export async function getMidpoint(tokenId: string): Promise<Record<string, unknown>> {
-  const url = withQuery(`${CONFIG.clobRestBase}/midpoint`, { token_id: tokenId });
-  return fetchJson<Record<string, unknown>>(url, { timeoutMs: CONFIG.restTimeoutMs });
+export async function getMidpoint(
+	tokenId: string,
+): Promise<Record<string, unknown>> {
+	const url = withQuery(`${CONFIG.clobRestBase}/midpoint`, {
+		token_id: tokenId,
+	});
+	return fetchJson<Record<string, unknown>>(url, {
+		timeoutMs: CONFIG.restTimeoutMs,
+	});
 }
 
 /**
@@ -740,25 +783,30 @@ export async function getMidpoint(tokenId: string): Promise<Record<string, unkno
  * const history = await getPriceHistory("0x123...");
  * console.log(`Price points: ${history.prices?.length}`);
  */
-export async function getPriceHistory(tokenId: string): Promise<Record<string, unknown>> {
-  const baseParams = {
-    market: tokenId,
-    interval: CONFIG.historyInterval,
-    fidelity: CONFIG.historyFidelity
-  };
+export async function getPriceHistory(
+	tokenId: string,
+): Promise<Record<string, unknown>> {
+	const baseParams = {
+		market: tokenId,
+		interval: CONFIG.historyInterval,
+		fidelity: CONFIG.historyFidelity,
+	};
 
-  const url = withQuery(`${CONFIG.clobRestBase}/prices-history`, baseParams);
-  try {
-    return await fetchJson<Record<string, unknown>>(url, {
-      timeoutMs: CONFIG.restTimeoutMs
-    });
-  } catch (err) {
-    // Fallback to alternative endpoint
-    const fallback = withQuery(`${CONFIG.clobRestBase}/price_history`, baseParams);
-    return fetchJson<Record<string, unknown>>(fallback, {
-      timeoutMs: CONFIG.restTimeoutMs
-    });
-  }
+	const url = withQuery(`${CONFIG.clobRestBase}/prices-history`, baseParams);
+	try {
+		return await fetchJson<Record<string, unknown>>(url, {
+			timeoutMs: CONFIG.restTimeoutMs,
+		});
+	} catch (_err) {
+		// Fallback to alternative endpoint
+		const fallback = withQuery(
+			`${CONFIG.clobRestBase}/price_history`,
+			baseParams,
+		);
+		return fetchJson<Record<string, unknown>>(fallback, {
+			timeoutMs: CONFIG.restTimeoutMs,
+		});
+	}
 }
 
 /**
@@ -773,16 +821,16 @@ export async function getPriceHistory(tokenId: string): Promise<Record<string, u
  * console.log(`Total holders: ${holders.total_holders || holders.holders?.length}`);
  */
 export async function getHolders(
-  conditionId: string,
-  limit = 10
+	conditionId: string,
+	limit = 10,
 ): Promise<Array<Record<string, unknown>>> {
-  const url = withQuery(`${CONFIG.dataApiBase}/holders`, {
-    market: conditionId,
-    limit
-  });
-  return fetchJson<Array<Record<string, unknown>>>(url, {
-    timeoutMs: CONFIG.restTimeoutMs
-  });
+	const url = withQuery(`${CONFIG.dataApiBase}/holders`, {
+		market: conditionId,
+		limit,
+	});
+	return fetchJson<Array<Record<string, unknown>>>(url, {
+		timeoutMs: CONFIG.restTimeoutMs,
+	});
 }
 
 /**
@@ -797,12 +845,12 @@ export async function getHolders(
  * console.log(`Recent trades: ${trades.trades?.length}`);
  */
 export async function getTrades(
-  conditionId: string,
-  limit = 10
+	conditionId: string,
+	limit = 10,
 ): Promise<Record<string, unknown>> {
-  const url = withQuery(`${CONFIG.dataApiBase}/trades`, {
-    market: conditionId,
-    limit
-  });
-  return fetchJson<Record<string, unknown>>(url);
+	const url = withQuery(`${CONFIG.dataApiBase}/trades`, {
+		market: conditionId,
+		limit,
+	});
+	return fetchJson<Record<string, unknown>>(url);
 }

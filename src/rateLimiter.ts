@@ -6,12 +6,12 @@
  * means 100 requests per 10 seconds.
  */
 export type RateLimitRule = {
-  /** Unique identifier for this rate limit (typically host+path) */
-  key: string;
-  /** Maximum number of requests allowed within the time window */
-  limit: number;
-  /** Time window duration in milliseconds */
-  windowMs: number;
+	/** Unique identifier for this rate limit (typically host+path) */
+	key: string;
+	/** Maximum number of requests allowed within the time window */
+	limit: number;
+	/** Time window duration in milliseconds */
+	windowMs: number;
 };
 
 /**
@@ -20,10 +20,10 @@ export type RateLimitRule = {
  * @private
  */
 type Bucket = {
-  /** Current number of tokens available in the bucket */
-  tokens: number;
-  /** Unix timestamp (ms) when the bucket will be refilled */
-  resetAt: number;
+	/** Current number of tokens available in the bucket */
+	tokens: number;
+	/** Unix timestamp (ms) when the bucket will be refilled */
+	resetAt: number;
 };
 
 /**
@@ -74,49 +74,49 @@ type Bucket = {
  * // If bucket is empty, waits until refill
  */
 export class RateLimiter {
-  /** Map of bucket keys to their current state */
-  private buckets = new Map<string, Bucket>();
+	/** Map of bucket keys to their current state */
+	private buckets = new Map<string, Bucket>();
 
-  /**
-   * Consume a token from the rate-limited bucket, waiting if necessary.
-   *
-   * If the bucket has tokens available, consumes 1 token and returns immediately.
-   * If the bucket is empty, waits until the next refill and retries.
-   *
-   * @param rule - Rate limit rule to apply
-   * @returns Promise that resolves when token is consumed
-   *
-   * @example
-   * const limiter = new RateLimiter();
-   * await limiter.take({ key: "api", limit: 10, windowMs: 1000 });
-   * console.log("Request allowed");
-   */
-  async take(rule: RateLimitRule): Promise<void> {
-    const now = Date.now();
-    let bucket = this.buckets.get(rule.key);
+	/**
+	 * Consume a token from the rate-limited bucket, waiting if necessary.
+	 *
+	 * If the bucket has tokens available, consumes 1 token and returns immediately.
+	 * If the bucket is empty, waits until the next refill and retries.
+	 *
+	 * @param rule - Rate limit rule to apply
+	 * @returns Promise that resolves when token is consumed
+	 *
+	 * @example
+	 * const limiter = new RateLimiter();
+	 * await limiter.take({ key: "api", limit: 10, windowMs: 1000 });
+	 * console.log("Request allowed");
+	 */
+	async take(rule: RateLimitRule): Promise<void> {
+		const now = Date.now();
+		let bucket = this.buckets.get(rule.key);
 
-    // Create new bucket or reset expired bucket
-    if (!bucket || now >= bucket.resetAt) {
-      bucket = {
-        tokens: rule.limit,     // Fill bucket to max
-        resetAt: now + rule.windowMs  // Next refill time
-      };
-      this.buckets.set(rule.key, bucket);
-    }
+		// Create new bucket or reset expired bucket
+		if (!bucket || now >= bucket.resetAt) {
+			bucket = {
+				tokens: rule.limit, // Fill bucket to max
+				resetAt: now + rule.windowMs, // Next refill time
+			};
+			this.buckets.set(rule.key, bucket);
+		}
 
-    // If bucket has tokens, consume one and proceed
-    if (bucket.tokens > 0) {
-      bucket.tokens -= 1;
-      return;
-    }
+		// If bucket has tokens, consume one and proceed
+		if (bucket.tokens > 0) {
+			bucket.tokens -= 1;
+			return;
+		}
 
-    // Bucket is empty - calculate wait time and wait for refill
-    const waitMs = Math.max(0, bucket.resetAt - now) + jitter(20, 120);
-    await sleep(waitMs);
+		// Bucket is empty - calculate wait time and wait for refill
+		const waitMs = Math.max(0, bucket.resetAt - now) + jitter(20, 120);
+		await sleep(waitMs);
 
-    // After waiting, retry (bucket will be refilled by now)
-    return this.take(rule);
-  }
+		// After waiting, retry (bucket will be refilled by now)
+		return this.take(rule);
+	}
 }
 
 /**
@@ -126,7 +126,7 @@ export class RateLimiter {
  * @returns Promise that resolves after sleep
  */
 function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -140,5 +140,5 @@ function sleep(ms: number) {
  * @returns Random jitter value between min and max (inclusive)
  */
 function jitter(min: number, max: number) {
-  return Math.floor(min + Math.random() * (max - min));
+	return Math.floor(min + Math.random() * (max - min));
 }

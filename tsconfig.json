@@ -1,18 +1,18 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ES2022",
-    "lib": ["ES2022"],
-    "moduleResolution": "Bundler",
-    "esModuleInterop": true,
-    "strict": true,
-    "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true,
-    "useUnknownInCatchVariables": true,
-    "noEmit": true,
-    "skipLibCheck": true,
-    "types": ["bun-types"],
-    "resolveJsonModule": true
-  },
-  "include": ["src/**/*.ts"]
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ES2022",
+		"lib": ["ES2022"],
+		"moduleResolution": "Bundler",
+		"esModuleInterop": true,
+		"strict": true,
+		"noFallthroughCasesInSwitch": true,
+		"forceConsistentCasingInFileNames": true,
+		"useUnknownInCatchVariables": true,
+		"noEmit": true,
+		"skipLibCheck": true,
+		"types": ["bun-types"],
+		"resolveJsonModule": true
+	},
+	"include": ["src/**/*.ts"]
 }
