@@ -111,20 +111,27 @@ describe("asciiChart", () => {
     expect(dataLine?.length).toBeLessThanOrEqual(20);
   });
 
-  test("handles single value", () => {
-    const result = asciiChart([0.5], 50, 4);
-    expect(result.length).toBeGreaterThan(1);
+  test("shows message for insufficient data (1-2 points)", () => {
+    const single = asciiChart([0.5], 50, 4);
+    expect(single.length).toBe(1);
+    expect(single[0]).toContain("insufficient for chart");
+    expect(single[0]).toContain("0.5000");
+    expect(single[0]).toContain("1 point");
+
+    const double = asciiChart([0.4, 0.6], 50, 4);
+    expect(double.length).toBe(1);
+    expect(double[0]).toContain("2 points");
   });
 
-  test("handles constant values with visible bars", () => {
+  test("handles constant values with flat line", () => {
     const series = [0.5, 0.5, 0.5, 0.5, 0.5];
     const result = asciiChart(series, 50, 6);
-    // Should show visible bars at mid-height for constant values
-    const chartContent = result.join("");
-    expect(chartContent).toContain("█"); // Full blocks in lower half
-    expect(chartContent).toContain("▄"); // Half block at midpoint
-    // Both labels should show same value
-    expect(result[0]).toContain("0.5000");
-    expect(result[result.length - 2]).toContain("0.5000");
+    const chartContent = result.join("\n");
+    // Should show flat horizontal line
+    expect(chartContent).toContain("─────");
+    // Should show price label
+    expect(chartContent).toContain("0.5000");
+    // Should indicate stable price
+    expect(chartContent).toContain("stable price");
   });
 });

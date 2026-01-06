@@ -38,27 +38,32 @@ export function asciiChart(series: number[], width = 50, height = 8): string[] {
   const max = Math.max(...sliced);
   const isConstant = max === min;
 
+  // For very few points, a chart isn't meaningful
+  if (sliced.length < 3) {
+    const value = sliced[sliced.length - 1] ?? 0;
+    return [`Price: ${formatPrice(value)} (${sliced.length} point${sliced.length === 1 ? "" : "s"} - insufficient for chart)`];
+  }
+
   const lines: string[] = [];
   const blocks = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
 
-  // Handle constant values - show bars at middle height
+  // Handle constant values - show flat line with label
   if (isConstant) {
     const midRow = Math.floor(height / 2);
     for (let row = height - 1; row >= 0; row--) {
       const rowChars: string[] = [];
       for (let i = 0; i < sliced.length; i++) {
-        if (row < midRow) {
-          rowChars.push("█");
-        } else if (row === midRow) {
-          rowChars.push("▄");
+        if (row === midRow) {
+          rowChars.push("─");
         } else {
           rowChars.push(" ");
         }
       }
-      const label = row === height - 1 || row === 0 ? formatPrice(min) : "";
+      const label = row === midRow ? formatPrice(min) : "";
       lines.push(`${label.padStart(7)} │${rowChars.join("")}`);
     }
     lines.push(`${"".padStart(7)} └${"─".repeat(sliced.length)}`);
+    lines.push(`${"".padStart(7)}  (stable price - no variation)`);
     return lines;
   }
 
