@@ -1,16 +1,17 @@
+import { mkdir, writeFile } from "node:fs/promises";
 import blessed from "blessed";
-import { CONFIG } from "./config";
 import {
   getHolders,
   getMidpoint,
   getOrderbook,
   getPriceHistory,
   getPrices,
-  type MarketInfo
+  type MarketInfo,
 } from "./api";
+import { CONFIG } from "./config";
+import { isNoOrderbookError } from "./http";
+import { logError } from "./logger";
 import { loadRadar, resolveMarket } from "./market";
-import { connectMarketWs } from "./ws";
-import { asciiSparkline, formatNumber, formatPct, formatPrice, midpointFrom } from "./utils";
 import {
   extractHistory,
   extractMidpoint,
@@ -18,32 +19,31 @@ import {
   normalizeHolders,
   normalizeOrderbook,
   type OrderbookLevel,
-  type OrderbookState
+  type OrderbookState,
 } from "./parsers";
-import { mkdir, writeFile } from "node:fs/promises";
-import { logError } from "./logger";
-import { isNoOrderbookError } from "./http";
-import { THEME, type DashboardOptions } from "./tui-types";
+import { generateDetailContent, generateHelpContent } from "./tui-modals";
 import {
+  cell,
   colorText,
   escapeTags,
-  textCell,
-  cell,
-  truncate,
-  truncateAlert,
+  filterRadar,
+  heatSymbol,
   renderTable,
   statusColor,
-  heatSymbol,
-  filterRadar
+  textCell,
+  truncate,
+  truncateAlert,
 } from "./tui-render";
-import { generateDetailContent, generateHelpContent } from "./tui-modals";
+import { type DashboardOptions, THEME } from "./tui-types";
+import { asciiSparkline, formatNumber, formatPct, formatPrice, midpointFrom } from "./utils";
+import { connectMarketWs } from "./ws";
 
 export type { DashboardOptions } from "./tui-types";
 
 export async function runDashboard(opts: DashboardOptions) {
   const screen = blessed.screen({
     smartCSR: true,
-    title: "Polymarket Pulse"
+    title: "Polymarket Pulse",
   });
 
   const header = blessed.box({
@@ -52,7 +52,7 @@ export async function runDashboard(opts: DashboardOptions) {
     width: "100%",
     height: 1,
     tags: true,
-    style: { fg: THEME.headerFg, bg: THEME.headerBg }
+    style: { fg: THEME.headerFg, bg: THEME.headerBg },
   });
 
   const radarTable = blessed.box({
@@ -71,9 +71,9 @@ export async function runDashboard(opts: DashboardOptions) {
     scrollbar: {
       ch: "│",
       track: { bg: "black" },
-      style: { bg: THEME.accent }
+      style: { bg: THEME.accent },
     },
-    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } }
+    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } },
   });
 
   const marketBox = blessed.box({
@@ -84,7 +84,7 @@ export async function runDashboard(opts: DashboardOptions) {
     border: "line",
     label: "Market",
     tags: true,
-    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } }
+    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } },
   });
 
   const statsBox = blessed.box({
@@ -95,7 +95,7 @@ export async function runDashboard(opts: DashboardOptions) {
     border: "line",
     label: "Pulse",
     tags: true,
-    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } }
+    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } },
   });
 
   const orderbookTable = blessed.box({
@@ -106,7 +106,7 @@ export async function runDashboard(opts: DashboardOptions) {
     border: "line",
     label: "Orderbook",
     tags: true,
-    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } }
+    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } },
   });
 
   const historyBox = blessed.box({
@@ -117,7 +117,7 @@ export async function runDashboard(opts: DashboardOptions) {
     border: "line",
     label: "History",
     tags: true,
-    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } }
+    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } },
   });
 
   const holdersTable = blessed.box({
@@ -128,7 +128,7 @@ export async function runDashboard(opts: DashboardOptions) {
     border: "line",
     label: "Holders",
     tags: true,
-    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } }
+    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } },
   });
 
   const alertsBox = blessed.box({
@@ -139,7 +139,7 @@ export async function runDashboard(opts: DashboardOptions) {
     border: "line",
     label: "Alerts & Status",
     tags: true,
-    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } }
+    style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } },
   });
 
   const footer = blessed.box({
@@ -148,7 +148,7 @@ export async function runDashboard(opts: DashboardOptions) {
     width: "100%",
     height: 1,
     tags: true,
-    style: { fg: THEME.text, bg: "black" }
+    style: { fg: THEME.text, bg: "black" },
   });
 
   const filterPrompt = blessed.prompt({
@@ -160,7 +160,7 @@ export async function runDashboard(opts: DashboardOptions) {
     border: "line",
     label: "Filter radar",
     tags: false,
-    hidden: true
+    hidden: true,
   });
 
   const alertPrompt = blessed.prompt({
@@ -172,7 +172,7 @@ export async function runDashboard(opts: DashboardOptions) {
     border: "line",
     label: "Set price alert (e.g. >0.6 or <0.4 or clear)",
     tags: false,
-    hidden: true
+    hidden: true,
   });
 
   const detailModal = blessed.box({
@@ -189,7 +189,13 @@ export async function runDashboard(opts: DashboardOptions) {
     alwaysScroll: true,
     keys: true,
     vi: true,
-    style: { fg: THEME.text, border: { fg: THEME.accent }, label: { fg: THEME.label } }
+    mouse: true,
+    scrollbar: {
+      ch: "|",
+      track: { bg: "black" },
+      style: { bg: THEME.accent },
+    },
+    style: { fg: THEME.text, border: { fg: THEME.accent }, label: { fg: THEME.label } },
   });
 
   const helpModal = blessed.box({
@@ -202,7 +208,7 @@ export async function runDashboard(opts: DashboardOptions) {
     label: "Help - Keyboard Shortcuts",
     tags: true,
     hidden: true,
-    style: { fg: THEME.text, border: { fg: THEME.accent }, label: { fg: THEME.label } }
+    style: { fg: THEME.text, border: { fg: THEME.accent }, label: { fg: THEME.label } },
   });
 
   const notificationBox = blessed.box({
@@ -214,13 +220,23 @@ export async function runDashboard(opts: DashboardOptions) {
     border: "line",
     tags: true,
     hidden: true,
-    style: { fg: THEME.text, bg: "black", border: { fg: THEME.danger }, label: { fg: THEME.danger } }
+    style: {
+      fg: THEME.text,
+      bg: "black",
+      border: { fg: THEME.danger },
+      label: { fg: THEME.danger },
+    },
   });
 
   let notificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  function showNotification(message: string, type: "error" | "warning" | "info" = "error", durationMs = 5000) {
-    const borderColor = type === "error" ? THEME.danger : type === "warning" ? THEME.warning : THEME.accent;
+  function showNotification(
+    message: string,
+    type: "error" | "warning" | "info" = "error",
+    durationMs = 5000,
+  ) {
+    const borderColor =
+      type === "error" ? THEME.danger : type === "warning" ? THEME.warning : THEME.accent;
     const label = type === "error" ? "Error" : type === "warning" ? "Warning" : "Info";
     notificationBox.style.border = { fg: borderColor };
     notificationBox.setLabel(` ${label} `);
@@ -323,7 +339,7 @@ export async function runDashboard(opts: DashboardOptions) {
     const [bookRes, pricesRes, midRes] = await Promise.allSettled([
       getOrderbook(tokenId, { allowNoOrderbook: true }),
       getPrices(tokenId, { allowNoOrderbook: true }),
-      midPromise
+      midPromise,
     ]);
 
     let noOrderbookThisRefresh = false;
@@ -334,9 +350,9 @@ export async function runDashboard(opts: DashboardOptions) {
         orderbook = null;
         orderbookMap.delete(tokenId);
       } else {
-      const normalized = normalizeOrderbook(bookRes.value);
-      orderbookMap.set(tokenId, normalized);
-      orderbook = normalized;
+        const normalized = normalizeOrderbook(bookRes.value);
+        orderbookMap.set(tokenId, normalized);
+        orderbook = normalized;
       }
     } else {
       if (isNoOrderbookError(bookRes.reason)) {
@@ -389,7 +405,11 @@ export async function runDashboard(opts: DashboardOptions) {
     } else {
       noOrderbookTokens.delete(tokenId);
     }
-    if (!noOrderbook && lastAlert !== "" && lastAlert.toLowerCase().includes("no orderbook exists")) {
+    if (
+      !noOrderbook &&
+      lastAlert !== "" &&
+      lastAlert.toLowerCase().includes("no orderbook exists")
+    ) {
       lastAlert = "";
     }
 
@@ -437,7 +457,8 @@ export async function runDashboard(opts: DashboardOptions) {
 
   function swapOutcome(delta: number) {
     if (!focusMarket) return;
-    outcomeIndex = (outcomeIndex + delta + focusMarket.clobTokenIds.length) % focusMarket.clobTokenIds.length;
+    outcomeIndex =
+      (outcomeIndex + delta + focusMarket.clobTokenIds.length) % focusMarket.clobTokenIds.length;
     const tokenId = focusMarket.clobTokenIds[outcomeIndex];
     if (!tokenId) return;
     orderbook = orderbookMap.get(tokenId) ?? orderbook;
@@ -480,7 +501,7 @@ export async function runDashboard(opts: DashboardOptions) {
     const restAge = colorText(restAgeRaw, restStale ? THEME.warning : THEME.muted);
     const msgRateLabel = colorText(String(msgRate), msgRate > 0 ? THEME.success : THEME.muted);
     header.setContent(
-      ` Polymarket Pulse | ${new Date().toLocaleTimeString()} | ws=${wsLabel} (${wsAge}) | rest=${restAge} | ${filterLabel} | msg/s=${msgRateLabel} `
+      ` Polymarket Pulse | ${new Date().toLocaleTimeString()} | ws=${wsLabel} (${wsAge}) | rest=${restAge} | ${filterLabel} | msg/s=${msgRateLabel} `,
     );
 
     renderRadar();
@@ -489,9 +510,11 @@ export async function runDashboard(opts: DashboardOptions) {
     renderOrderbook();
     renderHistory();
     renderAlerts();
-    const skipLabel = autoSkipNoOrderbook ? colorText("ON", THEME.success) : colorText("off", THEME.muted);
+    const skipLabel = autoSkipNoOrderbook
+      ? colorText("ON", THEME.success)
+      : colorText("off", THEME.muted);
     footer.setContent(
-      `${colorText("keys:", THEME.muted)} q=quit n/p=nav j/k=scroll Enter=detail h=help o=outcome r=refresh f=filter s=save a=skip[${skipLabel}] t=alert e=export`
+      `${colorText("keys:", THEME.muted)} q=quit n/p=nav j/k=scroll Enter=detail h=help o=outcome r=refresh f=filter s=save a=skip[${skipLabel}] t=alert e=export`,
     );
 
     screen.render();
@@ -511,7 +534,7 @@ export async function runDashboard(opts: DashboardOptions) {
         noBookIndicator,
         heatSymbol(market),
         textCell(truncate(market.question || market.eventTitle || "(no title)", 38)),
-        textCell(truncate(market.outcomes[0] || "-", 12))
+        textCell(truncate(market.outcomes[0] || "-", 12)),
       ]);
     });
     radarTable.setContent(renderTable(rows));
@@ -535,15 +558,20 @@ export async function runDashboard(opts: DashboardOptions) {
       `${colorText("question:", THEME.muted)} ${textCell(focusMarket.question || "-")}`,
       `${colorText("condition:", THEME.muted)} ${textCell(focusMarket.conditionId || "-")}`,
       `${colorText("outcome:", THEME.muted)} ${textCell(outcome)} ${colorText(`(${outcomeIndex + 1}/${focusMarket.clobTokenIds.length})`, THEME.muted)}`,
-      `${colorText("token:", THEME.muted)} ${textCell(tokenId)}`
+      `${colorText("token:", THEME.muted)} ${textCell(tokenId)}`,
     ];
 
     if (noOrderbook) {
-      const age = lastNoOrderbookAt ? `${Math.round((Date.now() - lastNoOrderbookAt) / 1000)}s` : "-";
-      lines.push(`${colorText("orderbook:", THEME.muted)} ${colorText(`none (${age})`, THEME.muted)}`);
+      const age = lastNoOrderbookAt
+        ? `${Math.round((Date.now() - lastNoOrderbookAt) / 1000)}s`
+        : "-";
+      lines.push(
+        `${colorText("orderbook:", THEME.muted)} ${colorText(`none (${age})`, THEME.muted)}`,
+      );
     }
 
-    if (orderbook?.tickSize !== undefined) lines.push(`${colorText("tick:", THEME.muted)} ${orderbook.tickSize}`);
+    if (orderbook?.tickSize !== undefined)
+      lines.push(`${colorText("tick:", THEME.muted)} ${orderbook.tickSize}`);
     if (orderbook?.minOrderSize !== undefined)
       lines.push(`${colorText("min order:", THEME.muted)} ${orderbook.minOrderSize}`);
     if (orderbook?.negRisk !== undefined)
@@ -566,7 +594,7 @@ export async function runDashboard(opts: DashboardOptions) {
       if (spread <= 0.01) score += 35;
       else if (spread <= 0.03) score += 25;
       else if (spread <= 0.05) score += 15;
-      else if (spread <= 0.10) score += 5;
+      else if (spread <= 0.1) score += 5;
     }
 
     if (totalDepth > 10000) score += 35;
@@ -579,8 +607,16 @@ export async function runDashboard(opts: DashboardOptions) {
     else if (volume > 1000) score += 10;
     else if (volume > 100) score += 5;
 
-    const label = score >= 80 ? "A" : score >= 60 ? "B" : score >= 40 ? "C" : score >= 20 ? "D" : "F";
-    const color = score >= 80 ? THEME.success : score >= 60 ? THEME.accent : score >= 40 ? THEME.warning : THEME.danger;
+    const label =
+      score >= 80 ? "A" : score >= 60 ? "B" : score >= 40 ? "C" : score >= 20 ? "D" : "F";
+    const color =
+      score >= 80
+        ? THEME.success
+        : score >= 60
+          ? THEME.accent
+          : score >= 40
+            ? THEME.warning
+            : THEME.danger;
 
     return { score, label, color };
   }
@@ -589,11 +625,25 @@ export async function runDashboard(opts: DashboardOptions) {
     const spread = bestBid !== undefined && bestAsk !== undefined ? bestAsk - bestBid : undefined;
     const bias = midpoint ?? lastTrade;
     const delta =
-      lastTrade !== undefined && lastTradePrev !== undefined ? lastTrade - lastTradePrev : undefined;
+      lastTrade !== undefined && lastTradePrev !== undefined
+        ? lastTrade - lastTradePrev
+        : undefined;
     const deltaColor =
-      delta === undefined ? THEME.muted : delta > 0 ? THEME.success : delta < 0 ? THEME.danger : THEME.muted;
+      delta === undefined
+        ? THEME.muted
+        : delta > 0
+          ? THEME.success
+          : delta < 0
+            ? THEME.danger
+            : THEME.muted;
     const spreadColor =
-      spread === undefined ? THEME.muted : spread < 0.01 ? THEME.success : spread < 0.05 ? THEME.warning : THEME.danger;
+      spread === undefined
+        ? THEME.muted
+        : spread < 0.01
+          ? THEME.success
+          : spread < 0.05
+            ? THEME.warning
+            : THEME.danger;
     const bidColor = bestBid === undefined ? THEME.muted : THEME.success;
     const askColor = bestAsk === undefined ? THEME.muted : THEME.danger;
     const health = computeHealthScore();
@@ -605,7 +655,7 @@ export async function runDashboard(opts: DashboardOptions) {
       `${colorText("last     :", THEME.muted)} ${colorText(formatPrice(lastTrade), THEME.accent)}`,
       `${colorText("bias     :", THEME.muted)} ${colorText(formatPct(bias), THEME.accent)}`,
       `${colorText("delta    :", THEME.muted)} ${colorText(formatPrice(delta), deltaColor)}`,
-      `${colorText("health   :", THEME.muted)} ${colorText(`${health.label} (${health.score})`, health.color)}`
+      `${colorText("health   :", THEME.muted)} ${colorText(`${health.label} (${health.score})`, health.color)}`,
     ];
     statsBox.setContent(lines.join("\n"));
   }
@@ -623,7 +673,7 @@ export async function runDashboard(opts: DashboardOptions) {
         cell(formatPrice(bid?.price)),
         cell(formatNumber(bid?.size)),
         cell(formatPrice(ask?.price)),
-        cell(formatNumber(ask?.size))
+        cell(formatNumber(ask?.size)),
       ]);
     }
 
@@ -636,7 +686,9 @@ export async function runDashboard(opts: DashboardOptions) {
       return;
     }
     const spark = asciiSparkline(historySeries, 40);
-    historyBox.setContent(`${colorText(spark, THEME.accent)}\n${colorText("last=", THEME.muted)}${colorText(formatPrice(historySeries.at(-1)), THEME.accent)}`);
+    historyBox.setContent(
+      `${colorText(spark, THEME.accent)}\n${colorText("last=", THEME.muted)}${colorText(formatPrice(historySeries.at(-1)), THEME.accent)}`,
+    );
   }
 
   function renderAlerts() {
@@ -660,7 +712,7 @@ export async function runDashboard(opts: DashboardOptions) {
       `${colorText("holders age  :", THEME.muted)} ${colorText(`${holdersAge ?? "-"}s`, THEME.muted)}`,
       `${colorText("price alerts :", THEME.muted)} ${colorText(alertsLabel, alertThresholds.length > 0 ? THEME.accent : THEME.muted)}`,
       `${colorText("last alert   :", THEME.muted)} ${colorText(escapeTags(lastAlert || "-"), lastAlert ? THEME.warning : THEME.muted)}`,
-      `${colorText("msg/s        :", THEME.muted)} ${colorText(String(msgRate), msgRate > 0 ? THEME.success : THEME.muted)}`
+      `${colorText("msg/s        :", THEME.muted)} ${colorText(String(msgRate), msgRate > 0 ? THEME.success : THEME.muted)}`,
     ];
     alertsBox.setContent(lines.join("\n"));
   }
@@ -669,13 +721,9 @@ export async function runDashboard(opts: DashboardOptions) {
     const holders = normalizeHolders(data);
     const rows = [[cell("rank"), cell("address"), cell("shares")]];
     holders.slice(0, CONFIG.holdersLimit).forEach((holder, idx) => {
-      const address = String(holder['address'] || holder['trader'] || "-");
-      const shares = Number(holder['shares'] || holder['shares_value'] || holder['value'] || 0);
-      rows.push([
-        cell(String(idx + 1)),
-        cell(truncate(address, 16)),
-        cell(formatNumber(shares))
-      ]);
+      const address = String(holder["address"] || holder["trader"] || "-");
+      const shares = Number(holder["shares"] || holder["shares_value"] || holder["value"] || 0);
+      rows.push([cell(String(idx + 1)), cell(truncate(address, 16)), cell(formatNumber(shares))]);
     });
 
     holdersTable.setContent(renderTable(rows));
@@ -692,7 +740,7 @@ export async function runDashboard(opts: DashboardOptions) {
       noOrderbook,
       orderbook,
       historySeries,
-      healthScore: computeHealthScore()
+      healthScore: computeHealthScore(),
     });
     detailModal.setContent(content);
   }
@@ -701,7 +749,7 @@ export async function runDashboard(opts: DashboardOptions) {
     const content = generateHelpContent({
       autoSkipNoOrderbook,
       priceAlertHigh,
-      priceAlertLow
+      priceAlertLow,
     });
     helpModal.setContent(content);
   }
@@ -709,11 +757,13 @@ export async function runDashboard(opts: DashboardOptions) {
   function applyPriceChange(assetId: string, side: "BUY" | "SELL", price: number, size: number) {
     const current = orderbookMap.get(assetId) ?? { bids: [], asks: [] };
     const depthLimit = CONFIG.orderbookDepth * 5;
-    const bids = side === "BUY" ? updateLevels(current.bids, price, size, true, depthLimit) : current.bids;
-    const asks = side === "SELL" ? updateLevels(current.asks, price, size, false, depthLimit) : current.asks;
+    const bids =
+      side === "BUY" ? updateLevels(current.bids, price, size, true, depthLimit) : current.bids;
+    const asks =
+      side === "SELL" ? updateLevels(current.asks, price, size, false, depthLimit) : current.asks;
     const updated: OrderbookState = {
       bids,
-      asks
+      asks,
     };
     if (current.minOrderSize !== undefined) updated.minOrderSize = current.minOrderSize;
     if (current.tickSize !== undefined) updated.tickSize = current.tickSize;
@@ -755,11 +805,11 @@ export async function runDashboard(opts: DashboardOptions) {
     const price = midpoint ?? lastTrade;
     if (price !== undefined) {
       if (priceAlertHigh !== null && price >= priceAlertHigh) {
-        lastAlert = `⚠ PRICE HIGH: ${price.toFixed(4)} >= ${priceAlertHigh.toFixed(4)}`;
+        lastAlert = `ALERT HIGH: ${price.toFixed(4)} >= ${priceAlertHigh.toFixed(4)}`;
         priceAlertHigh = null;
       }
       if (priceAlertLow !== null && price <= priceAlertLow) {
-        lastAlert = `⚠ PRICE LOW: ${price.toFixed(4)} <= ${priceAlertLow.toFixed(4)}`;
+        lastAlert = `ALERT LOW: ${price.toFixed(4)} <= ${priceAlertLow.toFixed(4)}`;
         priceAlertLow = null;
       }
     }
@@ -787,11 +837,11 @@ export async function runDashboard(opts: DashboardOptions) {
         lastTrade,
         wsStatus,
         lastWsAt,
-        lastRestAt
+        lastRestAt,
       },
       orderbook,
       history: historySeries,
-      holdersUpdatedAt: lastHoldersAt
+      holdersUpdatedAt: lastHoldersAt,
     };
 
     await mkdir("snapshots", { recursive: true });
@@ -818,7 +868,10 @@ export async function runDashboard(opts: DashboardOptions) {
     historySeries.forEach((price, idx) => {
       const minutesAgo = (historySeries.length - 1 - idx) * fidelity;
       const timestamp = new Date(now.getTime() - minutesAgo * 60 * 1000).toISOString();
-      const marketName = (focusMarket?.question || focusMarket?.eventTitle || "market").replace(/,/g, ";");
+      const marketName = (focusMarket?.question || focusMarket?.eventTitle || "market").replace(
+        /,/g,
+        ";",
+      );
       csvLines.push(`${timestamp},${price.toFixed(6)},${marketName},${outcome},${tokenId}`);
     });
 
@@ -832,6 +885,7 @@ export async function runDashboard(opts: DashboardOptions) {
   function bindKeys() {
     screen.key(["q", "C-c"], () => {
       wsConnection?.close();
+      screen.destroy();
       process.exit(0);
     });
 
@@ -925,7 +979,9 @@ export async function runDashboard(opts: DashboardOptions) {
 
     screen.key(["a"], () => {
       autoSkipNoOrderbook = !autoSkipNoOrderbook;
-      lastAlert = autoSkipNoOrderbook ? "auto-skip enabled (skip markets without orderbooks)" : "auto-skip disabled";
+      lastAlert = autoSkipNoOrderbook
+        ? "auto-skip enabled (skip markets without orderbooks)"
+        : "auto-skip disabled";
       render();
     });
 
@@ -943,7 +999,10 @@ export async function runDashboard(opts: DashboardOptions) {
         if (err) return;
         radarFilter = (value || "").trim();
         const view = filterRadar(radar, radarFilter);
-        if (view.length > 0 && !view.some((item) => item.conditionId === focusMarket?.conditionId)) {
+        if (
+          view.length > 0 &&
+          !view.some((item) => item.conditionId === focusMarket?.conditionId)
+        ) {
           const nextMarket = view[0];
           if (nextMarket) {
             focusMarket = nextMarket;
@@ -1009,11 +1068,15 @@ export async function runDashboard(opts: DashboardOptions) {
     });
 
     screen.key(["j", "down"], () => {
+      // Don't scroll radar when modal is open (modal handles its own scrolling)
+      if (showDetail || showHelp) return;
       radarTable.scroll(1);
       screen.render();
     });
 
     screen.key(["k", "up"], () => {
+      // Don't scroll radar when modal is open (modal handles its own scrolling)
+      if (showDetail || showHelp) return;
       radarTable.scroll(-1);
       screen.render();
     });
@@ -1041,7 +1104,11 @@ export async function runDashboard(opts: DashboardOptions) {
         if (update.hash && prevHash && update.hash === prevHash) {
           return;
         }
-        if (update.sequence !== undefined && prevSeq !== undefined && update.sequence !== prevSeq + 1) {
+        if (
+          update.sequence !== undefined &&
+          prevSeq !== undefined &&
+          update.sequence !== prevSeq + 1
+        ) {
           scheduleResync(update.assetId, `seq gap ${prevSeq}->${update.sequence}`);
         }
         if (updateTs && prevTs && updateTs < prevTs) {
@@ -1080,7 +1147,7 @@ export async function runDashboard(opts: DashboardOptions) {
           orderbook = normalized;
           render();
         }
-      }
+      },
     });
   }
 
@@ -1111,7 +1178,7 @@ function updateLevels(
   price: number,
   size: number,
   desc: boolean,
-  limit: number
+  limit: number,
 ) {
   const next = levels.slice();
   const idx = next.findIndex((level) => level.price === price);
@@ -1125,4 +1192,3 @@ function updateLevels(
   next.sort((a, b) => (desc ? b.price - a.price : a.price - b.price));
   return next.slice(0, limit);
 }
-
