@@ -129,6 +129,8 @@ export function generateHelpContent(state: HelpModalState): string {
     "",
     `  ${colorText("n", THEME.success)}        Next market in radar`,
     `  ${colorText("p", THEME.success)}        Previous market in radar`,
+    `  ${colorText("j, ↓", THEME.success)}     Scroll radar down`,
+    `  ${colorText("k, ↑", THEME.success)}     Scroll radar up`,
     `  ${colorText("o", THEME.success)}        Swap outcome (YES/NO)`,
     `  ${colorText("Enter", THEME.success)}    Show detail view`,
     `  ${colorText("ESC", THEME.success)}      Close modals`,
