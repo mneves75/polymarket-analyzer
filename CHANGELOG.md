@@ -1,6 +1,38 @@
 # Changelog
 
-## Unreleased
+## [Unreleased] - 2026-01-06
+
+### Documentation Improvements (Major Update)
+
+#### Completed Chapters 05-07
+- **Chapter 05 (TUI)**: Added ✅ Checkpoints, ⚠️ Common Pitfalls, 🔧 Troubleshooting, 🎓 Design Decisions, 📚 External Resources
+- **Chapter 06 (Erros & Rate Limiting)**: Added ✅ Checkpoints, ⚠️ Common Pitfalls, 🔧 Troubleshooting, 🎓 Design Decisions, 📚 External Resources
+- **Chapter 07 (Testes)**: Added ✅ Checkpoints, ⚠️ Common Pitfalls, 🔧 Troubleshooting, 🎓 Design Decisions, 📚 External Resources
+
+#### New Documentation Assets
+- **SELF-CRITIQUE-2026-01-06.md**: Comprehensive self-critique against 2025/2026 best practices
+- **EXEC-SPEC-2026-01-06.md**: Updated engineering execution specification with 4-phase plan
+
+#### Code Documentation
+- **src/http.ts**: Added comprehensive JSDoc comments for all functions
+  - Documented exponential backoff with jitter algorithm
+  - Documented retry strategy (429, 5xx retry; 4xx no retry)
+  - Documented rate limiting rules per endpoint
+  - Added examples for all major functions
+- **src/rateLimiter.ts**: Added token bucket algorithm documentation
+  - Algorithm explanation with timeline examples
+  - Comparison with alternative rate limiting approaches
+  - Jitter explanation for preventing synchronized storms
+
+#### Documentation Enhancements
+- 1000+ lines of comprehensive documentation added
+- All checkpoints include 5 questions with detailed answers
+- All pitfalls include bad vs good code examples
+- All troubleshooting sections include symptoms, diagnosis, and solutions
+- All design decisions include trade-off analysis tables
+- External resources expanded to 12+ links per chapter
+
+### Previous Features
 
 ### New Features
 - Add visual indicator (○) in Radar for markets without orderbooks.
@@ -14,6 +46,7 @@
 - Add ESC key to close modals (detail and help screens).
 
 ### Improvements
+- Detail screen now updates dynamically when navigating markets (n/p) or swapping outcomes (o).
 - Truncate long token IDs in error messages for better readability.
 - Improve Radar table spacing with separate columns and increased padding.
 - Increase Event column truncation from 30 to 38 characters.
