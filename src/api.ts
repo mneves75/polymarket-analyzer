@@ -1,5 +1,6 @@
 import { CONFIG } from "./config";
 import { fetchJson, isNoOrderbookError, withQuery } from "./http";
+import { GammaMarketSchema, validateWithSchema } from "./schemas";
 
 /**
  * Polymarket Gamma API Event type.
@@ -330,14 +331,29 @@ export async function fetchMarkets(
 	const res = await fetchJson<unknown>(url);
 
 	// Handle different response formats from the API
-	if (Array.isArray(res)) return res as GammaMarket[];
+	let markets: GammaMarket[];
+	if (Array.isArray(res)) {
+		markets = res as GammaMarket[];
+	} else {
+		const record = res as Record<string, unknown>;
+		markets =
+			(record.markets as GammaMarket[] | undefined) ||
+			(record.data as GammaMarket[] | undefined) ||
+			[];
+	}
 
-	const record = res as Record<string, unknown>;
-	const list =
-		(record.markets as GammaMarket[] | undefined) ||
-		(record.data as GammaMarket[] | undefined) ||
-		[];
-	return list;
+	// Validate markets if validation is enabled
+	if (CONFIG.enableValidation) {
+		return markets.map((market) =>
+			validateWithSchema(
+				GammaMarketSchema,
+				market,
+				`fetchMarkets market ${market.conditionId ?? "unknown"}`,
+			),
+		);
+	}
+
+	return markets;
 }
 
 /**

@@ -21,4 +21,12 @@ export const CONFIG = {
 	orderbookDepth: 10,
 	radarLimit: 50,
 	restTimeoutMs: 10000,
+	/**
+	 * Enable runtime validation of API responses using Zod schemas.
+	 * Set to true in development to catch API contract issues early.
+	 * Set to false in production to avoid performance overhead.
+	 *
+	 * @default false (disabled by default)
+	 */
+	enableValidation: false,
 };
