@@ -8,9 +8,9 @@ import {
   getPrices,
   type MarketInfo
 } from "./api";
-import { loadRadar, resolveMarket, type ResolveOptions } from "./market";
+import { loadRadar, resolveMarket } from "./market";
 import { connectMarketWs } from "./ws";
-import { asciiSparkline, formatNumber, formatPct, formatPrice, midpointFrom, padRight } from "./utils";
+import { asciiSparkline, formatNumber, formatPct, formatPrice, midpointFrom } from "./utils";
 import {
   extractHistory,
   extractMidpoint,
@@ -23,24 +23,21 @@ import {
 import { mkdir, writeFile } from "node:fs/promises";
 import { logError } from "./logger";
 import { isNoOrderbookError } from "./http";
+import { THEME, type DashboardOptions } from "./tui-types";
+import {
+  colorText,
+  escapeTags,
+  textCell,
+  cell,
+  truncate,
+  truncateAlert,
+  renderTable,
+  statusColor,
+  heatSymbol,
+  filterRadar
+} from "./tui-render";
 
-export type DashboardOptions = ResolveOptions & {
-  intervalMs: number;
-  ws: boolean;
-};
-
-const THEME = {
-  headerBg: "blue",
-  headerFg: "white",
-  border: "cyan",
-  label: "cyan",
-  text: "white",
-  muted: "gray",
-  success: "green",
-  warning: "yellow",
-  danger: "red",
-  accent: "magenta"
-};
+export type { DashboardOptions } from "./tui-types";
 
 export async function runDashboard(opts: DashboardOptions) {
   const screen = blessed.screen({
@@ -167,6 +164,36 @@ export async function runDashboard(opts: DashboardOptions) {
     hidden: true
   });
 
+  const detailModal = blessed.box({
+    parent: screen,
+    top: "center",
+    left: "center",
+    width: "80%",
+    height: "80%",
+    border: "line",
+    label: "Market Detail",
+    tags: true,
+    hidden: true,
+    scrollable: true,
+    alwaysScroll: true,
+    keys: true,
+    vi: true,
+    style: { fg: THEME.text, border: { fg: THEME.accent }, label: { fg: THEME.label } }
+  });
+
+  const helpModal = blessed.box({
+    parent: screen,
+    top: "center",
+    left: "center",
+    width: "60%",
+    height: "60%",
+    border: "line",
+    label: "Help - Keyboard Shortcuts",
+    tags: true,
+    hidden: true,
+    style: { fg: THEME.text, border: { fg: THEME.accent }, label: { fg: THEME.label } }
+  });
+
   screen.append(header);
   screen.append(radarTable);
   screen.append(marketBox);
@@ -209,6 +236,8 @@ export async function runDashboard(opts: DashboardOptions) {
   let lastAlert = "";
   let msgCount = 0;
   let msgRate = 0;
+  let showDetail = false;
+  let showHelp = false;
   const lastHashByAsset = new Map<string, string>();
   const lastSeqByAsset = new Map<string, number>();
   const lastTsByAsset = new Map<string, number>();
@@ -405,7 +434,7 @@ export async function runDashboard(opts: DashboardOptions) {
     renderAlerts();
     const skipLabel = autoSkipNoOrderbook ? colorText("ON", THEME.success) : colorText("off", THEME.muted);
     footer.setContent(
-      `${colorText("keys:", THEME.muted)} q=quit n/p=nav o=outcome r=refresh f=filter s=save a=skip[${skipLabel}] t=alert e=export`
+      `${colorText("keys:", THEME.muted)} q=quit n/p=nav Enter=detail h=help o=outcome r=refresh f=filter s=save a=skip[${skipLabel}] t=alert e=export`
     );
 
     screen.render();
@@ -590,6 +619,139 @@ export async function runDashboard(opts: DashboardOptions) {
     holdersTable.setContent(renderTable(rows));
   }
 
+  function renderDetailModal() {
+    if (!focusMarket) {
+      detailModal.setContent(colorText("No market selected", THEME.muted));
+      return;
+    }
+
+    const tokenId = focusMarket.clobTokenIds[outcomeIndex] ?? focusMarket.clobTokenIds[0];
+    const outcome = focusMarket.outcomes[outcomeIndex] || `OUTCOME_${outcomeIndex + 1}`;
+    const spread = bestBid !== undefined && bestAsk !== undefined ? bestAsk - bestBid : undefined;
+    const health = computeHealthScore();
+
+    const lines: string[] = [
+      colorText("=== MARKET INFORMATION ===", THEME.accent),
+      "",
+      `${colorText("Event:", THEME.muted)} ${textCell(focusMarket.eventTitle || "-")}`,
+      `${colorText("Question:", THEME.muted)} ${textCell(focusMarket.question || "-")}`,
+      `${colorText("Condition ID:", THEME.muted)} ${textCell(focusMarket.conditionId || "-")}`,
+      `${colorText("Market ID:", THEME.muted)} ${textCell(focusMarket.marketId || "-")}`,
+      `${colorText("Slug:", THEME.muted)} ${textCell(focusMarket.slug || "-")}`,
+      "",
+      colorText("=== OUTCOME ===", THEME.accent),
+      "",
+      `${colorText("Selected:", THEME.muted)} ${textCell(outcome)} (${outcomeIndex + 1}/${focusMarket.clobTokenIds.length})`,
+      `${colorText("Token ID:", THEME.muted)} ${textCell(tokenId)}`,
+      `${colorText("All Outcomes:", THEME.muted)} ${focusMarket.outcomes.join(", ")}`,
+      "",
+      colorText("=== PRICING ===", THEME.accent),
+      "",
+      `${colorText("Best Bid:", THEME.muted)} ${colorText(formatPrice(bestBid), THEME.success)}`,
+      `${colorText("Best Ask:", THEME.muted)} ${colorText(formatPrice(bestAsk), THEME.danger)}`,
+      `${colorText("Spread:", THEME.muted)} ${colorText(formatPrice(spread), spread && spread < 0.03 ? THEME.success : THEME.warning)}`,
+      `${colorText("Midpoint:", THEME.muted)} ${colorText(formatPrice(midpoint), THEME.accent)}`,
+      `${colorText("Last Trade:", THEME.muted)} ${colorText(formatPrice(lastTrade), THEME.accent)}`,
+      "",
+      colorText("=== MARKET HEALTH ===", THEME.accent),
+      "",
+      `${colorText("Health Grade:", THEME.muted)} ${colorText(`${health.label} (${health.score}/100)`, health.color)}`,
+      `${colorText("24hr Volume:", THEME.muted)} ${colorText(formatNumber(focusMarket.volume24hr), THEME.text)}`,
+      `${colorText("24hr Change:", THEME.muted)} ${colorText(formatPct(focusMarket.priceChange24hr), (focusMarket.priceChange24hr ?? 0) >= 0 ? THEME.success : THEME.danger)}`,
+      `${colorText("Has Orderbook:", THEME.muted)} ${colorText(noOrderbook ? "NO" : "YES", noOrderbook ? THEME.danger : THEME.success)}`,
+      ""
+    ];
+
+    if (orderbook) {
+      lines.push(colorText("=== ORDERBOOK (Full) ===", THEME.accent));
+      lines.push("");
+
+      const bids = orderbook.bids ?? [];
+      const asks = orderbook.asks ?? [];
+      const maxDepth = Math.max(bids.length, asks.length, 15);
+
+      lines.push(`${colorText("BIDS", THEME.success)}                    ${colorText("ASKS", THEME.danger)}`);
+      lines.push(`${colorText("Price      Size", THEME.muted)}           ${colorText("Price      Size", THEME.muted)}`);
+
+      for (let i = 0; i < maxDepth; i++) {
+        const bid = bids[i];
+        const ask = asks[i];
+        const bidStr = bid ? `${formatPrice(bid.price).padEnd(10)} ${formatNumber(bid.size).padEnd(10)}` : "".padEnd(20);
+        const askStr = ask ? `${formatPrice(ask.price).padEnd(10)} ${formatNumber(ask.size)}` : "";
+        lines.push(`${colorText(bidStr, THEME.success)}    ${colorText(askStr, THEME.danger)}`);
+      }
+
+      lines.push("");
+      if (orderbook.tickSize !== undefined) lines.push(`${colorText("Tick Size:", THEME.muted)} ${orderbook.tickSize}`);
+      if (orderbook.minOrderSize !== undefined) lines.push(`${colorText("Min Order:", THEME.muted)} ${orderbook.minOrderSize}`);
+      if (orderbook.negRisk !== undefined) lines.push(`${colorText("Neg Risk:", THEME.muted)} ${String(orderbook.negRisk)}`);
+    }
+
+    lines.push("");
+    lines.push(colorText("=== PRICE HISTORY ===", THEME.accent));
+    lines.push("");
+    if (historySeries.length > 0) {
+      const spark = asciiSparkline(historySeries, 60);
+      const min = Math.min(...historySeries);
+      const max = Math.max(...historySeries);
+      const avg = historySeries.reduce((a, b) => a + b, 0) / historySeries.length;
+      lines.push(colorText(spark, THEME.accent));
+      lines.push(`${colorText("Min:", THEME.muted)} ${formatPrice(min)}  ${colorText("Max:", THEME.muted)} ${formatPrice(max)}  ${colorText("Avg:", THEME.muted)} ${formatPrice(avg)}  ${colorText("Points:", THEME.muted)} ${historySeries.length}`);
+    } else {
+      lines.push(colorText("No history data available", THEME.muted));
+    }
+
+    lines.push("");
+    lines.push(colorText("Press Enter or ESC to close", THEME.muted));
+
+    detailModal.setContent(lines.join("\n"));
+  }
+
+  function renderHelpModal() {
+    const skipLabel = autoSkipNoOrderbook ? "ON" : "off";
+    const alertsActive = priceAlertHigh !== null || priceAlertLow !== null;
+
+    const lines: string[] = [
+      colorText("=== NAVIGATION ===", THEME.accent),
+      "",
+      `  ${colorText("n", THEME.success)}        Next market in radar`,
+      `  ${colorText("p", THEME.success)}        Previous market in radar`,
+      `  ${colorText("o", THEME.success)}        Swap outcome (YES/NO)`,
+      `  ${colorText("Enter", THEME.success)}    Show detail view`,
+      `  ${colorText("ESC", THEME.success)}      Close modals`,
+      "",
+      colorText("=== DATA ===", THEME.accent),
+      "",
+      `  ${colorText("r", THEME.success)}        Refresh all data`,
+      `  ${colorText("f, /", THEME.success)}     Filter radar by query`,
+      "",
+      colorText("=== FEATURES ===", THEME.accent),
+      "",
+      `  ${colorText("a", THEME.success)}        Toggle auto-skip [${skipLabel}]`,
+      `             Skip markets without orderbooks`,
+      `  ${colorText("t", THEME.success)}        Set price alert`,
+      `             Syntax: >0.6 or <0.4 or both`,
+      `             Current: ${alertsActive ? "Active" : "None"}`,
+      "",
+      colorText("=== EXPORT ===", THEME.accent),
+      "",
+      `  ${colorText("s", THEME.success)}        Save snapshot to JSON`,
+      `             Saves to snapshots/ directory`,
+      `  ${colorText("e", THEME.success)}        Export history to CSV`,
+      `             Saves to exports/ directory`,
+      "",
+      colorText("=== OTHER ===", THEME.accent),
+      "",
+      `  ${colorText("h, ?", THEME.success)}     Show this help`,
+      `  ${colorText("q", THEME.success)}        Quit application`,
+      `  ${colorText("Ctrl-C", THEME.success)}   Quit application`,
+      "",
+      colorText("Press h, ?, or ESC to close", THEME.muted)
+    ];
+
+    helpModal.setContent(lines.join("\n"));
+  }
+
   function applyPriceChange(assetId: string, side: "BUY" | "SELL", price: number, size: number) {
     const current = orderbookMap.get(assetId) ?? { bids: [], asks: [] };
     const depthLimit = CONFIG.orderbookDepth * 5;
@@ -718,6 +880,52 @@ export async function runDashboard(opts: DashboardOptions) {
     screen.key(["q", "C-c"], () => {
       wsConnection?.close();
       process.exit(0);
+    });
+
+    screen.key(["enter"], () => {
+      if (showHelp) {
+        showHelp = false;
+        helpModal.hide();
+        screen.render();
+        return;
+      }
+      showDetail = !showDetail;
+      if (showDetail) {
+        renderDetailModal();
+        detailModal.show();
+        detailModal.focus();
+      } else {
+        detailModal.hide();
+      }
+      screen.render();
+    });
+
+    screen.key(["escape"], () => {
+      if (showDetail) {
+        showDetail = false;
+        detailModal.hide();
+        screen.render();
+        return;
+      }
+      if (showHelp) {
+        showHelp = false;
+        helpModal.hide();
+        screen.render();
+        return;
+      }
+    });
+
+    screen.key(["h", "?"], () => {
+      if (showDetail) return;
+      showHelp = !showHelp;
+      if (showHelp) {
+        renderHelpModal();
+        helpModal.show();
+        helpModal.focus();
+      } else {
+        helpModal.hide();
+      }
+      screen.render();
     });
 
     screen.key(["n"], () => {
@@ -918,35 +1126,6 @@ export async function runDashboard(opts: DashboardOptions) {
   render();
 }
 
-function filterRadar(list: MarketInfo[], query: string) {
-  if (!query) return list;
-  const q = query.toLowerCase();
-  return list.filter((market) => {
-    const hay = `${market.question || ""} ${market.eventTitle || ""} ${market.slug || ""}`.toLowerCase();
-    return hay.includes(q);
-  });
-}
-
-function heatSymbol(market: MarketInfo) {
-  const heat = computeHeat(market);
-  const levels = [" ", ".", ":", "-", "=", "+", "*", "#", "%", "@"];
-  const idx = Math.max(0, Math.min(levels.length - 1, Math.floor(heat * (levels.length - 1))));
-  const color = heat > 0.7 ? THEME.danger : heat > 0.4 ? THEME.warning : THEME.success;
-  return colorText(levels[idx], color);
-}
-
-function computeHeat(market: MarketInfo) {
-  const volume = market.volume24hr ?? 0;
-  const priceChange = Math.abs(market.priceChange24hr ?? 0);
-  const bestBid = market.bestBid;
-  const bestAsk = market.bestAsk;
-  const spread = bestBid !== undefined && bestAsk !== undefined ? bestAsk - bestBid : undefined;
-  const normVolume = Math.min(1, Math.log10(volume + 1) / 6);
-  const normChange = Math.min(1, priceChange);
-  const normSpread = spread !== undefined ? Math.max(0, 1 - spread * 10) : 0.3;
-  return Math.min(1, normVolume * 0.5 + normChange * 0.3 + normSpread * 0.2);
-}
-
 function updateLevels(
   levels: OrderbookLevel[],
   price: number,
@@ -967,80 +1146,3 @@ function updateLevels(
   return next.slice(0, limit);
 }
 
-function truncate(value: string, max: number) {
-  if (value.length <= max) return value;
-  return `${value.slice(0, Math.max(0, max - 3))}...`;
-}
-
-function cell(value: string) {
-  return textCell(value);
-}
-
-function textCell(value: string) {
-  return escapeTags(value ?? "-");
-}
-
-function renderTable(rows: string[][], padding = 2) {
-  if (rows.length === 0) return "";
-  const colWidths: number[] = [];
-  rows.forEach((row) => {
-    row.forEach((cellValue, idx) => {
-      const width = visibleLength(String(cellValue ?? ""));
-      colWidths[idx] = Math.max(colWidths[idx] || 0, width);
-    });
-  });
-
-  return rows
-    .map((row) =>
-      row
-        .map((cellValue, idx) => padCell(String(cellValue ?? ""), (colWidths[idx] || 0) + padding))
-        .join("")
-        .trimEnd()
-    )
-    .join("\n");
-}
-
-function padCell(value: string, width: number) {
-  const len = visibleLength(value);
-  if (len >= width) return value;
-  return value + " ".repeat(width - len);
-}
-
-function escapeTags(value: string) {
-  return value.replace(/\{/g, "\\{").replace(/\}/g, "\\}");
-}
-
-function stripTags(value: string) {
-  return value.replace(/\{[^}]+\}/g, "").replace(/\\\{/g, "{").replace(/\\\}/g, "}");
-}
-
-function visibleLength(value: string) {
-  return stripTags(value).length;
-}
-
-function colorText(value: string, color: string) {
-  return `{${color}-fg}${value}{/}`;
-}
-
-function statusColor(status: string, stale: boolean) {
-  if (stale) return THEME.warning;
-  if (status === "connected") return THEME.success;
-  if (status === "connecting") return THEME.warning;
-  if (status === "stale") return THEME.warning;
-  if (status === "closed") return THEME.danger;
-  if (status === "error") return THEME.danger;
-  return THEME.muted;
-}
-
-function truncateAlert(message: string, maxLen = 100): string {
-  const tokenIdMatch = message.match(/token_id=([a-zA-Z0-9]{20,})/);
-  if (tokenIdMatch) {
-    const fullId = tokenIdMatch[1];
-    const shortId = `${fullId.slice(0, 8)}...${fullId.slice(-6)}`;
-    message = message.replace(fullId, shortId);
-  }
-  if (message.length > maxLen) {
-    return `${message.slice(0, maxLen - 3)}...`;
-  }
-  return message;
-}
