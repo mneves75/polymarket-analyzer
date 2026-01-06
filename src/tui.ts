@@ -155,6 +155,18 @@ export async function runDashboard(opts: DashboardOptions) {
     hidden: true
   });
 
+  const alertPrompt = blessed.prompt({
+    parent: screen,
+    top: "center",
+    left: "center",
+    width: "60%",
+    height: 7,
+    border: "line",
+    label: "Set price alert (e.g. >0.6 or <0.4 or clear)",
+    tags: false,
+    hidden: true
+  });
+
   screen.append(header);
   screen.append(radarTable);
   screen.append(marketBox);
@@ -182,6 +194,10 @@ export async function runDashboard(opts: DashboardOptions) {
   let midpoint: number | undefined;
   let noOrderbook = false;
   let lastNoOrderbookAt = 0;
+  const noOrderbookTokens = new Set<string>();
+  let autoSkipNoOrderbook = false;
+  let priceAlertHigh: number | null = null;
+  let priceAlertLow: number | null = null;
   let wsStatus = "off";
   let wsConnection: { close: () => void } | null = null;
   let radarFilter = "";
@@ -256,7 +272,7 @@ export async function runDashboard(opts: DashboardOptions) {
       } else {
         const message = (bookRes.reason as Error).message ?? String(bookRes.reason);
         logError("Orderbook", bookRes.reason);
-        lastAlert = `orderbook error: ${message}`;
+        lastAlert = truncateAlert(`orderbook error: ${message}`);
       }
     }
 
@@ -275,7 +291,7 @@ export async function runDashboard(opts: DashboardOptions) {
       } else {
         const message = (pricesRes.reason as Error).message ?? String(pricesRes.reason);
         logError("Prices", pricesRes.reason);
-        lastAlert = `prices error: ${message}`;
+        lastAlert = truncateAlert(`prices error: ${message}`);
       }
     }
 
@@ -287,7 +303,7 @@ export async function runDashboard(opts: DashboardOptions) {
       } else {
         const message = (midRes.reason as Error).message ?? String(midRes.reason);
         logError("Midpoint", midRes.reason);
-        lastAlert = `midpoint error: ${message}`;
+        lastAlert = truncateAlert(`midpoint error: ${message}`);
       }
       midpoint = midpointFrom(bestBid, bestAsk) ?? midpoint;
     } else {
@@ -296,6 +312,11 @@ export async function runDashboard(opts: DashboardOptions) {
 
     noOrderbook = noOrderbookThisRefresh;
     lastNoOrderbookAt = noOrderbook ? Date.now() : 0;
+    if (noOrderbook) {
+      noOrderbookTokens.add(tokenId);
+    } else {
+      noOrderbookTokens.delete(tokenId);
+    }
     if (!noOrderbook && lastAlert.toLowerCase().includes("no orderbook exists")) {
       lastAlert = "";
     }
@@ -345,6 +366,22 @@ export async function runDashboard(opts: DashboardOptions) {
     render();
   }
 
+  function hasOrderbook(market: MarketInfo): boolean {
+    return !market.clobTokenIds.some((tid) => noOrderbookTokens.has(tid));
+  }
+
+  function findNextMarket(view: MarketInfo[], currentIdx: number, delta: number): number {
+    if (!autoSkipNoOrderbook) {
+      return (currentIdx + delta + view.length) % view.length;
+    }
+    let idx = currentIdx;
+    for (let i = 0; i < view.length; i++) {
+      idx = (idx + delta + view.length) % view.length;
+      if (hasOrderbook(view[idx])) return idx;
+    }
+    return (currentIdx + delta + view.length) % view.length;
+  }
+
   function render() {
     const now = Date.now();
     const wsAgeRaw = lastWsAt ? `${Math.round((now - lastWsAt) / 1000)}s` : "-";
@@ -366,8 +403,9 @@ export async function runDashboard(opts: DashboardOptions) {
     renderOrderbook();
     renderHistory();
     renderAlerts();
+    const skipLabel = autoSkipNoOrderbook ? colorText("ON", THEME.success) : colorText("off", THEME.muted);
     footer.setContent(
-      `${colorText("keys:", THEME.muted)} q=quit  n/p=next/prev  o=toggle outcome  r=refresh  f=/ filter  s=save `
+      `${colorText("keys:", THEME.muted)} q=quit n/p=nav o=outcome r=refresh f=filter s=save a=skip[${skipLabel}] t=alert e=export`
     );
 
     screen.render();
@@ -375,15 +413,18 @@ export async function runDashboard(opts: DashboardOptions) {
 
   function renderRadar() {
     const view = filterRadar(radar, radarFilter).slice(0, opts.limit);
-    const rows = [[cell("#"), cell("Heat"), cell("Event"), cell("Outcome")]];
+    const rows = [[cell("#"), cell(" "), cell("Heat"), cell("Event"), cell("Outcome")]];
     view.forEach((market, idx) => {
       const isFocus = market.conditionId === focusMarket?.conditionId;
+      const hasNoOrderbook = market.clobTokenIds.some((tid) => noOrderbookTokens.has(tid));
       const prefix = isFocus ? colorText(">", THEME.accent) : " ";
+      const noBookIndicator = hasNoOrderbook ? colorText("○", THEME.warning) : " ";
       rows.push([
         `${prefix}${String(idx + 1).padStart(2, "0")}`,
+        noBookIndicator,
         heatSymbol(market),
-        textCell(truncate(market.question || market.eventTitle || "(no title)", 30)),
-        textCell(truncate(market.outcomes[0] || "-", 10))
+        textCell(truncate(market.question || market.eventTitle || "(no title)", 38)),
+        textCell(truncate(market.outcomes[0] || "-", 12))
       ]);
     });
     radarTable.setContent(renderTable(rows));
@@ -420,6 +461,39 @@ export async function runDashboard(opts: DashboardOptions) {
     marketBox.setContent(lines.join("\n"));
   }
 
+  function computeHealthScore(): { score: number; label: string; color: string } {
+    if (noOrderbook) return { score: 0, label: "N/A", color: THEME.muted };
+
+    let score = 0;
+    const spread = bestBid !== undefined && bestAsk !== undefined ? bestAsk - bestBid : undefined;
+    const bidDepth = orderbook?.bids?.reduce((sum, l) => sum + l.size, 0) ?? 0;
+    const askDepth = orderbook?.asks?.reduce((sum, l) => sum + l.size, 0) ?? 0;
+    const totalDepth = bidDepth + askDepth;
+    const volume = focusMarket?.volume24hr ?? 0;
+
+    if (spread !== undefined) {
+      if (spread <= 0.01) score += 35;
+      else if (spread <= 0.03) score += 25;
+      else if (spread <= 0.05) score += 15;
+      else if (spread <= 0.10) score += 5;
+    }
+
+    if (totalDepth > 10000) score += 35;
+    else if (totalDepth > 5000) score += 25;
+    else if (totalDepth > 1000) score += 15;
+    else if (totalDepth > 100) score += 5;
+
+    if (volume > 100000) score += 30;
+    else if (volume > 10000) score += 20;
+    else if (volume > 1000) score += 10;
+    else if (volume > 100) score += 5;
+
+    const label = score >= 80 ? "A" : score >= 60 ? "B" : score >= 40 ? "C" : score >= 20 ? "D" : "F";
+    const color = score >= 80 ? THEME.success : score >= 60 ? THEME.accent : score >= 40 ? THEME.warning : THEME.danger;
+
+    return { score, label, color };
+  }
+
   function renderPulse() {
     const spread = bestBid !== undefined && bestAsk !== undefined ? bestAsk - bestBid : undefined;
     const bias = midpoint ?? lastTrade;
@@ -431,6 +505,7 @@ export async function runDashboard(opts: DashboardOptions) {
       spread === undefined ? THEME.muted : spread < 0.01 ? THEME.success : spread < 0.05 ? THEME.warning : THEME.danger;
     const bidColor = bestBid === undefined ? THEME.muted : THEME.success;
     const askColor = bestAsk === undefined ? THEME.muted : THEME.danger;
+    const health = computeHealthScore();
     const lines = [
       `${colorText("best bid :", THEME.muted)} ${colorText(formatPrice(bestBid), bidColor)}`,
       `${colorText("best ask :", THEME.muted)} ${colorText(formatPrice(bestAsk), askColor)}`,
@@ -438,7 +513,8 @@ export async function runDashboard(opts: DashboardOptions) {
       `${colorText("midpoint :", THEME.muted)} ${colorText(formatPrice(midpoint), THEME.accent)}`,
       `${colorText("last     :", THEME.muted)} ${colorText(formatPrice(lastTrade), THEME.accent)}`,
       `${colorText("bias     :", THEME.muted)} ${colorText(formatPct(bias), THEME.accent)}`,
-      `${colorText("delta    :", THEME.muted)} ${colorText(formatPrice(delta), deltaColor)}`
+      `${colorText("delta    :", THEME.muted)} ${colorText(formatPrice(delta), deltaColor)}`,
+      `${colorText("health   :", THEME.muted)} ${colorText(`${health.label} (${health.score})`, health.color)}`
     ];
     statsBox.setContent(lines.join("\n"));
   }
@@ -481,11 +557,17 @@ export async function runDashboard(opts: DashboardOptions) {
     const wsStale = wsAge !== null && wsAge * 1000 > CONFIG.wsStaleMs;
     const restStale = restAge !== null && restAge * 1000 > CONFIG.restStaleMs;
 
+    const alertThresholds = [];
+    if (priceAlertHigh !== null) alertThresholds.push(`>=${priceAlertHigh}`);
+    if (priceAlertLow !== null) alertThresholds.push(`<=${priceAlertLow}`);
+    const alertsLabel = alertThresholds.length > 0 ? alertThresholds.join(" ") : "-";
+
     const lines = [
       `${colorText("ws stale     :", THEME.muted)} ${colorText(wsStale ? "YES" : "no", wsStale ? THEME.danger : THEME.success)} ${colorText(`(${wsAge ?? "-"}s)`, THEME.muted)}`,
       `${colorText("rest stale   :", THEME.muted)} ${colorText(restStale ? "YES" : "no", restStale ? THEME.danger : THEME.success)} ${colorText(`(${restAge ?? "-"}s)`, THEME.muted)}`,
       `${colorText("history age  :", THEME.muted)} ${colorText(`${historyAge ?? "-"}s`, THEME.muted)}`,
       `${colorText("holders age  :", THEME.muted)} ${colorText(`${holdersAge ?? "-"}s`, THEME.muted)}`,
+      `${colorText("price alerts :", THEME.muted)} ${colorText(alertsLabel, alertThresholds.length > 0 ? THEME.accent : THEME.muted)}`,
       `${colorText("last alert   :", THEME.muted)} ${colorText(escapeTags(lastAlert || "-"), lastAlert ? THEME.warning : THEME.muted)}`,
       `${colorText("msg/s        :", THEME.muted)} ${colorText(String(msgRate), msgRate > 0 ? THEME.success : THEME.muted)}`
     ];
@@ -554,6 +636,18 @@ export async function runDashboard(opts: DashboardOptions) {
   }
 
   function checkAlert() {
+    const price = midpoint ?? lastTrade;
+    if (price !== undefined) {
+      if (priceAlertHigh !== null && price >= priceAlertHigh) {
+        lastAlert = `⚠ PRICE HIGH: ${price.toFixed(4)} >= ${priceAlertHigh.toFixed(4)}`;
+        priceAlertHigh = null;
+      }
+      if (priceAlertLow !== null && price <= priceAlertLow) {
+        lastAlert = `⚠ PRICE LOW: ${price.toFixed(4)} <= ${priceAlertLow.toFixed(4)}`;
+        priceAlertLow = null;
+      }
+    }
+
     if (lastTrade === undefined || lastTradePrev === undefined) return;
     const delta = lastTrade - lastTradePrev;
     if (Math.abs(delta) >= CONFIG.alertDelta) {
@@ -591,6 +685,35 @@ export async function runDashboard(opts: DashboardOptions) {
     screen.render();
   }
 
+  async function exportHistoryCsv() {
+    if (!focusMarket) return;
+    if (historySeries.length === 0) {
+      lastAlert = "No history data to export";
+      render();
+      return;
+    }
+
+    const tokenId = focusMarket.clobTokenIds[outcomeIndex] ?? focusMarket.clobTokenIds[0];
+    const outcome = focusMarket.outcomes[outcomeIndex] || `OUTCOME_${outcomeIndex + 1}`;
+    const now = new Date();
+    const interval = CONFIG.historyInterval === "1d" ? 24 * 60 : CONFIG.historyInterval === "1h" ? 60 : 1;
+    const fidelity = CONFIG.historyFidelity;
+
+    const csvLines = ["timestamp,price,market,outcome,token_id"];
+    historySeries.forEach((price, idx) => {
+      const minutesAgo = (historySeries.length - 1 - idx) * fidelity;
+      const timestamp = new Date(now.getTime() - minutesAgo * 60 * 1000).toISOString();
+      const marketName = (focusMarket?.question || focusMarket?.eventTitle || "market").replace(/,/g, ";");
+      csvLines.push(`${timestamp},${price.toFixed(6)},${marketName},${outcome},${tokenId}`);
+    });
+
+    await mkdir("exports", { recursive: true });
+    const file = `exports/pm-history-${focusMarket.conditionId || "market"}-${Date.now()}.csv`;
+    await writeFile(file, csvLines.join("\n"));
+    lastAlert = `Exported ${historySeries.length} price points to ${file}`;
+    render();
+  }
+
   function bindKeys() {
     screen.key(["q", "C-c"], () => {
       wsConnection?.close();
@@ -601,7 +724,7 @@ export async function runDashboard(opts: DashboardOptions) {
       const view = filterRadar(radar, radarFilter);
       if (view.length === 0) return;
       const currentIdx = view.findIndex((item) => item.conditionId === focusMarket?.conditionId);
-      const nextIdx = (currentIdx + 1) % view.length;
+      const nextIdx = findNextMarket(view, currentIdx, 1);
       focusMarket = view[nextIdx];
       outcomeIndex = 0;
       restartWs();
@@ -615,13 +738,19 @@ export async function runDashboard(opts: DashboardOptions) {
       const view = filterRadar(radar, radarFilter);
       if (view.length === 0) return;
       const currentIdx = view.findIndex((item) => item.conditionId === focusMarket?.conditionId);
-      const prevIdx = (currentIdx - 1 + view.length) % view.length;
+      const prevIdx = findNextMarket(view, currentIdx, -1);
       focusMarket = view[prevIdx];
       outcomeIndex = 0;
       restartWs();
       refreshFocus();
       refreshHistory();
       refreshHolders();
+      render();
+    });
+
+    screen.key(["a"], () => {
+      autoSkipNoOrderbook = !autoSkipNoOrderbook;
+      lastAlert = autoSkipNoOrderbook ? "auto-skip enabled (skip markets without orderbooks)" : "auto-skip disabled";
       render();
     });
 
@@ -656,6 +785,48 @@ export async function runDashboard(opts: DashboardOptions) {
         logError("Snapshot", err);
         footer.setContent(`Snapshot error: ${(err as Error).message}`);
         screen.render();
+      });
+    });
+
+    screen.key(["t"], () => {
+      const currentAlerts = [];
+      if (priceAlertHigh !== null) currentAlerts.push(`>${priceAlertHigh}`);
+      if (priceAlertLow !== null) currentAlerts.push(`<${priceAlertLow}`);
+      const currentValue = currentAlerts.join(" ") || "";
+      alertPrompt.input("Alert threshold:", currentValue, (err, value) => {
+        if (err) return;
+        const input = (value || "").trim().toLowerCase();
+        if (input === "clear" || input === "") {
+          priceAlertHigh = null;
+          priceAlertLow = null;
+          lastAlert = "Price alerts cleared";
+        } else {
+          const highMatch = input.match(/>(\d*\.?\d+)/);
+          const lowMatch = input.match(/<(\d*\.?\d+)/);
+          if (highMatch) {
+            priceAlertHigh = parseFloat(highMatch[1]);
+            lastAlert = `Alert set: price >= ${priceAlertHigh}`;
+          }
+          if (lowMatch) {
+            priceAlertLow = parseFloat(lowMatch[1]);
+            lastAlert = `Alert set: price <= ${priceAlertLow}`;
+          }
+          if (highMatch && lowMatch) {
+            lastAlert = `Alerts set: price >= ${priceAlertHigh} OR price <= ${priceAlertLow}`;
+          }
+          if (!highMatch && !lowMatch) {
+            lastAlert = "Invalid format. Use >0.6 or <0.4 or both";
+          }
+        }
+        render();
+      });
+    });
+
+    screen.key(["e"], () => {
+      exportHistoryCsv().catch((err) => {
+        logError("Export", err);
+        lastAlert = `Export error: ${(err as Error).message}`;
+        render();
       });
     });
   }
@@ -776,11 +947,6 @@ function computeHeat(market: MarketInfo) {
   return Math.min(1, normVolume * 0.5 + normChange * 0.3 + normSpread * 0.2);
 }
 
-function midpointFrom(bestBid?: number, bestAsk?: number) {
-  if (bestBid === undefined || bestAsk === undefined) return undefined;
-  return (bestBid + bestAsk) / 2;
-}
-
 function updateLevels(
   levels: OrderbookLevel[],
   price: number,
@@ -814,7 +980,7 @@ function textCell(value: string) {
   return escapeTags(value ?? "-");
 }
 
-function renderTable(rows: string[][]) {
+function renderTable(rows: string[][], padding = 2) {
   if (rows.length === 0) return "";
   const colWidths: number[] = [];
   rows.forEach((row) => {
@@ -827,7 +993,7 @@ function renderTable(rows: string[][]) {
   return rows
     .map((row) =>
       row
-        .map((cellValue, idx) => padCell(String(cellValue ?? ""), (colWidths[idx] || 0) + 1))
+        .map((cellValue, idx) => padCell(String(cellValue ?? ""), (colWidths[idx] || 0) + padding))
         .join("")
         .trimEnd()
     )
@@ -864,4 +1030,17 @@ function statusColor(status: string, stale: boolean) {
   if (status === "closed") return THEME.danger;
   if (status === "error") return THEME.danger;
   return THEME.muted;
+}
+
+function truncateAlert(message: string, maxLen = 100): string {
+  const tokenIdMatch = message.match(/token_id=([a-zA-Z0-9]{20,})/);
+  if (tokenIdMatch) {
+    const fullId = tokenIdMatch[1];
+    const shortId = `${fullId.slice(0, 8)}...${fullId.slice(-6)}`;
+    message = message.replace(fullId, shortId);
+  }
+  if (message.length > maxLen) {
+    return `${message.slice(0, maxLen - 3)}...`;
+  }
+  return message;
 }
