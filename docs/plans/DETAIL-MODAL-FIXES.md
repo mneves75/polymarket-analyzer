@@ -91,6 +91,7 @@ Fix the detail modal to properly update when navigating between markets (n/p key
 - [x] Update tsconfig.json with `noFallthroughCasesInSwitch`, `forceConsistentCasingInFileNames`, `useUnknownInCatchVariables`
 - [x] Add 20 tests for utils.ts including asciiChart function
 - [x] Fix stale chart data on navigation - clear historySeries when market/outcome changes
+- [x] Improve chart edge cases: show message for 1-2 points, flat line for constant values
 
 ### High Priority (Future)
 - [ ] Extract tui-keys.ts (~150 lines) for key binding setup

@@ -47,6 +47,7 @@
 - Add visual multi-line ASCII price chart with Unicode block characters in detail modal.
 
 ### Improvements
+- Improve chart edge case handling: show clear messages for insufficient data (1-2 points) and flat line for stable prices.
 - Clear stale chart data when navigating markets (n/p/filter) or swapping outcomes (o).
 - Detail screen now updates dynamically when navigating markets (n/p) or swapping outcomes (o).
 - Detail screen updates in real-time as async data loads (orderbook, history).
