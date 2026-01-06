@@ -13,24 +13,21 @@ A **Polymarket** é uma plataforma descentralizada de mercados de previsão base
 
 **APIs da Polymarket:**
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    POLYMARKET API ECOSYSTEM                     │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
-│  │ Gamma API    │  │ CLOB API     │  │ Data API             │  │
-│  │              │  │              │  │                      │  │
-│  │ - Descoberta │  │ - Preços     │  │ - Detentores         │  │
-│  │ - Eventos    │  │ - Order book │  │ - Trades             │  │
-│  │ - Mercados   │  │ - Histórico  │  │ - Posições            │  │
-│  │              │  │ - WebSocket  │  │                      │  │
-│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
-│                                                                  │
-│  https://gamma-api.polymarket.com                               │
-│  https://clob.polymarket.com                                    │
-│  https://data-api.polymarket.com                                │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph Polymarket["POLYMARKET API ECOSYSTEM"]
+        Gamma["Gamma API<br/>- Descoberta<br/>- Eventos<br/>- Mercados"]
+        CLOB["CLOB API<br/>- Preços<br/>- Order book<br/>- Histórico<br/>- WebSocket"]
+        Data["Data API<br/>- Detentores<br/>- Trades<br/>- Posições"]
+    end
+
+    GammaUrl["https://gamma-api.polymarket.com"]
+    CLOBUrl["https://clob.polymarket.com"]
+    DataUrl["https://data-api.polymarket.com"]
+
+    Gamma --> GammaUrl
+    CLOB --> CLOBUrl
+    Data --> DataUrl
 ```
 
 ### 1.2 Visão Geral das APIs
@@ -54,18 +51,36 @@ A **Gamma API** é a API de **descoberta** da Polymarket. Ela serve como um "cat
 
 Imagine a Polymarket como um shopping gigante:
 
-```
-GAMMA API = Catálogo do Shopping
-├─ Piso 1: Loja de Eleições
-│  ├─ Eleições EUA 2024
-│  ├─ Eleições Brasil 2026
-│  └─ Eleições França 2027
-├─ Piso 2: Loja de Cripto
-│  ├─ Bitcoin > $100k?
-│  └─ Ethereum > $5k?
-└─ Piso 3: Loja de Esportes
-   ├─ Brasil Copa do Mundo?
-   └─ Messi vai jogar?
+```mermaid
+graph TB
+    Gamma["GAMMA API = Catálogo do Shopping"]
+
+    Piso1["Piso 1: Loja de Eleições"]
+    E1["Eleições EUA 2024"]
+    E2["Eleições Brasil 2026"]
+    E3["Eleições França 2027"]
+
+    Piso2["Piso 2: Loja de Cripto"]
+    C1["Bitcoin > $100k?"]
+    C2["Ethereum > $5k?"]
+
+    Piso3["Piso 3: Loja de Esportes"]
+    S1["Brasil Copa do Mundo?"]
+    S2["Messi vai jogar?"]
+
+    Gamma --> Piso1
+    Gamma --> Piso2
+    Gamma --> Piso3
+
+    Piso1 --> E1
+    Piso1 --> E2
+    Piso1 --> E3
+
+    Piso2 --> C1
+    Piso2 --> C2
+
+    Piso3 --> S1
+    Piso3 --> S2
 ```
 
 ### 2.2 Estrutura de Dados Gamma
@@ -421,16 +436,12 @@ function parseMaybeJsonArray(
 
 É onde os **pedidos de compra e venda** são registrados.
 
-```
-CLOB ORDER BOOK (Exemplo)
-────────────────────────────────────────────────────
-BIDS (Compras)              ASKS (Vendas)
-────────────────────────────────────────────────────
-0.65¢ × 1000 tokens    0.67¢ × 500 tokens
-0.64¢ × 2000 tokens    0.68¢ × 750 tokens
-0.63¢ × 1500 tokens    0.69¢ × 1000 tokens
-0.62¢ × 3000 tokens    0.70¢ × 2000 tokens
-0.61¢ × 500 tokens     0.71¢ × 1500 tokens
+```mermaid
+graph LR
+    subgraph CLOB["CLOB ORDER BOOK Exemplo"]
+        BIDS["BIDS Compras<br/>0.65¢ × 1000 tokens<br/>0.64¢ × 2000 tokens<br/>0.63¢ × 1500 tokens<br/>0.62¢ × 3000 tokens<br/>0.61¢ × 500 tokens"]
+        ASKS["ASKS Vendas<br/>0.67¢ × 500 tokens<br/>0.68¢ × 750 tokens<br/>0.69¢ × 1000 tokens<br/>0.70¢ × 2000 tokens<br/>0.71¢ × 1500 tokens"]
+    end
 ```
 
 ### 3.2 Endpoints CLOB REST
@@ -522,20 +533,26 @@ export async function getPrices(tokenId: string) {
 
 **Por que Promise.all?**
 
-```
-SEM PARALELISMO:
-────────────────────────────────────────────────────
-buy = await fetch(...)  // 100ms
-sell = await fetch(...) // 100ms
-Total: 200ms
+```mermaid
+graph TB
+    subgraph Sem["SEM PARALELISMO"]
+        S1["buy = await fetch - 100ms"]
+        S2["sell = await fetch - 100ms"]
+        STotal["Total: 200ms"]
+        S1 --> S2
+        S2 --> STotal
+    end
 
-COM PARALELISMO (Promise.all):
-────────────────────────────────────────────────────
-[buy, sell] = await Promise.all([
-  fetch(...),  // 100ms (executam em paralelo)
-  fetch(...)   // 100ms
-])
-Total: 100ms (50% mais rápido!)
+    subgraph Com["COM PARALELISMO Promise.all"]
+        C1["buy, sell = await Promise.all"]
+        C2["fetch - 100ms<br/>executam em paralelo"]
+        C3["fetch - 100ms<br/>executam em paralelo"]
+        CTotal["Total: 100ms<br/>50% mais rápido!"]
+        C1 --> C2
+        C1 --> C3
+        C2 --> CTotal
+        C3 --> CTotal
+    end
 ```
 
 #### GET /midpoint
@@ -592,13 +609,17 @@ export async function getPriceHistory(tokenId: string) {
 
 **Por que fallback?**
 
-```
-APIs mudam endpoints:
-────────────────────────────────────────────────────
-2023: /prices-history (novo)
-2022: /price_history (antigo, mas ainda funciona)
+```mermaid
+graph LR
+    A["APIs mudam endpoints"]
+    B["2023: /prices-history<br/>novo"]
+    C["2022: /price_history<br/>antigo mas ainda funciona"]
+    D["Se um falhar<br/>tentamos o outro!"]
 
-Se um falhar, tentamos o outro!
+    A --> B
+    A --> C
+    B --> D
+    C --> D
 ```
 
 **Extrair histórico:**
@@ -983,11 +1004,439 @@ async function agregarResultados(
 
 ---
 
-## 10. Para Saber Mais
+## ✅ Check Your Understanding
 
-- **Documentação Oficial Polymarket**: https://docs.polymarket.com
-- **REST API Design**: RESTful Web APIs (Leonard Richardson)
-- **HTTP Handbook**: https://developer.mozilla.org/en-US/docs/Web/HTTP
+### Pergunta 1: APIs Polymarket
+
+**Qual API usar para cada finalidade?**
+
+Match a coluna da esquerda com a direita:
+
+| Finalidade | API | URL Base |
+|-----------|-----|----------|
+| Descobrir mercados | [?] | [?] |
+| Preços em tempo real | [?] | [?] |
+| Order book completo | [?] | [?] |
+| Histórico de preços | [?] | [?] |
+| Maiores detentores | [?] | [?] |
+
+<details>
+<summary>Resposta</summary>
+
+| Finalidade | API | URL Base |
+|-----------|-----|----------|
+| Descobrir mercados | Gamma API | gamma-api.polymarket.com |
+| Preços em tempo real | CLOB WebSocket | ws-subscriptions-clob.polymarket.com |
+| Order book completo | CLOB REST | clob.polymarket.com |
+| Histórico de preços | CLOB REST | clob.polymarket.com |
+| Maiores detentores | Data API | data-api.polymarket.com |
+</details>
+
+---
+
+### Pergunta 2: Normalização
+
+**Por que precisamos normalizar dados da API?**
+
+<details>
+<summary>Resposta</summary>
+
+**Porque:**
+1. **Formatos inconsistentes:** A API retorna dados em formatos diferentes
+   - Às vezes: `{ conditionId: "0x123" }`
+   - Às vezes: `{ condition_id: "0x123" }`
+   - Às vezes: `{ conditionID: "0x123" }`
+
+2. **Arrays vs Strings:**
+   - Às vezes: `outcomes: ["Yes", "No"]`
+   - Às vezes: `outcomes: "[\"Yes\", \"No\"]"` (string JSON!)
+
+3. **Tipos incertos:**
+   - APIs retornam números como strings: `"0.65"` em vez de `0.65`
+   - Precisamos converter para number antes de usar
+
+**Sem normalização:**
+```typescript
+// ❌ Código quebraria se formato mudar
+const id = market.conditionId;  // Pode ser undefined!
+const price = market.price;    // Pode ser string "0.65"!
+```
+
+**Com normalização:**
+```typescript
+// ✅ Código robusto
+function normalize(market: unknown) {
+  const id = market.conditionId ?? market.condition_id ?? market.conditionID;
+  const price = typeof market.price === "string" ? parseFloat(market.price) : market.price;
+  return { id, price };
+}
+```
+</details>
+
+---
+
+### Pergunta 3: Rate Limiting
+
+**O que acontece se você fizer 100 requisições em 1 segundo para `/book` do CLOB?**
+
+<details>
+<summary>Resposta</summary>
+
+**Limite:** 1500 requisições por 10 segundos para `/book`
+
+**100 req em 1 segundo = ~1000 req em 10 segundos**
+
+Resultado: ✅ **Sucesso!** (dentro do limite)
+
+**Mas se fizer 2000 requisições em 10 segundos?**
+
+Resultado: ❌ **Bloqueio!** (HTTP 429 - Too Many Requests)
+
+**Solução:**
+```typescript
+// ✅ Com rate limiting
+const limiter = new TokenBucket(1500, 10000); // 1500 tokens por 10s
+
+for (let i = 0; i < 2000; i++) {
+  await limiter.consume();  // Aguarda se necessário
+  await fetch("/book");
+}
+```
+
+**Tempo total:**
+- 1500 primeiras: imediato
+- Próximas 500: aguarda até reset (até 10 segundos)
+- Total: ~10-20 segundos (vs bloqueio)
+</details>
+
+---
+
+### Pergunta 4: Paralelismo
+
+**Qual versão é mais rápida?**
+
+**Versão A (Sequencial):**
+```typescript
+const orderbook = await getOrderbook(tokenId);   // 100ms
+const prices = await getPrices(tokenId);          // 100ms
+const history = await getPriceHistory(tokenId);   // 100ms
+// Total: 300ms
+```
+
+**Versão B (Paralela):**
+```typescript
+const [orderbook, prices, history] = await Promise.all([
+  getOrderbook(tokenId),     // 100ms (em paralelo)
+  getPrices(tokenId),        // 100ms (em paralelo)
+  getPriceHistory(tokenId)  // 100ms (em paralelo)
+]);
+// Total: 100ms
+```
+
+<details>
+<summary>Resposta</summary>
+
+**Versão B (Paralela) é 3x mais rápida!**
+
+**Por que?**
+Promise.all executa as 3 requisições simultaneamente, em vez de esperar uma terminar antes de começar a próxima.
+
+**Mas cuidado:** Paralelismo só funciona quando as operações são **independentes**.
+</details>
+
+---
+
+## ⚠️ Common Pitfalls
+
+### Pitfall: Não Tratar Respostas Inconsistentes
+
+**❌ RUIM:**
+```typescript
+const res = await fetch(url);
+const markets = res.markets;  // ❌ Pode ser res.data, res.data.markets, etc!
+```
+
+**Problema:**
+API Polymarket tem respostas inconsistentes.
+
+**✅ BOM:**
+```typescript
+const res = await fetch(url);
+const data = await res.json();
+
+// Tenta múltiplos formatos
+const markets = data.markets ?? data.data ?? data;
+
+// Ou usa função do projeto
+const markets = extractMarkets(data);  // src/api.ts:50
+```
+
+---
+
+### Pitfall: Ignorar Timeout
+
+**❌ RUIM:**
+```typescript
+await fetch(url);  // Pode travar para sempre se API não responder
+```
+
+**Problema:**
+Sem timeout, sua aplicação trava se a API demorar.
+
+**✅ BOM:**
+```typescript
+const controller = new AbortController();
+const timeout = setTimeout(() => controller.abort(), 10000); // 10s
+
+try {
+  const res = await fetch(url, { signal: controller.signal });
+  // ...
+} finally {
+  clearTimeout(timeout);
+}
+```
+
+---
+
+### Pitfall: Não Verificar Erros HTTP
+
+**❌ RUIM:**
+```typescript
+const res = await fetch(url);
+const data = await res.json();  // ❌ Pode ser 404, 500, etc!
+```
+
+**Problema:**
+`fetch` só lança erro em falha de rede. HTTP 404, 500 etc. são "sucessos".
+
+**✅ BOM:**
+```typescript
+const res = await fetch(url);
+
+if (!res.ok) {
+  throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+}
+
+const data = await res.json();
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### Problema: "HTTP 429: Too Many Requests"
+
+**Sintoma:**
+```
+Error: HTTP 429 Too Many Requests
+```
+
+**Causa:**
+Você excedeu o rate limit da API.
+
+**Solução Imediata:**
+```bash
+# Aguarde 10 segundos
+sleep 10
+
+# Tentativa de novo
+```
+
+**Solução Permanente:**
+```typescript
+// Use RateLimiter do projeto
+import { fetchJson } from "./src/http";
+
+// Isso já inclui rate limiting automático!
+const markets = await fetchJson(url);
+```
+
+**Prevenção:**
+Sempre use o `http.fetchJson()` do projeto em vez de `fetch()` direto.
+
+---
+
+### Problema: "Timeout após 10 segundos"
+
+**Sintoma:**
+Requisições demoram muito e dão timeout.
+
+**Causa:**
+API Polymarket está sobrecarregada ou sua internet está lenta.
+
+**Solução:**
+```typescript
+// Aumente timeout (config.ts:19)
+// restTimeoutMs: 10000  // 10 segundos
+restTimeoutMs: 20000      // 20 segundos
+```
+
+**Mas cuidado:** Timeout muito alto pode fazer aplicação travar.
+
+---
+
+## 🎯 Milestone Completado
+
+Após completar este capítulo, você deve ser capaz de:
+
+- [ ] Diferenciar as 3 APIs da Polymarket
+- [ ] Fazer requisições à Gamma API manualmente
+- [ ] Entender normalização de dados
+- [ ] Implementar rate limiting corretamente
+- [ ] Usar Promise.all() para paralelismo
+- [ ] Evitar timeouts e bloqueios
+- [ ] Fazer fallback de endpoints
+
+**Exercício Prático:**
+Teste as APIs manualmente:
+```bash
+# 1. Gamma API
+curl "https://gamma-api.polymarket.com/markets?limit=1"
+
+# 2. CLOB API (precisa de token ID primeiro)
+# 3. Data API (precisa de condition ID primeiro)
+```
+
+---
+
+## 🎓 Design Decisions
+
+### Decisão 1: Por que normalização agressiva de dados?
+
+**Alternativas Consideradas:**
+1. **Confiar no formato da API** - Assumir dados consistentes
+2. **Normalizar tudo** - Converter todos os formatos ✅ **ESCOLHIDO**
+
+**Trade-offs:**
+
+| Abordagem | Velocidade | Manutenibilidade | Robustez |
+|-----------|------------|-------------------|----------|
+| Confiar na API | ⭐⭐⭐ Rápido | ⭐ Muito baixa | ⭐ Frágil |
+| Normalizar tudo | ⭐⭐ Lento no início | ⭐⭐⭐⭐⭐ Muito alta | ⭐⭐⭐⭐⭐ Robusto |
+
+**Por que normalização agressiva foi escolhida:**
+- ✅ **APIs mudam**: Polymarket mudou formato 3+ vezes em 2023-2024
+- ✅ **Defesa em profundidade**: Múltiplos fallbacks para cada campo
+- ✅ **Tipo seguro**: Sempre retorna tipos TypeScript corretos
+- ✅ **Previsível**: Mesma função para dados de cache, WS, etc.
+
+**Exemplo de evolução da API:**
+```json
+// 2023: camelCase
+{ "conditionId": "0x123", "clobTokenIds": [...] }
+
+// 2024: snake_case
+{ "condition_id": "0x123", "clob_token_ids": [...] }
+
+// Nossa normalização lida com AMBOS:
+const id = market.conditionId ?? market.condition_id ?? market.conditionID;
+```
+
+**Referência no código:** `src/api.ts:82-124` - `normalizeMarket()`
+
+---
+
+### Decisão 2: Por que Promise.all para requisições paralelas?
+
+**Alternativas Consideradas:**
+1. **Sequencial (await)** - Uma requisição por vez
+2. **Paralelo (Promise.all)** - Todas juntas ✅ **ESCOLHIDO**
+
+**Por que Promise.all foi escolhido:**
+- ✅ **3-5x mais rápido**: Requisições independentes executam simultaneamente
+- ✅ **Respeita rate limits**: Token bucket gerencia concorrência
+- ✅ **Fail-fast**: Um erro para tudo imediatamente
+
+**Exemplo de ganho de performance:**
+```typescript
+// ❌ SEQUENCIAL (3 segundos)
+const orderbook = await getOrderbook(id);    // 1000ms
+const prices = await getPrices(id);           // 1000ms
+const history = await getPriceHistory(id);    // 1000ms
+// Total: 3000ms
+
+// ✅ PARALELO (1 segundo)
+const [orderbook, prices, history] = await Promise.all([
+  getOrderbook(id),      // 1000ms (em paralelo)
+  getPrices(id),         // 1000ms (em paralelo)
+  getPriceHistory(id)    // 1000ms (em paralelo)
+]);
+// Total: 1000ms (3x mais rápido!)
+```
+
+**Quando NÃO usar:**
+- ❌ Requisições dependentes (B precisa de A)
+- ❌ Muitas requisições (vai estourar rate limit)
+
+**Referência no código:** `src/api.ts:195-217` - `getPrices()` com Promise.all
+
+---
+
+### Decisão 3: Por que fallback de endpoints?
+
+**Alternativas Consideradas:**
+1. **Endpoint único** - Confia em um endpoint apenas
+2. **Fallback automático** - Tenta alternativas ✅ **ESCOLHIDO**
+
+**Por que fallback foi escolhido:**
+- ✅ **Resiliência**: Se endpoint muda, app continua funcionando
+- ✅ **Zero downtime**: Sem necessidade de deploy emergencial
+- ✅ **Backward compatibility**: Suporta versões antigas da API
+
+**Exemplo real:**
+```typescript
+// src/api.ts:210-224
+async function getPriceHistory(tokenId) {
+  const url = `${CONFIG.clobRestBase}/prices-history`;
+
+  try {
+    return await fetchJson(url);  // Tenta endpoint novo
+  } catch {
+    // Se falhar, tenta endpoint antigo
+    const fallback = `${CONFIG.clobRestBase}/price_history`;
+    return fetchJson(fallback);
+  }
+}
+```
+
+**Referência no código:** `src/api.ts:210-224` - `getPriceHistory()` com fallback
+
+---
+
+## 📚 Recursos Externos
+
+### Aprender Mais Sobre:
+
+**REST APIs:**
+- [REST API Tutorial](https://restfulapi.net/) - Tutorial completo
+- [HTTP Methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods) - MDN
+- [Status Codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) - MDN
+
+**Rate Limiting:**
+- [Token Bucket](https://en.wikipedia.org/wiki/Token_bucket) - Wikipedia
+- [Rate Limiting Patterns](https://cloud.google.com/architecture/rate-limiting-strategies-techniques) - Google Cloud
+- [API Rate Limiting Best Practices](https://medium.com/@saisathishvik/exploring-rate-limiting-algorithms-and-implementation-strategies-2be2cd04d6f6) - Medium
+
+**Promise.all & Async Patterns:**
+- [Promise.all() MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all) - MDN
+- [JavaScript Async Patterns](https://javascript.info/async) - Info JavaScript
+- [Concurrency in JS](https://www.youtube.com/watch?v=PoaXtW2EAh4) - YouTube (20 min)
+
+**API Design:**
+- [Google API Design Guide](https://cloud.google.com/apis/design) - Google
+- [REST API Design Best Practices](https://restfulapi.net/) - RestfulAPI
+
+### Vídeos Recomendados:
+
+- [Understanding REST APIs](https://www.youtube.com/watch?v=ls_MQR_8lx8) - YouTube (15 min)
+- [Async/Await Tutorial](https://www.youtube.com/watch?v=V_Kr9OSfDeU) - YouTube (25 min)
+- [Rate Limiting Explained](https://www.youtube.com/watch?v=M9A7oQHs8QI) - YouTube (20 min)
+
+### Ferramentas Úteis:
+
+- [Postman](https://www.postman.com/) - Teste APIs visualmente
+- [curl](https://curl.se/) - CLI para requisições HTTP
+- [HTTPie](https://httpie.io/) - Alternativa user-friendly ao curl
 
 ---
 

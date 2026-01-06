@@ -5,19 +5,38 @@
 
 ---
 
+## 📊 Sistema de Níveis
+
+Os exercícios são classificados em 4 níveis de dificuldade:
+
+| Nível | Badge | Descrição | Tempo Estimado |
+|-------|-------|-----------|----------------|
+| 🟢 **Iniciante** | Fácil | Conceitos básicos, bem guiado | 15-30 min |
+| 🟡 **Intermediário** | Médio | Requer pensamento, múltiplos passos | 30-60 min |
+| 🟠 **Avançado** | Difícil | Problemas complexos, menos guiado | 1-2 horas |
+| 🔴 **Mestre** | Desafiador | Requer pesquisa, arquitetura própria | 2+ horas |
+
+---
+
 ## Introdução
 
 Este capítulo contém **exercícios práticos completos** que cobrem todos os conceitos aprendidos. Cada exercício inclui:
 
-1. **Descrição** do que deve ser implementado
-2. **Dicas** para guiar sua solução
-3. **Solução exemplo** (não olhe antes de tentar!)
+1. **Nível de dificuldade** (ver tabela acima)
+2. **Pré-requisitos** (conhecimentos necessários)
+3. **Descrição** do que deve ser implementado
+4. **Dicas** para guiar sua solução
+5. **Solução exemplo** (não olhe antes de tentar!)
 
 ---
 
-## Módulo 1: TypeScript Básico
+## 🟢 Módulo 1: TypeScript Básico (Iniciante)
 
 ### Exercício 1.1: Tipos e Interfaces
+
+**Nível:** 🟢 Iniciante
+**Pré-requisitos:** Capítulo 01
+**Tempo estimado:** 20 minutos
 
 Implemente tipos TypeScript para um sistema de pedidos:
 
@@ -765,6 +784,421 @@ export function formatMarketsAsJSON(markets: MarketInfo[]): string {
   return JSON.stringify(markets, null, 2);
 }
 ```
+
+</details>
+
+---
+
+## 🟠 Módulo 7: Exercícios Avançados
+
+### Exercício 7.1: Cliente WebSocket com Reconexão Inteligente
+
+**Nível:** 🟠 Avançado
+**Pré-requisitos:** Capítulos 03, 04
+**Tempo estimado:** 1-2 horas
+
+Implemente um cliente WebSocket com reconexão adaptativa baseada em taxa de sucesso:
+
+```typescript
+// TODO: Implemente AdaptiveWebSocketClient
+interface ReconnectStrategy {
+  getDelay(attempt: number): number;
+  onSuccess(): void;
+  onFailure(): void;
+}
+
+class AdaptiveReconnect implements ReconnectStrategy {
+  // Exponential backoff adaptado ao histórico de sucesso/falha
+  // - Se muitas falhas: aumenta o delay mais agressivamente
+  // - Se muitos sucessos: reduz o baseline delay
+  // - Sempre com jitter para evitar thundering herd
+
+  getDelay(attempt: number): number {
+    // Implemente
+  }
+
+  onSuccess(): void {
+    // Reduz baseline delay se tiver muitos sucessos consecutivos
+  }
+
+  onFailure(): void {
+    // Aumenta baseline delay se tiver muitas falhas consecutivas
+  }
+}
+
+class WebSocketClient {
+  private ws: WebSocket | null = null;
+  private reconnectAttempts = 0;
+
+  async connect(url: string, strategy: ReconnectStrategy): Promise<void> {
+    // 1. Conecta ao WebSocket
+    // 2. Em caso de falha, usa strategy.getDelay() para esperar
+    // 3. Tenta reconectar com backoff
+    // 4. Reporta sucesso/falha para a estratégia
+  }
+}
+
+// Teste
+const strategy = new AdaptiveReconnect();
+const client = new WebSocketClient();
+await client.connect("wss://ws.example.com", strategy);
+```
+
+**Dicas:**
+- Mantenha histórico de últimos N resultados (sucesso/falha)
+- Use média móvel para calcular taxa de sucesso
+- Ajuste base delay dinamicamente
+
+<details>
+<summary>Solução Parcial</summary>
+
+```typescript
+class AdaptiveReconnect implements ReconnectStrategy {
+  private baseDelay = 500;
+  private successCount = 0;
+  private failureCount = 0;
+  private history: boolean[] = [];
+
+  getDelay(attempt: number): number {
+    // Backoff exponencial
+    const backoff = Math.min(30000, 500 * Math.pow(2, attempt));
+
+    // Ajuste baseado em taxa de sucesso recente
+    const recentSuccessRate = this.getRecentSuccessRate();
+    const multiplier = recentSuccessRate > 0.8 ? 0.5 : recentSuccessRate < 0.3 ? 2 : 1;
+
+    // Jitter
+    return Math.floor((backoff * multiplier) + Math.random() * 200);
+  }
+
+  private getRecentSuccessRate(): number {
+    if (this.history.length === 0) return 0.5;
+    const recent = this.history.slice(-10);
+    return recent.filter(h => h).length / recent.length;
+  }
+
+  onSuccess(): void {
+    this.successCount++;
+    this.history.push(true);
+    if (this.history.length > 20) this.history.shift();
+  }
+
+  onFailure(): void {
+    this.failureCount++;
+    this.history.push(false);
+    if (this.history.length > 20) this.history.shift();
+  }
+}
+```
+
+</details>
+
+---
+
+### Exercício 7.2: Normalizador de Dados Resiliente
+
+**Nível:** 🟠 Avançado
+**Pré-requisitos:** Capítulo 03
+**Tempo estimado:** 1-2 horas
+
+Implemente um normalizador de dados que lida com múltiplos formatos de API evolutiva:
+
+```typescript
+// TODO: Implemente normalizador resiliente
+interface RawMarket {
+  [key: string]: unknown;
+}
+
+type MarketField = {
+  names: string[];  // Todos os nomes possíveis do campo
+  transform?: (value: unknown) => unknown;
+  required: boolean;
+  defaultValue?: unknown;
+}
+
+const MARKET_SCHEMA: Record<string, MarketField> = {
+  conditionId: {
+    names: ["conditionId", "condition_id", "conditionID", "condition-id"],
+    required: true
+  },
+  clobTokenIds: {
+    names: ["clobTokenIds", "clob_token_ids", "tokenIds", "tokens"],
+    transform: (value) => {
+      // Pode ser array, string JSON, ou aninhado
+      // Implemente extração resiliente
+    },
+    required: true,
+    defaultValue: []
+  },
+  volume24hr: {
+    names: ["volume24hr", "volume24h", "volume_24h", "volumeUsd"],
+    transform: (value) => typeof value === "string" ? parseFloat(value) : value,
+    required: false
+  },
+  // ... adicione outros campos
+};
+
+function normalizeMarket(raw: RawMarket): Record<string, unknown> | null {
+  // 1. Para cada campo em MARKET_SCHEMA
+  // 2. Tenta encontrar valor usando qualquer um dos nomes
+  // 3. Aplica transformação se existir
+  // 4. Valida campos required
+  // 5. Retorna objeto normalizado ou null se inválido
+}
+```
+
+**Dica:** Use função genérica que tenta múltiplas chaves no objeto.
+
+---
+
+### Exercício 7.3: Sistema de Cache com Invalidação
+
+**Nível:** 🟠 Avançado
+**Pré-requisitos:** Capítulos 02, 03
+**Tempo estimado:** 1-2 horas
+
+Implemente um sistema de cache com múltiplas estratégias de invalidação:
+
+```typescript
+// TODO: Implemente sistema de cache
+type CacheEntry<T> = {
+  data: T;
+  expiresAt: number;
+  tags: string[];
+  version: number;
+};
+
+class SmartCache<T> {
+  private cache = new Map<string, CacheEntry<T>>();
+
+  set(key: string, data: T, ttl: number, tags: string[]): void {
+    // Implemente com:
+    // - TTL (time to live)
+    // - Tags para invalidação em grupo
+    // - Versioning para stale-while-revalidate
+  }
+
+  get(key: string): T | null {
+    // Implemente:
+    // - Retorna null se expirado
+    // - Marca como stale se próximo de expirar (< 10% TTL)
+  }
+
+  invalidate(tags: string[]): void {
+    // Invalida todos os entries com qualquer das tags
+  }
+
+  getStaleEntries(): CacheEntry<T>[] {
+    // Retorna entries que estão stale mas ainda não expirados
+  }
+
+  async getOrFetch(
+    key: string,
+    fetcher: () => Promise<T>,
+    ttl: number,
+    tags: string[]
+  ): Promise<T> {
+    // Implemente padrão stale-while-revalidate:
+    // 1. Se cache fresco, retorna
+    // 2. Se stale, retorna stale MAS async refresca
+    // 3. Se miss, busca e cacheia
+  }
+}
+
+// Uso prático
+const cache = new SmartCache<MarketInfo[]>();
+
+// Busca (com stale-while-revalidate)
+const markets = await cache.getOrFetch(
+  "markets:active",
+  () => fetchMarkets(10),
+  60_000,  // 1 minuto TTL
+  ["markets", "gamma"]
+);
+
+// Invalidação por tag
+cache.invalidate(["gamma"]);  // Invalida tudo taggeado com "gamma"
+```
+
+---
+
+## 🔴 Módulo 8: Desafios Mestre
+
+### Exercício 8.1: Mini Polymarket Completo
+
+**Nível:** 🔴 Mestre
+**Pré-requisitos:** Todos os capítulos
+**Tempo estimado:** 3-5 horas
+
+Construa um **mini clone** do Polymarket Analyzer com:
+
+1. **CLI completa** com múltiplos comandos:
+   - `markets` - Lista mercados
+   - `market <id>` - Detalhes de um mercado
+   - `watch <id>` - Modo watch em tempo real (WebSocket)
+   - `export <id>` - Exporta snapshot JSON
+
+2. **Rate limiting** configurável por endpoint
+
+3. **WebSocket** com reconexão automática
+
+4. **TUI** (opcional) ou output formatado em tabela
+
+5. **Configuração** via arquivo de config
+
+6. **Logs** estruturados
+
+**Requisitos mínimos:**
+- [ ] Pelo menos 3 comandos funcionais
+- [ ] Tratamento de erros robusto
+- [ ] Testes para funções críticas
+- [ ] README com instruções de uso
+
+**Critérios de sucesso:**
+- Funciona sem crash por 10 minutos
+- Recupera de falhas de rede
+- Respeita rate limits da Polymarket
+
+**Entrega:**
+- Código em repositório Git
+- README documentando
+- 1 exemplo de uso de cada comando
+
+<details>
+<summary>Dicas de Implementação</summary>
+
+1. **Comece pequeno**: Implemente 1 comando por vez
+2. **Use o código do projeto** como referência (mas não copie!)
+3. **Teste localmente**: `bun run src/index.ts markets`
+4. **Iterate**: Adicione features gradualmente
+5. **Documente**: README é tão importante quanto código
+
+</details>
+
+---
+
+### Exercício 8.2: Sistema de Alertas em Tempo Real
+
+**Nível:** 🔴 Mestre
+**Pré-requisitos:** Capítulos 04, 05
+**Tempo estimado:** 2-4 horas
+
+Implemente um sistema de alertas que notifica o usuário sobre eventos significativos:
+
+```typescript
+// TODO: Implemente sistema de alertas
+interface AlertRule {
+  id: string;
+  name: string;
+  condition: (update: MarketUpdate) => boolean;
+  message: (update: MarketUpdate) => string;
+  cooldown: number;  // ms entre notificações
+  enabled: boolean;
+}
+
+class AlertSystem {
+  private rules: AlertRule[] = [];
+  private lastAlerted = new Map<string, number>();
+
+  addRule(rule: AlertRule): void {
+    this.rules.push(rule);
+  }
+
+  onUpdate(update: MarketUpdate): void {
+    // Para cada regra habilitada:
+    // 1. Testa condição
+    // 2. Verifica cooldown
+    // 3. Dispara alerta se aplicável
+    // 4. Registra timestamp do alerta
+  }
+}
+
+// Exemplos de regras:
+const priceChangeAlert: AlertRule = {
+  id: "price-spike",
+  name: "Mudança Brusca de Preço",
+  condition: (update) => {
+    // Alerta se preço mudou > 5% em 1 minuto
+  },
+  message: (update) => `🚨 ${update.question}: ${update.priceChange}%`,
+  cooldown: 60_000,  // 1 minuto entre alertas
+  enabled: true
+};
+
+const volumeAlert: AlertRule = {
+  id: "volume-surge",
+  name: "Aumento de Volume",
+  condition: (update) => {
+    // Alerta se volume 24h aumentou > 50%
+  },
+  message: (update) => `📊 ${update.question}: Volume ${update.volumeChange}%`,
+  cooldown: 300_000,  // 5 minutos
+  enabled: true
+};
+```
+
+**Features extras (mestre):**
+- [ ] Persistência de regras (JSON/YAML)
+- [ ] UI para criar/editar regras
+- [ ] Notificações multi-canal (console, email, Slack)
+- [ ] Histórico de alertas disparados
+- [ ] Estatísticas de falsos positivos
+
+---
+
+### Exercício 8.3: Otimizador de Performance
+
+**Nível:** 🔴 Mestre
+**Pré-requisitos:** Todos os capítulos + profiling
+**Tempo estimado:** 2-4 horas
+
+Analise e otimize o Polymarket Analyzer para:
+
+**Objetivos:**
+1. Tempo de inicialização < 2 segundos
+2. Uso de memória < 80MB
+3. Renderização TUI < 100ms
+4. Zero memory leaks
+
+**Ferramentas:**
+```bash
+# Profile de CPU
+bun --prof run src/index.js
+
+# Profile de memória
+node --heap-prof run src/index.js
+
+# Análise de bundle
+bun build src/index.ts --analyze
+```
+
+**Otimizações típicas:**
+- Deferir carregamento de módulos pesados
+- Pool de conexões HTTP reutilizáveis
+- Debounce/throttle de atualizações TUI
+- Lazy loading de dados não críticos
+- Cache de resultados de parsing
+
+**Entrega:**
+1. Relatório de antes/depois
+2. Benchmarks medindo melhorias
+3. PR com otimizações aplicadas
+
+<details>
+<summary>Dicas de Otimização</summary>
+
+**CPU Profile:**
+- Funções "quentes" em vermelho = candidatos a otimização
+- Procure por loops aninhados, JSON.parse de dados grandes
+
+**Memory Profile:**
+- Heap crescendo constantemente = memory leak
+- Procure por event listeners não removidos, caches infinitos
+
+**TUI Performance:**
+- Renderizar apenas o que mudou (não tela toda)
+- Usar `screen.render()` apenas quando necessário
+- Evitar alocações em hot path de renderização
 
 </details>
 
