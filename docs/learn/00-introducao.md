@@ -116,7 +116,7 @@ Existem duas formas principais de comunicação com a Polymarket:
 **Exemplo no código:** Veja `src/api.ts` nas linhas 22-36:
 
 ```typescript
-export async function fetchEvents(limit = 10, offset = 0) {
+export async function fetchEvents(limit = 50, offset = 0) {
   const url = withQuery(`${CONFIG.gammaBase}/events`, {
     limit,
     offset,
@@ -537,6 +537,7 @@ Agora que você tem uma visão geral, vamos mergulhar nos detalhes técnicos:
 - **Documentação Bun**: https://bun.sh/docs
 - **Documentação TypeScript**: https://www.typescriptlang.org/docs/
 - **Documentação Blessed**: https://github.com/chjj/blessed
+- **Polymarket (plataforma)**: https://polymarket.com
 - **Documentação Polymarket**: https://docs.polymarket.com
 
 ---

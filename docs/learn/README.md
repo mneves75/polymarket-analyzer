@@ -104,6 +104,7 @@ Docs: documentação
 - [Bun Docs](https://bun.sh/docs)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Blessed](https://github.com/chjj/blessed)
+- [Polymarket (plataforma)](https://polymarket.com)
 - [Polymarket API](https://docs.polymarket.com)
 
 ### Livros Recomendados
