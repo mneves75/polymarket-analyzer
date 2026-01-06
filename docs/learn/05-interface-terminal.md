@@ -781,7 +781,645 @@ function renderVerticalBars(
 
 ---
 
-## 9. Resumo do Capítulo
+## 9. ✅ Checkpoint
+
+**Teste seu conhecimento antes de continuar:**
+
+1. **Qual é a principal diferença entre CLI, TUI e GUI?**
+   - a) CLI usa mouse, TUI usa teclado, GUI usa ambos
+   - b) CLI é texto puro, TUI tem elementos visuais no terminal, GUI usa janelas gráficas
+   - c) Não há diferença, são sinônimos
+
+   <details>
+   <summary>Resposta</summary>
+   **b)** CLI = Command Line Interface (texto puro), TUI = Terminal User Interface (elementos visuais no terminal), GUI = Graphical User Interface (janelas gráficas).
+   </details>
+
+2. **Como você cria um componente básico com Blessed?**
+   ```typescript
+   const box = blessed.box({
+     top: "center",
+     left: "center",
+     width: "50%",
+     height: "50%",
+     content: "Hello, World!",
+     border: { type: "line" },
+     style: { fg: "white", bg: "blue" }
+   });
+   screen.append(box);
+   screen.render();
+   ```
+
+3. **O que é `smartCSR` e quando você deve usá-lo?**
+   - a) Uma técnica de otimização de renderização que deve ser sempre usada
+   - b) Um algoritmo que atualiza apenas partes da tela que mudaram
+   - c) Um tipo de layout responsivo
+
+   <details>
+   <summary>Resposta</summary>
+   **b)** `smartCSR` é "cursely-style screen refreshing" - uma otimização que recalcula apenas a parte da tela que mudou, melhorando performance. Deve ser usado em praticamente todas as aplicações TUI.
+   </details>
+
+4. **Como você captura entrada de teclado em Blessed?**
+   ```typescript
+   screen.key(["q", "C-c"], () => {
+     process.exit(0);
+   });
+   ```
+
+5. **Qual é a diferença entre tags como `{bold}` e `style.fg`?**
+   - `{bold}` é usado dentro de `setContent()` para formatar texto
+   - `style.fg` define a cor padrão do componente
+   - Tags são para formatação dinâmica, style é para configuração estática
+
+**Parabéns!** Se você respondeu corretamente, está pronto para o próximo capítulo. Se não, revise as seções anteriores.
+
+---
+
+## 10. ⚠️ Common Pitfalls
+
+### Pitfall 1: Esquecer `screen.render()`
+
+**Problem:** Você adiciona componentes ou atualiza conteúdo mas não vê nada na tela.
+
+```typescript
+// ❌ RUIM
+box.setContent("Novo conteúdo");
+// Nada acontece!
+
+// ✅ BOM
+box.setContent("Novo conteúdo");
+screen.render();  // Sempre chame render() após modificar
+```
+
+**Why it happens:** Blessed não atualiza a tela automaticamente a cada mudança para performance.
+
+### Pitfall 2: Memory Leaks com Timers
+
+**Problem:** `setInterval` nunca é limpo, causando memory leaks quando usuários navegam entre telas.
+
+```typescript
+// ❌ RUIM
+setInterval(() => {
+  updateData();
+}, 1000);
+// Timer nunca para, mesmo depois da tela ser destruída
+
+// ✅ BOM
+const timer = setInterval(() => {
+  updateData();
+}, 1000);
+
+screen.on("destroy", () => {
+  clearInterval(timer);  // Limpa timer ao destruir tela
+});
+```
+
+### Pitfall 3: Layout Fixo vs Responsivo
+
+**Problem:** Usar posições fixas quebram em terminais pequenos.
+
+```typescript
+// ❌ RUIM - quebra em terminais pequenos
+const box = blessed.box({
+  top: 10,
+  left: 20,
+  width: 80,
+  height: 20
+});
+
+// ✅ BOM - funciona em qualquer tamanho
+const box = blessed.box({
+  top: "10%",
+  left: "20%",
+  width: "60%",
+  height: "40%"
+});
+```
+
+### Pitfall 4: Muitas Renders
+
+**Problem:** Chamar `screen.render()` a cada mensagem WebSocket causa lag e alto uso de CPU.
+
+```typescript
+// ❌ RUIM - renderiza a cada mensagem
+ws.addEventListener("message", (msg) => {
+  updateData(msg);
+  screen.render();  // Muitas renders por segundo!
+});
+
+// ✅ BOM - rate limit de renders
+let renderScheduled = false;
+ws.addEventListener("message", (msg) => {
+  updateData(msg);
+  if (!renderScheduled) {
+    renderScheduled = true;
+    requestAnimationFrame(() => {
+      screen.render();
+      renderScheduled = false;
+    });
+  }
+});
+```
+
+### Pitfall 5: Ignorar Unicode/UTF-8
+
+**Problem:** Caracteres especiais e emojis aparecem quebrados.
+
+```typescript
+// ❌ RUIM - assume ASCII
+box.setContent("Preço: R$ 1.000,50");  // Pode quebrar
+
+// ✅ BOM - usa UTF-8 explicitamente
+process.stdout.write("\x1b]0;My App\x07");  // Configura terminal
+box.setContent("Preço: R$ 1.000,50");
+```
+
+### Pitfall 6: Sair sem Cleanup
+
+**Problem:** WebSocket fica aberto, timers continuam rodando, recursos não são liberados.
+
+```typescript
+// ❌ RUIM
+screen.key(["q"], () => {
+  process.exit(0);  // Saída brusca sem cleanup
+});
+
+// ✅ BOM
+let wsConnection = null;
+const timers = [];
+
+screen.key(["q"], () => {
+  // Cleanup
+  wsConnection?.close();
+  timers.forEach(t => clearInterval(t));
+
+  // Saída graciosa
+  process.exit(0);
+});
+```
+
+### Pitfall 7: Cores Não Portáveis
+
+**Problem:** Cores funcionam em um terminal mas não em outro.
+
+```typescript
+// ❌ RUIM - pode não funcionar em todos os terminais
+style: { fg: "#FF5733" }  // Cor RGB hexadecimal
+
+// ✅ BOM - usa cores básicas portáveis
+style: { fg: "red" }  // Uma das 16 cores básicas
+
+// ✅ MELHOR - usa palette com fallback
+style: {
+  fg: THEME.primaryColor || "blue"
+}
+```
+
+---
+
+## 11. 🔧 Troubleshooting
+
+### Issue: "Cannot find module 'blessed'"
+
+**Symptoms:**
+```
+Error: Cannot find module 'blessed'
+```
+
+**Diagnosis:** Dependência não instalada
+
+**Solution:**
+```bash
+# Limpe node_modules e reinstale
+rm -rf node_modules
+bun install
+
+# Verifique que blessed está instalado
+ls node_modules/blessed
+```
+
+**Prevention:** Sempre rode `bun install` após clonar o projeto
+
+---
+
+### Issue: TUI aparece distorcida
+
+**Symptoms:**
+- Linhas não se alinham
+- Texto sobreposto
+- Caixas com caracteres estrangeiros
+
+**Diagnosis:**
+1. Terminal muito pequeno
+2. Fonte não monoespaçada
+3. Codificação de caracteres incorreta
+
+**Solutions:**
+
+```bash
+# 1. Aumente o tamanho do terminal
+# Mínimo recomendado: 80 colunas x 24 linhas
+# Ideal: 120 colunas x 40 linhas
+
+# 2. Verifique fonte do terminal
+# Use fonte monoespaçada (Courier, Consolas, Monaco, etc.)
+# NÃO use fontes proporcionais (Arial, Helvetica, etc.)
+
+# 3. Configure encoding (Linux/Mac)
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# No Windows, configure terminal para UTF-8
+# Configurações > Hora e idioma > Administrativo > Alterar localidade do sistema
+# Marque "Beta: Usar Unicode UTF-8"
+```
+
+---
+
+### Issue: Teclas não funcionam
+
+**Symptoms:** Pressionar teclas não faz nada
+
+**Diagnosis:**
+1. Foco no componente errado
+2. Key binding incorreto
+3. Terminal não envia eventos
+
+**Solutions:**
+
+```typescript
+// 1. Verifique key binding correto
+// ❌ ERRADO
+screen.key("ctrl-c", () => {});  // Não funciona
+
+// ✅ CORRETO
+screen.key("C-c", () => {});  // "C-c" não "ctrl-c"
+
+// 2. Verifique foco
+box.focus();  // Se componente precisa de foco
+
+// 3. Teste se tecla está sendo detectada
+screen.key(["*"], (ch, key) => {
+  console.log("Tecla pressionada:", ch, key);
+});
+```
+
+---
+
+### Issue: Performance lenta
+
+**Symptoms:**
+- TUI trava ao atualizar
+- Alto uso de CPU
+- Lag entre entrada e resposta
+
+**Diagnosis:**
+1. Muitas renders por segundo
+2. Processamento pesado na thread principal
+3. Muitos componentes sendo renderizados
+
+**Solutions:**
+
+```typescript
+// 1. Implemente render throttling
+let lastRender = 0;
+const RENDER_THROTTLE = 100;  // Máximo 10 renders/segundo
+
+function smartRender() {
+  const now = Date.now();
+  if (now - lastRender < RENDER_THROTTLE) {
+    return;  // Skip render
+  }
+  lastRender = now;
+  screen.render();
+}
+
+// 2. Mova processamento para worker threads
+// Para operações pesadas (parse de JSON, cálculos)
+import { Worker } from "worker_threads";
+
+const worker = new Worker("./heavy-processor.ts");
+worker.postMessage(largeData);
+worker.on("message", (result) => {
+  updateUI(result);
+  smartRender();
+});
+
+// 3. Use virtual scrolling para listas grandes
+// Em vez de renderizar 1000 itens, renderize apenas os visíveis
+```
+
+---
+
+### Issue: WebSocket reconecta infinitamente
+
+**Symptoms:** Mensagem "reconnecting..." aparece constantemente
+
+**Diagnosis:**
+1. URL incorreta
+2. Servidor fora do ar
+3. Autenticação falhando
+4. Protocolo WebSocket não suportado
+
+**Solutions:**
+
+```typescript
+// 1. Verifique URL
+console.log("WebSocket URL:", CONFIG.clobWsBase);
+// Deve começar com wss:// (não https://)
+
+// 2. Teste conexão manualmente
+// Use wscat ou ferramenta similar
+bunx wscat -c wss://ws-subscriptions-clob.polymarket.com/ws/
+
+// 3. Verifique autenticação (se necessário)
+const ws = new WebSocket(url, {
+  headers: {
+    "Authorization": `Bearer ${token}`
+  }
+});
+
+// 4. Adicione timeout e max retries
+const MAX_RETRIES = 10;
+const RETRY_TIMEOUT = 60000;  // Desiste após 1 minuto
+```
+
+---
+
+### Issue: Dados não atualizam
+
+**Symptoms:** Valores ficam estáticos mesmo com WebSocket conectado
+
+**Diagnosis:**
+1. Event handler não registrado
+2. assetId incorreto
+3. Filtro bloqueando updates
+4. Parse de mensagem falhando silenciosamente
+
+**Solutions:**
+
+```typescript
+// 1. Verifique se onUpdate está registrado
+wsConnection = connectMarketWs(tokenIds, {
+  onUpdate: (update) => {
+    console.log("Update recebido:", update);  // Debug
+    // Atualiza UI
+  }
+});
+
+// 2. Confirme assetId
+console.log("Token esperado:", tokenId);
+console.log("Asset recebido:", update.assetId);
+if (update.assetId !== tokenId) {
+  console.log("AssetId mismatch!");
+}
+
+// 3. Adicione logging para debug
+wsConnection = connectMarketWs(tokenIds, {
+  onUpdate: (update) => {
+    logger.info("WebSocket update", {
+      assetId: update.assetId,
+      eventType: update.eventType,
+      price: update.price
+    });
+  }
+});
+
+// 4. Verifique por erros de parse silenciosos
+ws.addEventListener("message", (event) => {
+  try {
+    const data = JSON.parse(event.data);
+    // Process data
+  } catch (err) {
+    logger.error("Parse error", err, { raw: event.data });
+  }
+});
+```
+
+---
+
+### Issue: Erro "content is not a function"
+
+**Symptoms:**
+```
+TypeError: box.content is not a function
+```
+
+**Diagnosis:** Usando método incorreto para definir conteúdo
+
+**Solution:**
+```typescript
+// ❌ ERRADO
+box.content("Novo conteúdo");  // content não existe
+
+// ✅ CORRETO
+box.setContent("Novo conteúdo");  // setContent é o método correto
+
+// ❌ ERRADO
+const content = box.getContent();  // getContent não existe
+
+// ✅ CORRETO
+const content = box.content;  // Acesse propriedade diretamente
+```
+
+---
+
+## 12. 🎓 Design Decisions
+
+### Decisão 1: Por que TUI (Terminal UI) em vez de GUI?
+
+**Alternativas Consideradas:**
+
+| Opção | Vantagens | Desvantagens |
+|-------|-----------|--------------|
+| **Web App** (React/Next.js) | Interface visual moderna, acessível | Requer servidor/browsing, difícil via SSH |
+| **Desktop App** (Electron) | Nativo, gráfico rico | Pesado (~100MB), distribuição complexa |
+| **CLI Simples** | Leve, fácil implementar | Não visual, difícil para dados complexos |
+| **TUI (Blessed)** | Visual no terminal, leve, SSH-friendly | Limitado a texto | ✅ |
+
+**Trade-offs Analysis:**
+
+| Critério | Web App | Electron | CLI | **TUI** | Vencedor |
+|----------|---------|----------|-----|-------|----------|
+| Facilidade SSH | ❌ Difícil | ❌ Impossível | ✅ Fácil | ✅ Fácil | TUI/CLI |
+| Performance | ⚠️ Browser overhead | ❌ Pesado | ✅ Leve | ✅ Leve | TUI/CLI |
+| Distribuição | ⚠️ Servidor required | ⚠️ Binário grande | ✅ Single binary | ✅ Single binary | TUI/CLI |
+| Visual rico | ✅ HTML/CSS | ✅ HTML/CSS | ❌ Sem visual | ⚠️ Limitado | Web |
+| Aparência | ❌ Corporate | ❌ App comum | ⚠️ Simples | ✅ "Hacker" | TUI |
+| Recursos | ⚠️ Limitado | ✅ Acesso total | ✅ Acesso total | ✅ Acesso total | TUI |
+
+**Por que TUI foi escolhido:**
+
+1. ✅ **Foco em servidores:** Muito uso em ambientes remotos via SSH
+2. ✅ **Leveza:** Sem overhead de navegador/Electron
+3. ✅ **Distribuição:** Single binary, fácil de instalar e compartilhar
+4. ✅ **Estética:** Aparência "hacker profissional" que agrada ao público-alvo
+5. ✅ **Performance:** Renderização instantânea sem latência de browser
+
+**Cenários onde outras opções seriam melhores:**
+- **Web App:** Para usuários não-técnicos que preferem interface visual amigável
+- **Electron:** Se precisasse de recursos gráficos avançados (gráficos 3D, animações complexas)
+- **CLI:** Para automação e scripts sem necessidade de interface visual
+
+---
+
+### Decisão 2: Por que Blessed em vez de alternativas?
+
+**Alternativas:**
+
+1. **Blessed** - Biblioteca ncurses para Node.js ✅ **ESCOLHIDO**
+2. **Ink** - React para CLIs
+3. **Terminal-kit** - Biblioteca alternativa
+4. **Raw ANSI codes** - Sem biblioteca
+
+**Por que Blessed:**
+
+| Critério | Blessed | Ink | Terminal-kit | ANSI Raw |
+|----------|---------|-----|--------------|----------|
+| Maturidade | ✅ Estável (anos) | ✅ Estável | ⚠️ Menos popular | ✅ Universal |
+| Simplicidade | ✅ API direta | ❌ Requer React | ⚠️ API complexa | ❌ Muito manual |
+| Completude | ✅ Layouts, mouse, forms | ⚠️ Focado em React | ✅ Completo | ❌ Manual |
+| Comunidade | ✅ Grande | ✅ React devs | ⚠️ Pequena | N/A |
+| Compatibilidade | ✅ Node.js + Bun | ✅ Node.js | ✅ Node.js | ✅ Todos |
+| Aprendizado | ✅ Simples | ❌ Precisa de React | ⚠️ Moderado | ⚠️ ANSI codes |
+
+**Por que NÃO Ink:**
+- Requer conhecimento de React (overhead para projeto simples)
+- Abstração desnecessária para TUI simples
+- Bundle size maior
+
+**Por que NÃO Terminal-kit:**
+- Menos popular → menos recursos/comunidade
+- API mais complexa do que necessário
+- Menos exemplos e tutoriais
+
+**Por que NÃO ANSI Raw:**
+- Muito trabalho manual (posicionamento, cores, input)
+- Difícil de manter
+- Reinventando a roda
+
+---
+
+### Decisão 3: Layout de 8 painéis ou layout simples?
+
+**Abordagens:**
+
+1. **Single panel** - Mostra apenas uma coisa por vez
+2. **Two panels** - Radar + detalhe do mercado
+3. **Eight panels** - Radar, Market, Pulse, Orderbook, History, Holders, Alerts, Footer ✅ **ESCOLHIDO**
+
+**Por que 8 painéis:**
+
+- ✅ **Visibilidade completa:** Tudo importante visível de uma vez
+- ✅ **Eficiência:** Sem necessidade de navegar entre telas
+- ✅ **Monitoramento:** Veja múltiplos mercados simultaneamente
+- ✅ **Profissional:** Parece uma ferramenta de trading real
+
+**Trade-offs:**
+
+| Aspecto | Vantagem | Desvantagem |
+|---------|----------|-------------|
+| **Complexidade** | - | ❌ Mais código para gerenciar |
+| **Espaço** | - | ❌ Requer terminal maior (mínimo 80x24, ideal 120x40) |
+| **Aprendizado** | ✅ Tudo visível | ⚠️ Mais informações para processar |
+
+**Se terminal é pequeno:**
+```typescript
+// Implementar alternância de painéis
+const compactMode = process.stdout.columns < 100;
+
+if (compactMode) {
+  // Mostra apenas Radar + Market, oculta outros
+  orderbookTable.hide();
+  historyBox.hide();
+  holdersTable.hide();
+}
+```
+
+---
+
+### Decisão 4: Atualização contínua ou on-demand?
+
+**Abordagens:**
+
+1. **Polling contínuo** - Atualiza a cada X segundos automaticamente ✅ **ESCOLHIDO**
+2. **On-demand** - Só atualiza quando usuário pressionar 'r'
+3. **Híbrido** - Algumas coisas contínuas, outras on-demand
+
+**Por que Polling Contínuo:**
+
+- ✅ **Tempo real:** Dados sempre frescos
+- ✅ **Conveniência:** Usuário não precisa fazer nada
+- ✅ **WebSocket:** Já recebemos updates em tempo real, então por que não mostrar?
+
+**Estratégia de atualização implementada:**
+
+| Dado | Intervalo | Razão |
+|------|-----------|-------|
+| **Radar** | 60 segundos | Muda pouco, lista de mercados é relativamente estática |
+| **Orderbook** | 3 segundos (ou WebSocket imediato) | Muda muito, precisa estar atualizado |
+| **History** | 30 segundos | Dados históricos não mudam rápido |
+| **Holders** | 60 segundos | Posição de holders muda lentamente |
+| **WebSocket** | Imediato | Push em tempo real quando há trades |
+
+**Exemplo de código:**
+```typescript
+// src/tui.ts
+function startPolling() {
+  setInterval(refreshRadar, CONFIG.radarMs);      // 60s
+  setInterval(refreshFocus, opts.intervalMs);     // 3s
+  setInterval(refreshHistory, CONFIG.historyMs);  // 30s
+  setInterval(refreshHolders, CONFIG.holdersMs);  // 60s
+}
+```
+
+**Se fosse on-demand:**
+```typescript
+// Usuário teria que pressionar 'r' sempre
+screen.key("r", () => {
+  refreshAllData();
+});
+// Menos conveniente, mas economiza requisições
+```
+
+---
+
+## 13. 📚 Para Saber Mais
+
+### Documentação Oficial
+
+- **Blessed Documentation**: https://github.com/chjj/blessed
+- **Blessed Wiki**: https://github.com/chjj/blessed/wiki
+- **ncurses** (inspiração original): https://www.gnu.org/software/ncurses/
+- **Terminal Escape Codes**: https://gist.github.com/fnky/458734343aabd01cfb17a3a4f729679d
+
+### Tutoriais e Artigos
+
+- **Building Terminal UIs with Node.js**: https://blog.npmjs.org/post/164854783755/building-terminal-tools-with-node-and-babel
+- **An Introduction to ncurses**: https://www.vt100.net/docs/vt100-ug/chapter3.html
+- **Terminal UI Design Patterns**: Series de blog posts sobre design de TUIs
+
+### Projetos Exemplo
+
+- **htop** (monitor de processos): https://htop.dev/
+- **btop** (sucessor moderno do htop): https://github.com/aristocratos/btop
+- **lazydocker** (gerenciador Docker TUI): https://github.com/jesseduffield/lazydocker
+- **lazygit** (gerenciador Git TUI): https://github.com/jesseduffield/lazygit
+
+### Vídeos
+
+- **Terminal UI Design**: Busque por "terminal ui design" no YouTube
+- **ncurses Programming**: Tutoriais de programação ncurses em C/C++
+
+### Comunidade
+
+- **Reddit**: r/terminal, r/commandline
+- **Discord**: Servidores de Node.js/Bun
+
+---
+
+## 14. Resumo do Capítulo
 
 - **TUI** = Interface de usuário no terminal
 - **Blessed** = Biblioteca para criar TUIs
@@ -790,14 +1428,6 @@ function renderVerticalBars(
 - **Loop** = Timer de refresh + renderização
 - **Input** = Captura de teclado para interação
 - **Semântica** = Cores e símbolos com significado
-
----
-
-## 10. Para Saber Mais
-
-- **Blessed Documentation**: https://github.com/chjj/blessed
-- **ncurses** (inspiração original): https://www.gnu.org/software/ncurses/
-- **Terminal UI Design**: "Terminal UI Design Patterns" (blog posts)
 
 ---
 

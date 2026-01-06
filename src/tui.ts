@@ -203,6 +203,8 @@ export async function runDashboard(opts: DashboardOptions) {
   screen.append(holdersTable);
   screen.append(alertsBox);
   screen.append(footer);
+  screen.append(detailModal);
+  screen.append(helpModal);
 
   radarTable.setContent(renderTable([[cell("#"), cell("Heat"), cell("Event"), cell("Outcome")]]));
   orderbookTable.setContent(renderTable([[cell("bid"), cell("size"), cell("ask"), cell("size")]]));
@@ -393,6 +395,10 @@ export async function runDashboard(opts: DashboardOptions) {
     refreshFocus();
     refreshHistory();
     render();
+    if (showDetail) {
+      renderDetailModal();
+      screen.render();
+    }
   }
 
   function hasOrderbook(market: MarketInfo): boolean {
@@ -940,6 +946,10 @@ export async function runDashboard(opts: DashboardOptions) {
       refreshHistory();
       refreshHolders();
       render();
+      if (showDetail) {
+        renderDetailModal();
+        screen.render();
+      }
     });
 
     screen.key(["p"], () => {
@@ -954,6 +964,10 @@ export async function runDashboard(opts: DashboardOptions) {
       refreshHistory();
       refreshHolders();
       render();
+      if (showDetail) {
+        renderDetailModal();
+        screen.render();
+      }
     });
 
     screen.key(["a"], () => {

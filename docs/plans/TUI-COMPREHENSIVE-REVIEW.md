@@ -27,6 +27,8 @@ The result is a production-quality TUI that John Carmack would approve: clear, c
 - [x] (2026-01-06 00:05Z) Phase 3: Extract tui-types.ts (63 lines) and tui-render.ts (151 lines)
 - [x] (2026-01-06 00:06Z) Phase 4: Add 45 tests for tui-render module (59 total tests passing)
 - [x] (2026-01-06 00:07Z) Phase 5: Final verification - TypeScript compiles, all tests pass
+- [x] (2026-01-06 00:08Z) Phase 6: Detail modal updates on navigation (n/p/o keys)
+- [x] (2026-01-06 00:09Z) Phase 7: Bugfix - screen.render() after renderDetailModal() in n/p/o handlers
 
 ## Surprises & Discoveries
 
@@ -35,6 +37,10 @@ The result is a production-quality TUI that John Carmack would approve: clear, c
 
 - Observation: Blessed library uses tag-based formatting which requires escaping curly braces
   Evidence: `escapeTags()` function at line 1009-1011
+
+- Bug Found: Detail modal not displaying when navigating with n/p keys
+  Root Cause: `render()` calls `screen.render()` internally, but `renderDetailModal()` called afterward without a subsequent `screen.render()`
+  Fix: Wrap `renderDetailModal()` in block with explicit `screen.render()` call
 
 - Observation: WebSocket integration has sophisticated sequence/hash tracking for resync detection
   Evidence: Lines 846-864 in connectMarketWs callback
@@ -53,6 +59,10 @@ The result is a production-quality TUI that John Carmack would approve: clear, c
   Rationale: Improves discoverability; current footer only shows partial list
   Date/Author: 2026-01-06 / Agent
 
+- Decision: Update detail modal on navigation (n/p/o keys)
+  Rationale: Users expect modal to reflect current market when scrolling; improves UX without requiring modal close/reopen
+  Date/Author: 2026-01-06 / Agent
+
 ## Outcomes & Retrospective
 
 **Completed**: 2026-01-06
@@ -63,6 +73,8 @@ The result is a production-quality TUI that John Carmack would approve: clear, c
 3. Extracted tui-types.ts (63 lines) and tui-render.ts (151 lines) for better modularity
 4. Added 45 tests for rendering utilities (59 total tests, 86 assertions)
 5. All TypeScript compiles cleanly with strict mode
+6. Detail modal updates dynamically when navigating markets (n/p) or swapping outcomes (o)
+7. Fixed screen.render() call sequence ensuring modal displays after navigation
 
 **Remaining**:
 - Main tui.ts still at 1148 lines (added modals increased size)
