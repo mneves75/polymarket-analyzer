@@ -15,7 +15,8 @@
 		"typecheck": "bun tsc"
 	},
 	"dependencies": {
-		"blessed": "^0.1.81"
+		"blessed": "^0.1.81",
+		"zod": "^4.3.5"
 	},
 	"devDependencies": {
 		"@types/blessed": "^0.1.25",
