@@ -295,8 +295,8 @@ export async function fetchEvents(limit = 10, offset = 0): Promise<GammaEvent[]>
 
   const record = res as Record<string, unknown>;
   const list =
-    (record.events as GammaEvent[] | undefined) ||
-    (record.data as GammaEvent[] | undefined) ||
+    (record['events'] as GammaEvent[] | undefined) ||
+    (record['data'] as GammaEvent[] | undefined) ||
     [];
   return list;
 }
@@ -328,8 +328,8 @@ export async function fetchMarkets(limit = 10, offset = 0): Promise<GammaMarket[
 
   const record = res as Record<string, unknown>;
   const list =
-    (record.markets as GammaMarket[] | undefined) ||
-    (record.data as GammaMarket[] | undefined) ||
+    (record['markets'] as GammaMarket[] | undefined) ||
+    (record['data'] as GammaMarket[] | undefined) ||
     [];
   return list;
 }
@@ -348,7 +348,7 @@ export async function fetchMarketBySlug(slug: string): Promise<GammaMarket> {
 
   // API may return { market: {...} } or just the market object
   if (res && typeof res === "object" && "market" in (res as Record<string, unknown>)) {
-    return (res as Record<string, unknown>).market as GammaMarket;
+    return (res as Record<string, unknown>)['market'] as GammaMarket;
   }
   return res as GammaMarket;
 }
@@ -367,7 +367,7 @@ export async function fetchEventBySlug(slug: string): Promise<GammaEvent> {
 
   // API may return { event: {...} } or just the event object
   if (res && typeof res === "object" && "event" in (res as Record<string, unknown>)) {
-    return (res as Record<string, unknown>).event as GammaEvent;
+    return (res as Record<string, unknown>)['event'] as GammaEvent;
   }
   return res as GammaEvent;
 }
@@ -397,8 +397,8 @@ export async function fetchMarketByConditionId(
 
   const record = res as Record<string, unknown>;
   const list =
-    (record.markets as GammaMarket[] | undefined) ||
-    (record.data as GammaMarket[] | undefined) ||
+    (record['markets'] as GammaMarket[] | undefined) ||
+    (record['data'] as GammaMarket[] | undefined) ||
     [];
   return list[0];
 }
@@ -432,8 +432,8 @@ export function normalizeMarket(
   // Extract marketId from various possible field names
   const marketId =
     (market.id as string | undefined) ||
-    (market.marketId as string | undefined) ||
-    (market.market_id as string | undefined);
+    (market['marketId'] as string | undefined) ||
+    (market['market_id'] as string | undefined);
 
   // Extract question/title from various possible fields
   const question =
@@ -461,20 +461,30 @@ export function normalizeMarket(
   // Use default outcomes if none provided
   const resolvedOutcomes = outcomes.length > 0 ? outcomes : defaultOutcomes(clobTokenIds.length);
 
-  return {
-    eventId: (event?.id as string | undefined) || (market.eventId as string | undefined),
-    eventTitle: (event?.title as string | undefined),
-    marketId,
-    question,
-    conditionId,
-    slug: (market.slug as string | undefined) || (event?.slug as string | undefined),
+  const result: MarketInfo = {
     outcomes: resolvedOutcomes,
-    clobTokenIds,
-    volume24hr: volume24hr ?? undefined,
-    priceChange24hr: priceChange24hr ?? undefined,
-    bestBid: bestBid ?? undefined,
-    bestAsk: bestAsk ?? undefined
+    clobTokenIds
   };
+
+  const eventId = (event?.id as string | undefined) || (market.eventId as string | undefined);
+  if (eventId !== undefined) result.eventId = eventId;
+
+  const eventTitle = (event?.title as string | undefined);
+  if (eventTitle !== undefined) result.eventTitle = eventTitle;
+
+  if (marketId !== undefined) result.marketId = marketId;
+  if (question !== undefined) result.question = question;
+  if (conditionId !== undefined) result.conditionId = conditionId;
+
+  const slug = (market.slug as string | undefined) || (event?.slug as string | undefined);
+  if (slug !== undefined) result.slug = slug;
+
+  if (volume24hr !== undefined) result.volume24hr = volume24hr;
+  if (priceChange24hr !== undefined) result.priceChange24hr = priceChange24hr;
+  if (bestBid !== undefined) result.bestBid = bestBid;
+  if (bestAsk !== undefined) result.bestAsk = bestAsk;
+
+  return result;
 }
 
 /**
@@ -500,7 +510,7 @@ function extractOutcomes(market: GammaMarket): string[] {
   const nested = market.tokens as Array<Record<string, unknown>> | undefined;
   if (Array.isArray(nested)) {
     const names = nested
-      .map((token) => token.outcome as string | undefined)
+      .map((token) => token['outcome'] as string | undefined)
       .filter(Boolean);
     if (names.length > 0) return names as string[];
   }
@@ -557,7 +567,7 @@ function extractTokenIds(market: GammaMarket): string[] {
     const ids = nested
       .map(
         (token) =>
-          (token.token_id as string | undefined) || (token.id as string | undefined)
+          (token['token_id'] as string | undefined) || (token['id'] as string | undefined)
       )
       .filter(Boolean);
     if (ids.length > 0) return ids as string[];

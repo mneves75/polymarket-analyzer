@@ -362,9 +362,9 @@ function errorBodyMessage(body: unknown) {
   if (typeof body === "object") {
     const record = body as Record<string, unknown>;
     const message =
-      (typeof record.error === "string" && record.error) ||
-      (typeof record.message === "string" && record.message) ||
-      (typeof record.detail === "string" && record.detail);
+      (typeof record['error'] === "string" && record['error']) ||
+      (typeof record['message'] === "string" && record['message']) ||
+      (typeof record['detail'] === "string" && record['detail']);
     if (message) return message.slice(0, 200);
     try {
       return JSON.stringify(body).slice(0, 200);

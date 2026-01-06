@@ -36,14 +36,37 @@ export function asciiChart(series: number[], width = 50, height = 8): string[] {
   const sliced = series.slice(-width);
   const min = Math.min(...sliced);
   const max = Math.max(...sliced);
-  const range = max - min || 0.01;
+  const isConstant = max === min;
 
   const lines: string[] = [];
   const blocks = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
 
+  // Handle constant values - show bars at middle height
+  if (isConstant) {
+    const midRow = Math.floor(height / 2);
+    for (let row = height - 1; row >= 0; row--) {
+      const rowChars: string[] = [];
+      for (let i = 0; i < sliced.length; i++) {
+        if (row < midRow) {
+          rowChars.push("█");
+        } else if (row === midRow) {
+          rowChars.push("▄");
+        } else {
+          rowChars.push(" ");
+        }
+      }
+      const label = row === height - 1 || row === 0 ? formatPrice(min) : "";
+      lines.push(`${label.padStart(7)} │${rowChars.join("")}`);
+    }
+    lines.push(`${"".padStart(7)} └${"─".repeat(sliced.length)}`);
+    return lines;
+  }
+
+  // Normal case - values have range
+  const range = max - min;
+
   // Create the chart rows (top to bottom)
   for (let row = height - 1; row >= 0; row--) {
-    const threshold = min + (range * (row + 1)) / height;
     const rowChars: string[] = [];
 
     for (const val of sliced) {
@@ -54,20 +77,19 @@ export function asciiChart(series: number[], width = 50, height = 8): string[] {
         rowChars.push("█");
       } else if (fillLevel > row) {
         const partialIdx = Math.floor((fillLevel - row) * blocks.length);
-        rowChars.push(blocks[Math.min(partialIdx, blocks.length - 1)]);
+        const block = blocks[Math.min(partialIdx, blocks.length - 1)];
+        rowChars.push(block ?? " ");
       } else {
         rowChars.push(" ");
       }
     }
 
     const label = row === height - 1 ? formatPrice(max) : row === 0 ? formatPrice(min) : "";
-    const paddedLabel = label.padStart(7);
-    lines.push(`${paddedLabel} │${rowChars.join("")}`);
+    lines.push(`${label.padStart(7)} │${rowChars.join("")}`);
   }
 
   // Add bottom axis
-  const axisLine = "─".repeat(sliced.length);
-  lines.push(`${"".padStart(7)} └${axisLine}`);
+  lines.push(`${"".padStart(7)} └${"─".repeat(sliced.length)}`);
 
   return lines;
 }

@@ -32,6 +32,10 @@ export function generateDetailContent(state: DetailModalState): string {
   }
 
   const tokenId = focusMarket.clobTokenIds[outcomeIndex] ?? focusMarket.clobTokenIds[0];
+  if (!tokenId) {
+    return colorText("No token ID available for this market", THEME.muted);
+  }
+
   const outcome = focusMarket.outcomes[outcomeIndex] || `OUTCOME_${outcomeIndex + 1}`;
   const spread = bestBid !== undefined && bestAsk !== undefined ? bestAsk - bestBid : undefined;
 

@@ -27,8 +27,10 @@ export function truncateAlert(message: string, maxLen = 100): string {
   const tokenIdMatch = message.match(/token_id=([a-zA-Z0-9]{20,})/);
   if (tokenIdMatch) {
     const fullId = tokenIdMatch[1];
-    const shortId = `${fullId.slice(0, 8)}...${fullId.slice(-6)}`;
-    message = message.replace(fullId, shortId);
+    if (fullId !== undefined) {
+      const shortId = `${fullId.slice(0, 8)}...${fullId.slice(-6)}`;
+      message = message.replace(fullId, shortId);
+    }
   }
   if (message.length > maxLen) {
     return `${message.slice(0, maxLen - 3)}...`;
@@ -96,8 +98,10 @@ export function heatSymbol(market: MarketInfo): string {
   const heat = computeHeat(market);
   const levels = [" ", ".", ":", "-", "=", "+", "*", "#", "%", "@"];
   const idx = Math.max(0, Math.min(levels.length - 1, Math.floor(heat * (levels.length - 1))));
+  const symbol = levels[idx];
+  if (!symbol) return " ";
   const color = heat > 0.7 ? THEME.danger : heat > 0.4 ? THEME.warning : THEME.success;
-  return colorText(levels[idx], color);
+  return colorText(symbol, color);
 }
 
 export function computeHealthScore(opts: {

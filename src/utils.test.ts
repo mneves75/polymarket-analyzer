@@ -115,4 +115,16 @@ describe("asciiChart", () => {
     const result = asciiChart([0.5], 50, 4);
     expect(result.length).toBeGreaterThan(1);
   });
+
+  test("handles constant values with visible bars", () => {
+    const series = [0.5, 0.5, 0.5, 0.5, 0.5];
+    const result = asciiChart(series, 50, 6);
+    // Should show visible bars at mid-height for constant values
+    const chartContent = result.join("");
+    expect(chartContent).toContain("█"); // Full blocks in lower half
+    expect(chartContent).toContain("▄"); // Half block at midpoint
+    // Both labels should show same value
+    expect(result[0]).toContain("0.5000");
+    expect(result[result.length - 2]).toContain("0.5000");
+  });
 });
