@@ -3,6 +3,18 @@
 ## [Unreleased] - 2026-01-06
 
 ### New Features
+- **Comprehensive Error Handling System** - Structured error types for better debugging and error handling
+  - `AppError` base class with error codes, context metadata, timestamps, and `toJSON()` serialization
+  - Specialized error types: `NetworkError`, `ValidationError`, `ApiError`, `ConfigError`, `WebSocketError`, `ParseError`, `RateLimitError`
+  - Type guards: `isAppError`, `isNetworkError`, `isValidationError`, `isApiError`, `isRateLimitError`
+  - Utility functions: `getErrorInfo`, `formatErrorForLogging`, `normalizeError`
+  - `HttpError` now extends `NetworkError` for consistency with error hierarchy
+  - 33 comprehensive tests for error handling
+- **Zod Runtime Validation** - Schema validation at API boundaries
+  - `TokenIdSchema`, `ConditionIdSchema`, `MarketIdSchema` for branded types
+  - `GammaMarketSchema`, `OrderbookStateSchema` for API responses
+  - `validateWithSchema()` helper with detailed error reporting
+  - Configurable via `CONFIG.enableValidation` flag (disabled by default)
 - **Scrollable Radar Panel** - Radar box now scrolls to show all markets (not limited by display height)
   - Added scrollbar with visual indicator
   - Vi-style navigation: `j`/`k` or arrow keys to scroll
