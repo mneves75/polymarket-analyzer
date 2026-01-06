@@ -20,18 +20,28 @@ export async function runSnapshot(opts: DemoOptions) {
   }
 
   const tokenId = market.clobTokenIds[0];
+  if (!tokenId) {
+    console.error("Market has no token IDs.");
+    process.exit(1);
+  }
+
   let orderbook;
   let prices;
   let midpoint;
   let history;
   let holders;
 
+  if (!market.conditionId) {
+    console.error("Market has no conditionId.");
+    process.exit(1);
+  }
+
   const [orderbookRes, pricesRes, midpointRes, historyRes, holdersRes] = await Promise.allSettled([
     getOrderbook(tokenId, { allowNoOrderbook: true }),
     getPrices(tokenId, { allowNoOrderbook: true }),
     getMidpoint(tokenId),
     getPriceHistory(tokenId),
-    getHolders(market.conditionId || "", CONFIG.holdersLimit)
+    getHolders(market.conditionId, CONFIG.holdersLimit)
   ]);
 
   if (orderbookRes.status === "fulfilled") {

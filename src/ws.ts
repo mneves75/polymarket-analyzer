@@ -25,11 +25,11 @@ export type WsHandlers = {
 export function parseMarketMessage(data: Record<string, unknown>) {
   const updates: WsUpdate[] = [];
   const books: Array<{ assetId: string; book: Record<string, unknown> }> = [];
-  const eventType = String(data.event_type || data.type || "");
-  const baseTs = asNumber(data.timestamp ?? data.ts ?? data.time);
+  const eventType = String(data['event_type'] || data['type'] || "");
+  const baseTs = asNumber(data['timestamp'] ?? data['ts'] ?? data['time']);
 
   if (eventType === "book") {
-    const assetId = String(data.asset_id || data.token_id || "");
+    const assetId = String(data['asset_id'] || data['token_id'] || "");
     if (assetId) {
       books.push({ assetId, book: data });
     }
@@ -37,89 +37,120 @@ export function parseMarketMessage(data: Record<string, unknown>) {
   }
 
   if (eventType === "best_bid_ask") {
-    const assetId = String(data.asset_id || data.token_id || "");
-    const bestBid = asNumber(data.best_bid);
-    const bestAsk = asNumber(data.best_ask);
+    const assetId = String(data['asset_id'] || data['token_id'] || "");
+    const bestBid = asNumber(data['best_bid']);
+    const bestAsk = asNumber(data['best_ask']);
     if (assetId) {
       const ts = baseTs ?? Date.now();
-      updates.push({ assetId, eventType, bestBid, bestAsk, timestamp: baseTs, ts });
+      const update: WsUpdate = {
+        assetId,
+        eventType,
+        ts
+      };
+      if (bestBid !== undefined) update.bestBid = bestBid;
+      if (bestAsk !== undefined) update.bestAsk = bestAsk;
+      if (baseTs !== undefined) update.timestamp = baseTs;
+      updates.push(update);
     }
     return { updates, books };
   }
 
   if (eventType === "last_trade_price") {
-    const assetId = String(data.asset_id || data.token_id || "");
-    const price = asNumber(data.price);
+    const assetId = String(data['asset_id'] || data['token_id'] || "");
+    const price = asNumber(data['price']);
     if (assetId && price !== undefined) {
       const ts = baseTs ?? Date.now();
-      updates.push({ assetId, eventType, lastTrade: price, timestamp: baseTs, ts });
+      const update: WsUpdate = {
+        assetId,
+        eventType,
+        lastTrade: price,
+        ts
+      };
+      if (baseTs !== undefined) update.timestamp = baseTs;
+      updates.push(update);
     }
     return { updates, books };
   }
 
   if (eventType === "price_change") {
-    const assetId = String(data.asset_id || data.token_id || "");
-    const bestBid = asNumber(data.best_bid);
-    const bestAsk = asNumber(data.best_ask);
-    const hash = typeof data.hash === "string" ? data.hash : undefined;
-    const sequence = asNumber((data.sequence ?? data.seq) as unknown);
+    const assetId = String(data['asset_id'] || data['token_id'] || "");
+    const bestBid = asNumber(data['best_bid']);
+    const bestAsk = asNumber(data['best_ask']);
+    const hash = typeof data['hash'] === "string" ? data['hash'] : undefined;
+    const sequence = asNumber((data['sequence'] ?? data['seq']) as unknown);
 
-    const changes = Array.isArray(data.price_changes)
-      ? (data.price_changes as Array<Record<string, unknown>>)
-      : Array.isArray(data.changes)
-        ? (data.changes as Array<Record<string, unknown>>)
+    const changes = Array.isArray(data['price_changes'])
+      ? (data['price_changes'] as Array<Record<string, unknown>>)
+      : Array.isArray(data['changes'])
+        ? (data['changes'] as Array<Record<string, unknown>>)
         : [];
 
     if (changes.length === 0) {
       if (assetId && (bestBid !== undefined || bestAsk !== undefined)) {
         const ts = baseTs ?? Date.now();
-        updates.push({
+        const update: WsUpdate = {
           assetId,
           eventType,
-          bestBid,
-          bestAsk,
-          hash,
-          sequence,
-          timestamp: baseTs,
           ts
-        });
+        };
+        if (bestBid !== undefined) update.bestBid = bestBid;
+        if (bestAsk !== undefined) update.bestAsk = bestAsk;
+        if (hash !== undefined) update.hash = hash;
+        if (sequence !== undefined) update.sequence = sequence;
+        if (baseTs !== undefined) update.timestamp = baseTs;
+        updates.push(update);
       }
       return { updates, books };
     }
 
     for (const change of changes) {
-      const changeAsset = String(change.asset_id || change.token_id || assetId || "");
-      const side = String(change.side || change.action || "").toUpperCase();
-      const price = asNumber(change.price ?? change.p);
-      const size = asNumber(change.size ?? change.quantity ?? change.amount);
+      const changeAsset = String(change['asset_id'] || change['token_id'] || assetId || "");
+      const side = String(change['side'] || change['action'] || "").toUpperCase();
+      const price = asNumber(change['price'] ?? change['p']);
+      const size = asNumber(change['size'] ?? change['quantity'] ?? change['amount']);
       const changeHash =
-        (typeof change.hash === "string" ? (change.hash as string) : undefined) || hash;
-      const changeSeq = asNumber(change.sequence ?? change.seq ?? sequence);
-      const changeTs = asNumber(change.timestamp ?? change.ts ?? baseTs);
+        (typeof change['hash'] === "string" ? (change['hash'] as string) : undefined) || hash;
+      const changeSeq = asNumber(change['sequence'] ?? change['seq'] ?? sequence);
+      const changeTs = asNumber(change['timestamp'] ?? change['ts'] ?? baseTs);
       if (!changeAsset || price === undefined) continue;
 
-      updates.push({
+      const update: WsUpdate = {
         assetId: changeAsset,
         eventType,
         side: side === "SELL" ? "SELL" : "BUY",
         price,
-        size,
-        bestBid: bestBid ?? asNumber(change.best_bid),
-        bestAsk: bestAsk ?? asNumber(change.best_ask),
-        hash: changeHash,
-        sequence: changeSeq,
-        timestamp: changeTs,
         ts: changeTs ?? Date.now()
-      });
+      };
+      if (size !== undefined) update.size = size;
+      if (bestBid !== undefined) update.bestBid = bestBid;
+      else {
+        const changeBestBid = asNumber(change['best_bid']);
+        if (changeBestBid !== undefined) update.bestBid = changeBestBid;
+      }
+      if (bestAsk !== undefined) update.bestAsk = bestAsk;
+      else {
+        const changeBestAsk = asNumber(change['best_ask']);
+        if (changeBestAsk !== undefined) update.bestAsk = changeBestAsk;
+      }
+      if (changeHash !== undefined) update.hash = changeHash;
+      if (changeSeq !== undefined) update.sequence = changeSeq;
+      if (changeTs !== undefined) update.timestamp = changeTs;
+      updates.push(update);
     }
     return { updates, books };
   }
 
   if (eventType === "tick_size_change") {
-    const assetId = String(data.asset_id || data.token_id || "");
+    const assetId = String(data['asset_id'] || data['token_id'] || "");
     if (assetId) {
       const ts = baseTs ?? Date.now();
-      updates.push({ assetId, eventType, timestamp: baseTs, ts });
+      const update: WsUpdate = {
+        assetId,
+        eventType,
+        ts
+      };
+      if (baseTs !== undefined) update.timestamp = baseTs;
+      updates.push(update);
     }
   }
 
@@ -222,17 +253,17 @@ export function connectMarketWs(assetIds: string[], handlers: WsHandlers) {
   };
 
   const isPingMessage = (data: Record<string, unknown>) => {
-    const type = String(data.type || data.event_type || "");
+    const type = String(data['type'] || data['event_type'] || "");
     return type === "ping" || type === "heartbeat";
   };
 
   const sendPong = (data: Record<string, unknown>) => {
     if (!ws || ws.readyState !== WebSocket.OPEN) return;
-    const type = String(data.type || data.event_type || "");
+    const type = String(data['type'] || data['event_type'] || "");
     const payload: Record<string, unknown> = {};
-    if (type === "ping") payload.type = "pong";
-    if (type === "heartbeat") payload.type = "heartbeat";
-    if ("id" in data) payload.id = data.id as unknown;
+    if (type === "ping") payload['type'] = "pong";
+    if (type === "heartbeat") payload['type'] = "heartbeat";
+    if ("id" in data) payload['id'] = data['id'] as unknown;
     if (Object.keys(payload).length > 0) {
       ws.send(JSON.stringify(payload));
     }

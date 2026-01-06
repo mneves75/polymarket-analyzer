@@ -22,22 +22,24 @@ if (opts.listMarkets) {
 }
 
 if (opts.once) {
-  await runSnapshot({
-    market: opts.market,
-    slug: opts.slug,
+  const snapshotOptions: Record<string, unknown> = {
     intervalMs: opts.intervalMs,
     limit: opts.limit
-  });
+  };
+  if (opts.market !== undefined) snapshotOptions['market'] = opts.market;
+  if (opts.slug !== undefined) snapshotOptions['slug'] = opts.slug;
+  await runSnapshot(snapshotOptions as { intervalMs: number; limit: number });
   process.exit(0);
 }
 
-await runDashboard({
-  market: opts.market,
-  slug: opts.slug,
+const dashboardOptions: Record<string, unknown> = {
   intervalMs: opts.intervalMs,
   limit: opts.limit,
   ws: opts.ws
-});
+};
+if (opts.market !== undefined) dashboardOptions['market'] = opts.market;
+if (opts.slug !== undefined) dashboardOptions['slug'] = opts.slug;
+await runDashboard(dashboardOptions as { intervalMs: number; limit: number; ws: boolean });
 
 function parseArgs(args: string[]): Options {
   const options: Options = {
@@ -51,6 +53,7 @@ function parseArgs(args: string[]): Options {
 
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
+    if (arg === undefined) continue;
 
     if (arg === "--help" || arg === "-h") {
       printHelp();
@@ -66,17 +69,39 @@ function parseArgs(args: string[]): Options {
       // default mode
     }
 
-    if (arg === "--market" || arg === "-m") options.market = requireValue(args, i, arg);
-    if (arg.startsWith("--market=")) options.market = arg.split("=")[1];
+    if (arg === "--market" || arg === "-m") {
+      const nextArg = args[i + 1];
+      if (nextArg !== undefined && nextArg !== "") options.market = nextArg;
+    }
+    if (arg.startsWith("--market=")) {
+      const parts = arg.split("=");
+      const value = parts[1];
+      if (value !== undefined && value !== "") options.market = value;
+    }
 
-    if (arg === "--slug" || arg === "-s") options.slug = requireValue(args, i, arg);
-    if (arg.startsWith("--slug=")) options.slug = arg.split("=")[1];
+    if (arg === "--slug" || arg === "-s") {
+      const nextArg = args[i + 1];
+      if (nextArg !== undefined && nextArg !== "") options.slug = nextArg;
+    }
+    if (arg.startsWith("--slug=")) {
+      const parts = arg.split("=");
+      const value = parts[1];
+      if (value !== undefined && value !== "") options.slug = value;
+    }
 
     if (arg === "--interval") options.intervalMs = Number(requireValue(args, i, arg));
-    if (arg.startsWith("--interval=")) options.intervalMs = Number(arg.split("=")[1]);
+    if (arg.startsWith("--interval=")) {
+      const parts = arg.split("=");
+      const value = parts[1];
+      if (value !== undefined && value !== "") options.intervalMs = Number(value);
+    }
 
     if (arg === "--limit") options.limit = Number(requireValue(args, i, arg));
-    if (arg.startsWith("--limit=")) options.limit = Number(arg.split("=")[1]);
+    if (arg.startsWith("--limit=")) {
+      const parts = arg.split("=");
+      const value = parts[1];
+      if (value !== undefined && value !== "") options.limit = Number(value);
+    }
   }
 
   if (!Number.isFinite(options.intervalMs) || options.intervalMs <= 0) {

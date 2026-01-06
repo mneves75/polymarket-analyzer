@@ -267,6 +267,7 @@ export async function runDashboard(opts: DashboardOptions) {
   async function refreshFocus(force = false) {
     if (!focusMarket) return;
     const tokenId = focusMarket.clobTokenIds[outcomeIndex] ?? focusMarket.clobTokenIds[0];
+    if (!tokenId) return;
     const now = Date.now();
 
     if (!force && isWsHealthy() && now - lastReconcileAt < CONFIG.reconcileMs) {
@@ -349,7 +350,7 @@ export async function runDashboard(opts: DashboardOptions) {
     } else {
       noOrderbookTokens.delete(tokenId);
     }
-    if (!noOrderbook && lastAlert.toLowerCase().includes("no orderbook exists")) {
+    if (!noOrderbook && lastAlert !== "" && lastAlert.toLowerCase().includes("no orderbook exists")) {
       lastAlert = "";
     }
 
@@ -365,6 +366,7 @@ export async function runDashboard(opts: DashboardOptions) {
   async function refreshHistory() {
     if (!focusMarket) return;
     const tokenId = focusMarket.clobTokenIds[outcomeIndex] ?? focusMarket.clobTokenIds[0];
+    if (!tokenId) return;
     try {
       const history = await getPriceHistory(tokenId);
       historySeries = extractHistory(history);
@@ -400,6 +402,7 @@ export async function runDashboard(opts: DashboardOptions) {
     if (!focusMarket) return;
     outcomeIndex = (outcomeIndex + delta + focusMarket.clobTokenIds.length) % focusMarket.clobTokenIds.length;
     const tokenId = focusMarket.clobTokenIds[outcomeIndex];
+    if (!tokenId) return;
     orderbook = orderbookMap.get(tokenId) ?? orderbook;
     historySeries = []; // Clear stale chart data for new outcome
     refreshFocus();
@@ -422,7 +425,8 @@ export async function runDashboard(opts: DashboardOptions) {
     let idx = currentIdx;
     for (let i = 0; i < view.length; i++) {
       idx = (idx + delta + view.length) % view.length;
-      if (hasOrderbook(view[idx])) return idx;
+      const market = view[idx];
+      if (market && hasOrderbook(market)) return idx;
     }
     return (currentIdx + delta + view.length) % view.length;
   }
@@ -482,6 +486,10 @@ export async function runDashboard(opts: DashboardOptions) {
     }
 
     const tokenId = focusMarket.clobTokenIds[outcomeIndex] ?? focusMarket.clobTokenIds[0];
+    if (!tokenId) {
+      marketBox.setContent(colorText("No token ID available for this market", THEME.muted));
+      return;
+    }
     const outcome = focusMarket.outcomes[outcomeIndex] || `OUTCOME_${outcomeIndex + 1}`;
 
     const lines = [
@@ -623,8 +631,8 @@ export async function runDashboard(opts: DashboardOptions) {
     const holders = normalizeHolders(data);
     const rows = [[cell("rank"), cell("address"), cell("shares")]];
     holders.slice(0, CONFIG.holdersLimit).forEach((holder, idx) => {
-      const address = String(holder.address || holder.trader || "-");
-      const shares = Number(holder.shares || holder.shares_value || holder.value || 0);
+      const address = String(holder['address'] || holder['trader'] || "-");
+      const shares = Number(holder['shares'] || holder['shares_value'] || holder['value'] || 0);
       rows.push([
         cell(String(idx + 1)),
         cell(truncate(address, 16)),
@@ -667,11 +675,11 @@ export async function runDashboard(opts: DashboardOptions) {
     const asks = side === "SELL" ? updateLevels(current.asks, price, size, false, depthLimit) : current.asks;
     const updated: OrderbookState = {
       bids,
-      asks,
-      minOrderSize: current.minOrderSize,
-      tickSize: current.tickSize,
-      negRisk: current.negRisk
+      asks
     };
+    if (current.minOrderSize !== undefined) updated.minOrderSize = current.minOrderSize;
+    if (current.tickSize !== undefined) updated.tickSize = current.tickSize;
+    if (current.negRisk !== undefined) updated.negRisk = current.negRisk;
     orderbookMap.set(assetId, updated);
   }
 
@@ -841,7 +849,9 @@ export async function runDashboard(opts: DashboardOptions) {
       if (view.length === 0) return;
       const currentIdx = view.findIndex((item) => item.conditionId === focusMarket?.conditionId);
       const nextIdx = findNextMarket(view, currentIdx, 1);
-      focusMarket = view[nextIdx];
+      const nextMarket = view[nextIdx];
+      if (!nextMarket) return;
+      focusMarket = nextMarket;
       outcomeIndex = 0;
       historySeries = []; // Clear stale chart data for new market
       restartWs();
@@ -860,7 +870,9 @@ export async function runDashboard(opts: DashboardOptions) {
       if (view.length === 0) return;
       const currentIdx = view.findIndex((item) => item.conditionId === focusMarket?.conditionId);
       const prevIdx = findNextMarket(view, currentIdx, -1);
-      focusMarket = view[prevIdx];
+      const prevMarket = view[prevIdx];
+      if (!prevMarket) return;
+      focusMarket = prevMarket;
       outcomeIndex = 0;
       historySeries = []; // Clear stale chart data for new market
       restartWs();
@@ -895,13 +907,16 @@ export async function runDashboard(opts: DashboardOptions) {
         radarFilter = (value || "").trim();
         const view = filterRadar(radar, radarFilter);
         if (view.length > 0 && !view.some((item) => item.conditionId === focusMarket?.conditionId)) {
-          focusMarket = view[0];
-          outcomeIndex = 0;
-          historySeries = []; // Clear stale chart data for new market
-          restartWs();
-          refreshFocus();
-          refreshHistory();
-          refreshHolders();
+          const nextMarket = view[0];
+          if (nextMarket) {
+            focusMarket = nextMarket;
+            outcomeIndex = 0;
+            historySeries = []; // Clear stale chart data for new market
+            restartWs();
+            refreshFocus();
+            refreshHistory();
+            refreshHolders();
+          }
         }
         render();
       });
@@ -930,15 +945,15 @@ export async function runDashboard(opts: DashboardOptions) {
         } else {
           const highMatch = input.match(/>(\d*\.?\d+)/);
           const lowMatch = input.match(/<(\d*\.?\d+)/);
-          if (highMatch) {
+          if (highMatch && highMatch[1] !== undefined) {
             priceAlertHigh = parseFloat(highMatch[1]);
             lastAlert = `Alert set: price >= ${priceAlertHigh}`;
           }
-          if (lowMatch) {
+          if (lowMatch && lowMatch[1] !== undefined) {
             priceAlertLow = parseFloat(lowMatch[1]);
             lastAlert = `Alert set: price <= ${priceAlertLow}`;
           }
-          if (highMatch && lowMatch) {
+          if (highMatch && lowMatch && priceAlertHigh !== null && priceAlertLow !== null) {
             lastAlert = `Alerts set: price >= ${priceAlertHigh} OR price <= ${priceAlertLow}`;
           }
           if (!highMatch && !lowMatch) {

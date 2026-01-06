@@ -334,12 +334,14 @@ class Logger {
     let errorDetails: LogEntry["error"] | undefined;
     if (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      errorDetails = {
+      const details: LogEntry["error"] = {
         name: err.name,
-        message: err.message,
-        stack: err.stack,
-        code: (err as unknown as { code: string }).code
+        message: err.message
       };
+      if (err.stack !== undefined) details.stack = err.stack;
+      const code = (err as unknown as { code?: string }).code;
+      if (code !== undefined) details.code = code;
+      errorDetails = details;
     }
 
     // Get current request context if available
@@ -363,7 +365,7 @@ class Logger {
     };
 
     // Detect if we're in a TUI environment (pretty output)
-    const isTui = process.env.TUI_MODE === "true" || process.stdout.isTTY;
+    const isTui = process['env']['TUI_MODE'] === "true" || process.stdout.isTTY;
     const formatted = formatLogEntry(entry, isTui);
 
     // Output to appropriate stream
@@ -389,19 +391,19 @@ class ContextLogger extends Logger {
     super({ component: (parent as any).options.component });
   }
 
-  debug(message: string, context?: LogContext): void {
+  override debug(message: string, context?: LogContext): void {
     this.parent.debug(message, { ...this.boundContext, ...context });
   }
 
-  info(message: string, context?: LogContext): void {
+  override info(message: string, context?: LogContext): void {
     this.parent.info(message, { ...this.boundContext, ...context });
   }
 
-  warn(message: string, context?: LogContext): void {
+  override warn(message: string, context?: LogContext): void {
     this.parent.warn(message, { ...this.boundContext, ...context });
   }
 
-  error(message: string, error: Error | unknown, context?: LogContext): void {
+  override error(message: string, error: Error | unknown, context?: LogContext): void {
     this.parent.error(message, error, { ...this.boundContext, ...context });
   }
 }
