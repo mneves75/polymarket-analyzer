@@ -9,7 +9,7 @@
 
 ### 1.1 O Que é a Polymarket?
 
-A **Polymarket** é uma plataforma descentralizada de mercados de previsão baseada em blockchain. Ela permite que as pessoas apostem em eventos do mundo real, desde eleições até resultados esportivos.
+A [Polymarket](https://polymarket.com) é uma plataforma descentralizada de mercados de previsão baseada em blockchain. Ela permite que as pessoas apostem em eventos do mundo real, desde eleições até resultados esportivos.
 
 **APIs da Polymarket:**
 
@@ -118,7 +118,7 @@ Lista eventos ativos.
 
 ```typescript
 // src/api.ts:22-36
-export async function fetchEvents(limit = 10, offset = 0) {
+export async function fetchEvents(limit = 50, offset = 0) {
   const url = withQuery(`${CONFIG.gammaBase}/events`, {
     limit,
     offset,
@@ -167,7 +167,7 @@ Lista mercados ativos.
 
 ```typescript
 // src/api.ts:38-52
-export async function fetchMarkets(limit = 10, offset = 0) {
+export async function fetchMarkets(limit = 50, offset = 0) {
   const url = withQuery(`${CONFIG.gammaBase}/markets`, {
     limit,
     offset,

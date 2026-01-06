@@ -19,6 +19,6 @@ export const CONFIG = {
   historyFidelity: 30,
   holdersLimit: 8,
   orderbookDepth: 10,
-  radarLimit: 10,
+  radarLimit: 50,
   restTimeoutMs: 10000
 };

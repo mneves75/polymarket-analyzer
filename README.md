@@ -1,6 +1,8 @@
 # Polymarket Analyzer - Realtime CLI/TUI Demo
 
-Realtime terminal interface for Polymarket public APIs (Gamma discovery + CLOB REST/WS + Data API).
+Realtime terminal interface for [Polymarket](https://polymarket.com) public APIs (Gamma discovery + CLOB REST/WS + Data API).
+
+> **Note**: All data is **real and live** from Polymarket's production APIs. This is not mock/demo data.
 
 ## Quickstart
 
@@ -42,6 +44,12 @@ bun run dev --list-markets --json
 ```sh
 bun run dev --market <conditionId>
 bun run dev --slug <slug>
+```
+
+### Fetch More Markets
+```sh
+bun run dev --limit 100           # Fetch 100 markets (default: 50)
+bun run dev --list-markets --limit 200  # List 200 markets
 ```
 
 ## TUI Controls

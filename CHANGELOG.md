@@ -2,6 +2,16 @@
 
 ## [Unreleased] - 2026-01-06
 
+### Configuration Changes
+- **Increase default radarLimit from 10 to 50** - Now fetches 50 markets by default instead of 10
+- Add `--limit` CLI flag documentation for overriding market fetch count
+
+### Documentation Improvements
+- Add prominent [Polymarket](https://polymarket.com) link to README with note about real/live data
+- Add Polymarket platform link to docs/learn/00-introducao.md, docs/learn/03-apis-polymarket.md, docs/learn/README.md
+- Update code examples in docs to reflect new default limit of 50
+- Add "Fetch More Markets" section to README with `--limit` usage examples
+
 ### Documentation Improvements (Major Update)
 
 #### Completed Chapters 05-07
