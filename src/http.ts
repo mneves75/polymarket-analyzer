@@ -1,3 +1,4 @@
+import { NetworkError } from "./errors";
 import { RateLimiter } from "./rateLimiter";
 
 /**
@@ -17,7 +18,9 @@ export type FetchOptions = {
 };
 
 /**
- * Custom HTTP Error class that extends Error with HTTP-specific information.
+ * Custom HTTP Error class with HTTP-specific information.
+ *
+ * Extends NetworkError for consistency with the application error hierarchy.
  *
  * @example
  * try {
@@ -29,7 +32,7 @@ export type FetchOptions = {
  *   }
  * }
  */
-export class HttpError extends Error {
+export class HttpError extends NetworkError {
 	/** HTTP status code (e.g., 404, 500, etc.) */
 	status: number;
 	/** The full URL that was requested */
@@ -38,11 +41,56 @@ export class HttpError extends Error {
 	body: unknown;
 
 	constructor(status: number, url: string, body: unknown, message: string) {
-		super(message);
+		// Call parent constructor (NetworkError sets code to "NETWORK_ERROR" by default)
+		super(message, {
+			url,
+			statusCode: status,
+			responseBody: body,
+		});
+
 		this.name = "HttpError";
 		this.status = status;
 		this.url = url;
 		this.body = body;
+
+		// Override the error code based on HTTP status
+		// We need to set this after super() call since NetworkError sets it to "NETWORK_ERROR"
+		const code =
+			status === 429
+				? "RATE_LIMIT_ERROR"
+				: status >= 500
+					? "SERVER_ERROR"
+					: status >= 400
+						? "CLIENT_ERROR"
+						: "HTTP_ERROR";
+
+		Object.defineProperty(this, "code", {
+			value: code,
+			enumerable: true,
+			writable: false,
+			configurable: false,
+		});
+	}
+
+	/**
+	 * Check if this is a rate limit error (HTTP 429).
+	 */
+	isRateLimit(): boolean {
+		return this.status === 429;
+	}
+
+	/**
+	 * Check if this is a server error (5xx).
+	 */
+	isServerError(): boolean {
+		return this.status >= 500;
+	}
+
+	/**
+	 * Check if this is a client error (4xx, excluding 429).
+	 */
+	isClientError(): boolean {
+		return this.status >= 400 && this.status < 500 && this.status !== 429;
 	}
 }
 
