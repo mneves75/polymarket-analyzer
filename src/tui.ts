@@ -63,6 +63,16 @@ export async function runDashboard(opts: DashboardOptions) {
     border: "line",
     label: "Radar",
     tags: true,
+    scrollable: true,
+    alwaysScroll: true,
+    keys: true,
+    vi: true,
+    mouse: true,
+    scrollbar: {
+      ch: "│",
+      track: { bg: "black" },
+      style: { bg: THEME.accent }
+    },
     style: { fg: THEME.text, border: { fg: THEME.border }, label: { fg: THEME.label } }
   });
 
@@ -195,6 +205,36 @@ export async function runDashboard(opts: DashboardOptions) {
     style: { fg: THEME.text, border: { fg: THEME.accent }, label: { fg: THEME.label } }
   });
 
+  const notificationBox = blessed.box({
+    parent: screen,
+    top: 2,
+    right: 1,
+    width: "50%",
+    height: 3,
+    border: "line",
+    tags: true,
+    hidden: true,
+    style: { fg: THEME.text, bg: "black", border: { fg: THEME.danger }, label: { fg: THEME.danger } }
+  });
+
+  let notificationTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  function showNotification(message: string, type: "error" | "warning" | "info" = "error", durationMs = 5000) {
+    const borderColor = type === "error" ? THEME.danger : type === "warning" ? THEME.warning : THEME.accent;
+    const label = type === "error" ? "Error" : type === "warning" ? "Warning" : "Info";
+    notificationBox.style.border = { fg: borderColor };
+    notificationBox.setLabel(` ${label} `);
+    notificationBox.setContent(` ${colorText(escapeTags(message), borderColor)}`);
+    notificationBox.show();
+    screen.render();
+
+    if (notificationTimeout) clearTimeout(notificationTimeout);
+    notificationTimeout = setTimeout(() => {
+      notificationBox.hide();
+      screen.render();
+    }, durationMs);
+  }
+
   screen.append(header);
   screen.append(radarTable);
   screen.append(marketBox);
@@ -259,8 +299,7 @@ export async function runDashboard(opts: DashboardOptions) {
       render();
     } catch (err) {
       logError("Radar", err);
-      footer.setContent(`Radar error: ${(err as Error).message}`);
-      screen.render();
+      showNotification(`Radar: ${(err as Error).message}`, "error");
     }
   }
 
@@ -379,8 +418,7 @@ export async function runDashboard(opts: DashboardOptions) {
       }
     } catch (err) {
       logError("History", err);
-      footer.setContent(`History error: ${(err as Error).message}`);
-      screen.render();
+      showNotification(`History: ${(err as Error).message}`, "error");
     }
   }
 
@@ -393,8 +431,7 @@ export async function runDashboard(opts: DashboardOptions) {
       lastRestAt = Date.now();
     } catch (err) {
       logError("Holders", err);
-      footer.setContent(`Holders error: ${(err as Error).message}`);
-      screen.render();
+      showNotification(`Holders: ${(err as Error).message}`, "error");
     }
   }
 
@@ -454,14 +491,15 @@ export async function runDashboard(opts: DashboardOptions) {
     renderAlerts();
     const skipLabel = autoSkipNoOrderbook ? colorText("ON", THEME.success) : colorText("off", THEME.muted);
     footer.setContent(
-      `${colorText("keys:", THEME.muted)} q=quit n/p=nav Enter=detail h=help o=outcome r=refresh f=filter s=save a=skip[${skipLabel}] t=alert e=export`
+      `${colorText("keys:", THEME.muted)} q=quit n/p=nav j/k=scroll Enter=detail h=help o=outcome r=refresh f=filter s=save a=skip[${skipLabel}] t=alert e=export`
     );
 
     screen.render();
   }
 
   function renderRadar() {
-    const view = filterRadar(radar, radarFilter).slice(0, opts.limit);
+    const view = filterRadar(radar, radarFilter);
+    radarTable.setLabel(` Radar (${view.length}) `);
     const rows = [[cell("#"), cell(" "), cell("Heat"), cell("Event"), cell("Outcome")]];
     view.forEach((market, idx) => {
       const isFocus = market.conditionId === focusMarket?.conditionId;
@@ -708,7 +746,7 @@ export async function runDashboard(opts: DashboardOptions) {
         }
       } catch (err) {
         logError("Resync", err);
-        lastAlert = `resync failed: ${(err as Error).message ?? String(err)}`;
+        showNotification(`Resync failed: ${(err as Error).message ?? String(err)}`, "warning");
       }
     }, CONFIG.resyncDelayMs);
   }
@@ -774,7 +812,6 @@ export async function runDashboard(opts: DashboardOptions) {
     const tokenId = focusMarket.clobTokenIds[outcomeIndex] ?? focusMarket.clobTokenIds[0];
     const outcome = focusMarket.outcomes[outcomeIndex] || `OUTCOME_${outcomeIndex + 1}`;
     const now = new Date();
-    const interval = CONFIG.historyInterval === "1d" ? 24 * 60 : CONFIG.historyInterval === "1h" ? 60 : 1;
     const fidelity = CONFIG.historyFidelity;
 
     const csvLines = ["timestamp,price,market,outcome,token_id"];
@@ -925,8 +962,7 @@ export async function runDashboard(opts: DashboardOptions) {
     screen.key(["s"], () => {
       saveSnapshot().catch((err) => {
         logError("Snapshot", err);
-        footer.setContent(`Snapshot error: ${(err as Error).message}`);
-        screen.render();
+        showNotification(`Snapshot: ${(err as Error).message}`, "error");
       });
     });
 
@@ -970,6 +1006,16 @@ export async function runDashboard(opts: DashboardOptions) {
         lastAlert = `Export error: ${(err as Error).message}`;
         render();
       });
+    });
+
+    screen.key(["j", "down"], () => {
+      radarTable.scroll(1);
+      screen.render();
+    });
+
+    screen.key(["k", "up"], () => {
+      radarTable.scroll(-1);
+      screen.render();
     });
   }
 

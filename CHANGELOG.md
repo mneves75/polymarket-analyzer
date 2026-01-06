@@ -2,6 +2,18 @@
 
 ## [Unreleased] - 2026-01-06
 
+### New Features
+- **Scrollable Radar Panel** - Radar box now scrolls to show all markets (not limited by display height)
+  - Added scrollbar with visual indicator
+  - Vi-style navigation: `j`/`k` or arrow keys to scroll
+  - Mouse wheel scrolling support
+  - Market count displayed in label: `Radar (N)`
+- **Error Notification Toast** - Errors now display as auto-dismissing toast notifications
+  - Shows at top-right for 5 seconds
+  - Color-coded by type (error=red, warning=yellow, info=blue)
+  - Replaces inline footer error messages for better visibility
+- Update help modal with scroll instructions (`j`, `k`, arrow keys)
+
 ### Configuration Changes
 - **Increase default radarLimit from 10 to 50** - Now fetches 50 markets by default instead of 10
 - Add `--limit` CLI flag documentation for overriding market fetch count
