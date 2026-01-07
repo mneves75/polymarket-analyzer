@@ -67,7 +67,7 @@ export async function runDashboard(opts: DashboardOptions) {
 	const radarTable = blessed.box({
 		top: 1,
 		left: 0,
-		width: "65%",
+		width: "50%",
 		height: "30%",
 		border: "line",
 		label: "Radar",
@@ -91,8 +91,8 @@ export async function runDashboard(opts: DashboardOptions) {
 
 	const marketBox = blessed.box({
 		top: 1,
-		left: "65%",
-		width: "35%",
+		left: "50%",
+		width: "50%",
 		height: "30%",
 		border: "line",
 		label: "Market",
@@ -107,7 +107,7 @@ export async function runDashboard(opts: DashboardOptions) {
 	const statsBox = blessed.box({
 		top: "31%",
 		left: 0,
-		width: "65%",
+		width: "50%",
 		height: "20%",
 		border: "line",
 		label: "Pulse",
@@ -121,8 +121,8 @@ export async function runDashboard(opts: DashboardOptions) {
 
 	const orderbookTable = blessed.box({
 		top: "31%",
-		left: "65%",
-		width: "35%",
+		left: "50%",
+		width: "50%",
 		height: "20%",
 		border: "line",
 		label: "Orderbook",
@@ -137,7 +137,7 @@ export async function runDashboard(opts: DashboardOptions) {
 	const historyBox = blessed.box({
 		top: "51%",
 		left: 0,
-		width: "65%",
+		width: "50%",
 		height: "20%",
 		border: "line",
 		label: "History",
@@ -151,8 +151,8 @@ export async function runDashboard(opts: DashboardOptions) {
 
 	const holdersTable = blessed.box({
 		top: "51%",
-		left: "65%",
-		width: "35%",
+		left: "50%",
+		width: "50%",
 		height: "20%",
 		border: "line",
 		label: "Holders",
