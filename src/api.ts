@@ -144,6 +144,8 @@ export interface MarketInfo {
 	bestBid?: number;
 	/** Current best ask price */
 	bestAsk?: number;
+	/** Market end/close date (ISO string) */
+	endDate?: string;
 }
 
 /**
@@ -523,6 +525,14 @@ export function normalizeMarket(
 	if (priceChange24hr !== undefined) result.priceChange24hr = priceChange24hr;
 	if (bestBid !== undefined) result.bestBid = bestBid;
 	if (bestAsk !== undefined) result.bestAsk = bestAsk;
+
+	// Extract end date from market or event
+	const endDate =
+		(market.endTime as string | undefined) ||
+		(market.end_time as string | undefined) ||
+		(event?.end_date as string | undefined) ||
+		(event?.endDate as string | undefined);
+	if (endDate !== undefined) result.endDate = endDate;
 
 	return result;
 }

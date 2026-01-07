@@ -38,6 +38,7 @@ import {
 import { type DashboardOptions, THEME } from "./tui-types";
 import {
 	asciiSparkline,
+	formatDateTime,
 	formatNumber,
 	formatPct,
 	formatPrice,
@@ -65,7 +66,7 @@ export async function runDashboard(opts: DashboardOptions) {
 	const radarTable = blessed.box({
 		top: 1,
 		left: 0,
-		width: "40%",
+		width: "65%",
 		height: "30%",
 		border: "line",
 		label: "Radar",
@@ -89,8 +90,8 @@ export async function runDashboard(opts: DashboardOptions) {
 
 	const marketBox = blessed.box({
 		top: 1,
-		left: "40%",
-		width: "60%",
+		left: "65%",
+		width: "35%",
 		height: "30%",
 		border: "line",
 		label: "Market",
@@ -105,7 +106,7 @@ export async function runDashboard(opts: DashboardOptions) {
 	const statsBox = blessed.box({
 		top: "31%",
 		left: 0,
-		width: "40%",
+		width: "65%",
 		height: "20%",
 		border: "line",
 		label: "Pulse",
@@ -119,8 +120,8 @@ export async function runDashboard(opts: DashboardOptions) {
 
 	const orderbookTable = blessed.box({
 		top: "31%",
-		left: "40%",
-		width: "60%",
+		left: "65%",
+		width: "35%",
 		height: "20%",
 		border: "line",
 		label: "Orderbook",
@@ -135,7 +136,7 @@ export async function runDashboard(opts: DashboardOptions) {
 	const historyBox = blessed.box({
 		top: "51%",
 		left: 0,
-		width: "40%",
+		width: "65%",
 		height: "20%",
 		border: "line",
 		label: "History",
@@ -149,8 +150,8 @@ export async function runDashboard(opts: DashboardOptions) {
 
 	const holdersTable = blessed.box({
 		top: "51%",
-		left: "40%",
-		width: "60%",
+		left: "65%",
+		width: "35%",
 		height: "20%",
 		border: "line",
 		label: "Holders",
@@ -588,7 +589,7 @@ export async function runDashboard(opts: DashboardOptions) {
 			msgRate > 0 ? THEME.success : THEME.muted,
 		);
 		header.setContent(
-			` Polymarket Pulse | ${new Date().toLocaleTimeString()} | ws=${wsLabel} (${wsAge}) | rest=${restAge} | ${filterLabel} | msg/s=${msgRateLabel} `,
+			` Polymarket Pulse | ${formatDateTime(new Date())} | ws=${wsLabel} (${wsAge}) | rest=${restAge} | ${filterLabel} | msg/s=${msgRateLabel} `,
 		);
 
 		renderRadar();
@@ -611,7 +612,7 @@ export async function runDashboard(opts: DashboardOptions) {
 		const view = filterRadar(radar, radarFilter);
 		radarTable.setLabel(` Radar (${view.length}) `);
 		const rows = [
-			[cell("#"), cell(" "), cell("Heat"), cell("Event"), cell("Outcome")],
+			[cell("#"), cell(" "), cell("Heat"), cell("Out"), cell("Event")],
 		];
 		view.forEach((market, idx) => {
 			const isFocus = market.conditionId === focusMarket?.conditionId;
@@ -626,10 +627,8 @@ export async function runDashboard(opts: DashboardOptions) {
 				`${prefix}${String(idx + 1).padStart(2, "0")}`,
 				noBookIndicator,
 				heatSymbol(market),
-				textCell(
-					truncate(market.question || market.eventTitle || "(no title)", 38),
-				),
-				textCell(truncate(market.outcomes[0] || "-", 12)),
+				textCell(truncate(market.outcomes[0] || "-", 6)),
+				textCell(market.question || market.eventTitle || "(no title)"),
 			]);
 		});
 		radarTable.setContent(renderTable(rows));
@@ -652,9 +651,14 @@ export async function runDashboard(opts: DashboardOptions) {
 		const outcome =
 			focusMarket.outcomes[outcomeIndex] || `OUTCOME_${outcomeIndex + 1}`;
 
+		const closeDate = focusMarket.endDate
+			? formatDateTime(new Date(focusMarket.endDate))
+			: "-";
+
 		const lines = [
 			`${colorText("event:", THEME.muted)} ${textCell(focusMarket.eventTitle || "-")}`,
 			`${colorText("question:", THEME.muted)} ${textCell(focusMarket.question || "-")}`,
+			`${colorText("closes:", THEME.muted)} ${textCell(closeDate)}`,
 			`${colorText("condition:", THEME.muted)} ${textCell(focusMarket.conditionId || "-")}`,
 			`${colorText("outcome:", THEME.muted)} ${textCell(outcome)} ${colorText(`(${outcomeIndex + 1}/${focusMarket.clobTokenIds.length})`, THEME.muted)}`,
 			`${colorText("token:", THEME.muted)} ${textCell(tokenId)}`,
