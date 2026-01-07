@@ -56,6 +56,12 @@
   - Standard Node.js pattern for one-time shutdown signals
   - Note: `uncaughtException` and `unhandledRejection` handlers correctly remain as `process.on()` as they may fire multiple times before process exit
 
+### Code Quality: Safe Error Message Extraction
+- **Replace unsafe `(err as Error).message` casts with `getErrorInfo()`** - 10 instances fixed across `src/tui.ts` and `src/ws.ts`
+  - `getErrorInfo()` safely handles any error type: Error objects, strings, objects with message property, or unknown values
+  - Prevents potential `undefined` access when non-Error values are thrown
+  - Uses existing `getErrorInfo()` utility from `src/errors.ts` for consistency
+
 ### Documentation: Bun Runtime Flag Standardization
 - **Add `--bun` flag to all commands** - Ensures Bun runtime is used instead of Node.js fallback
   - Updated `package.json` scripts: `dev`, `dev:opentui`, `snapshot`, `tui`, `markets`, `typecheck`

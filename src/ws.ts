@@ -1,4 +1,5 @@
 import { CONFIG } from "./config";
+import { getErrorInfo } from "./errors";
 import { asNumber } from "./parsers";
 
 export type WsUpdate = {
@@ -197,7 +198,7 @@ export function connectMarketWs(assetIds: string[], handlers: WsHandlers) {
 					handlers.onUpdate(update);
 				});
 			} catch (err) {
-				handlers.onStatus?.(`ws parse error: ${(err as Error).message}`);
+				handlers.onStatus?.(`ws parse error: ${getErrorInfo(err).message}`);
 			}
 		});
 
