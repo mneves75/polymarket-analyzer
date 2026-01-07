@@ -1,7 +1,10 @@
 #!/usr/bin/env bun
 import { CONFIG } from "./config";
 import { listMarkets, runSnapshot } from "./demo";
-import { runDashboard } from "./tui";
+import { runDashboard as runBlessedDashboard } from "./tui";
+
+// Environment variable to switch TUI backends
+const USE_OPENTUI = process.env.OPENTUI === "1";
 
 type Options = {
 	market?: string;
@@ -39,9 +42,20 @@ const dashboardOptions: Record<string, unknown> = {
 };
 if (opts.market !== undefined) dashboardOptions.market = opts.market;
 if (opts.slug !== undefined) dashboardOptions.slug = opts.slug;
-await runDashboard(
-	dashboardOptions as { intervalMs: number; limit: number; ws: boolean },
-);
+
+// Switch between blessed and OpenTUI backends
+if (USE_OPENTUI) {
+	console.log("Starting TUI with OpenTUI backend...");
+	const { runDashboard } = await import("./opentui/tui.js");
+	await runDashboard(
+		dashboardOptions as { intervalMs: number; limit: number; ws: boolean },
+	);
+} else {
+	console.log("Starting TUI with Blessed backend...");
+	await runBlessedDashboard(
+		dashboardOptions as { intervalMs: number; limit: number; ws: boolean },
+	);
+}
 
 function parseArgs(args: string[]): Options {
 	const options: Options = {

@@ -1,6 +1,67 @@
 # Changelog
 
-## [Unreleased] - 2026-01-06
+## [Unreleased] - 2026-01-07
+
+### OpenTUI Implementation (Experimental)
+- **Complete OpenTUI backend** - Full-featured TUI implementation using @opentui/core
+  - 8-panel layout matching blessed implementation (radar, market, pulse, orderbook, history, holders, alerts, footer)
+  - Detail modal with scrolling support (Enter key to open, j/k to scroll, ESC to close)
+  - Help modal with keyboard shortcuts (h key to open)
+  - Full keyboard navigation (n/p for markets, o for outcome toggle, r for refresh)
+  - Signal handlers for graceful shutdown (SIGINT, SIGTERM, SIGQUIT)
+  - Error boundaries and recovery for TUI operations
+  - WARNING: OpenTUI is NOT production-ready - use Blessed for production
+
+- **Event-driven state management** - Centralized state with EventEmitter
+  - `StateManager` singleton with immutable state updates
+  - State change events for reactive rendering
+  - Input validation for all state mutations (focusIndex, outcomeIndex, etc.)
+  - Debounced rendering to prevent CPU thrashing
+
+- **Result type for error handling** - Functional error handling pattern
+  - `Result<T, E>` type with `ok()` and `err()` constructors
+  - Helper functions: `unwrap`, `unwrapOr`, `map`, `mapErr`, `flatMap`, `fromPromise`
+  - Type guards: `isOk`, `isErr`
+
+- **TUI-safe logging** - Logger that writes to stderr (not stdout)
+  - Log levels: DEBUG, INFO, WARN, ERROR
+  - In-memory log storage with rotation (max 100 entries)
+  - Log filtering and counting utilities
+
+- **Specialized error types** - Domain-specific errors for TUI operations
+  - `TUIError` base class with code, context, timestamp, and `toJSON()`
+  - Subclasses: `RenderError`, `DataError`, `NavigationError`, `NetworkError`, `InitError`
+  - Type guards for all error types
+
+- **Configuration system** - Centralized config with runtime updates
+  - Layout config (panel dimensions, heights)
+  - Color config (theme colors for bid/ask, borders, etc.)
+  - Performance config (target FPS, debounce delays, cache expiry)
+  - `getConfig()`, `updateConfig()`, `resetConfig()` functions
+
+- **Market service with caching** - Cached API calls for radar data
+  - Configurable cache expiry via performance config
+  - Cache status monitoring
+
+### Fresh Eyes Code Review Fixes
+- **Fix test mock field name** - Changed `volume24h` to `volume24hr` to match `MarketInfo` type
+- **Remove unused parameter** - Removed dead `renderer` parameter from `clearBox()` function
+- **Fix hardcoded limit** - Refresh handler now uses validated options instead of hardcoded `50`
+- **Fix config caching bug** - MarketService now gets fresh config on each call instead of caching at construction
+- **Fix shallow copy issue** - Initial config now properly deep copies nested objects
+- **Log cleanup errors** - Shutdown cleanup now logs errors instead of silently swallowing them
+
+### Test Coverage
+- **119 OpenTUI tests** covering:
+  - State manager (modal state, navigation, pricing, alerts, filters, stats)
+  - Result type (ok, err, unwrap, map, fromPromise)
+  - Logger (levels, filtering, rotation, counts)
+  - Config (defaults, updates, reset)
+  - Error types (TUIError, subclasses, type guards)
+  - Types (createDefaultState, getFocusedMarket, getCurrentTokenId, validateDashboardOptions)
+  - Market service (cache status, clear cache)
+
+## [Previous] - 2026-01-06
 
 ### New Features
 - **Comprehensive Error Handling System** - Structured error types for better debugging and error handling

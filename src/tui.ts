@@ -1039,12 +1039,22 @@ export async function runDashboard(opts: DashboardOptions) {
 		render();
 	}
 
+	/**
+	 * Graceful shutdown handler - cleans up resources before exit.
+	 * Called by quit keys (q, Ctrl+C) and OS signals (SIGTERM, SIGINT).
+	 */
+	function shutdown() {
+		wsConnection?.close();
+		screen.destroy();
+		process.exit(0);
+	}
+
+	// Handle OS signals for graceful shutdown (e.g., kill, docker stop)
+	process.on("SIGTERM", shutdown);
+	process.on("SIGINT", shutdown);
+
 	function bindKeys() {
-		screen.key(["q", "C-c"], () => {
-			wsConnection?.close();
-			screen.destroy();
-			process.exit(0);
-		});
+		screen.key(["q", "C-c"], shutdown);
 
 		screen.key(["enter"], () => {
 			if (showHelp) {
@@ -1262,7 +1272,8 @@ export async function runDashboard(opts: DashboardOptions) {
 			onUpdate(update) {
 				msgCount += 1;
 				const updateTs = update.timestamp ?? update.ts;
-				lastWsAt = updateTs;
+				// Only update lastWsAt if we have a valid timestamp
+				if (updateTs !== undefined) lastWsAt = updateTs;
 				const prevTs = lastTsByAsset.get(update.assetId);
 				const prevSeq = lastSeqByAsset.get(update.assetId);
 				const prevHash = lastHashByAsset.get(update.assetId);

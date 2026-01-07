@@ -118,6 +118,39 @@ describe("http", () => {
 				expect(attempts).toBeGreaterThanOrEqual(1);
 			});
 
+			// Regression test: HttpError from 4xx responses must not be retried
+			// This specifically tests the fix where HttpError thrown from the response
+			// handler was being caught and retried incorrectly
+			it("does not retry HttpError from 4xx (regression: exact attempt count)", async () => {
+				let attempts = 0;
+				mockFetch.mockImplementation(() => {
+					attempts++;
+					return Promise.resolve({
+						ok: false,
+						status: 400,
+						statusText: "Bad Request",
+						text: () => Promise.resolve('{"error": "Invalid parameters"}'),
+						get headers() {
+							return new Headers();
+						},
+					} as Response);
+				});
+
+				try {
+					await fetchJson("https://api.test.com/data", { retries: 3 });
+					// Should not reach here
+					expect(true).toBe(false);
+				} catch (err) {
+					expect(err).toBeInstanceOf(HttpError);
+					if (err instanceof HttpError) {
+						expect(err.status).toBe(400);
+						expect(err.isClientError()).toBe(true);
+					}
+				}
+				// Critical: must be exactly 1 attempt - no retries for 4xx errors
+				expect(attempts).toBe(1);
+			});
+
 			it("respects max retries", async () => {
 				let attempts = 0;
 				mockFetch.mockImplementation(() => {

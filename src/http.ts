@@ -226,6 +226,12 @@ export async function fetchJson<T>(
 
 			return (await res.json()) as T;
 		} catch (err) {
+			// Don't retry HttpError - it was already decided not to retry based on status code.
+			// Only retry on network errors (timeouts, connection failures, AbortError).
+			if (err instanceof HttpError) {
+				throw err;
+			}
+
 			// Retry on network errors (timeouts, connection failures)
 			if (attempt < retries) {
 				attempt += 1;
