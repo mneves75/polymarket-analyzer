@@ -9,6 +9,7 @@ import {
 	type MarketInfo,
 } from "./api";
 import { CONFIG } from "./config";
+import { getErrorInfo } from "./errors";
 import { isNoOrderbookError } from "./http";
 import { logError } from "./logger";
 import { loadRadar, resolveMarket } from "./market";
@@ -372,7 +373,7 @@ export async function runDashboard(opts: DashboardOptions) {
 			render();
 		} catch (err) {
 			logError("Radar", err);
-			showNotification(`Radar: ${(err as Error).message}`, "error");
+			showNotification(`Radar: ${getErrorInfo(err).message}`, "error");
 		}
 	}
 
@@ -420,8 +421,7 @@ export async function runDashboard(opts: DashboardOptions) {
 			if (isNoOrderbookError(bookRes.reason)) {
 				noOrderbookThisRefresh = true;
 			} else {
-				const message =
-					(bookRes.reason as Error).message ?? String(bookRes.reason);
+				const message = getErrorInfo(bookRes.reason).message;
 				logError("Orderbook", bookRes.reason);
 				lastAlert = truncateAlert(`orderbook error: ${message}`);
 			}
@@ -440,8 +440,7 @@ export async function runDashboard(opts: DashboardOptions) {
 			if (isNoOrderbookError(pricesRes.reason)) {
 				noOrderbookThisRefresh = true;
 			} else {
-				const message =
-					(pricesRes.reason as Error).message ?? String(pricesRes.reason);
+				const message = getErrorInfo(pricesRes.reason).message;
 				logError("Prices", pricesRes.reason);
 				lastAlert = truncateAlert(`prices error: ${message}`);
 			}
@@ -453,8 +452,7 @@ export async function runDashboard(opts: DashboardOptions) {
 			if (isNoOrderbookError(midRes.reason)) {
 				noOrderbookThisRefresh = true;
 			} else {
-				const message =
-					(midRes.reason as Error).message ?? String(midRes.reason);
+				const message = getErrorInfo(midRes.reason).message;
 				logError("Midpoint", midRes.reason);
 				lastAlert = truncateAlert(`midpoint error: ${message}`);
 			}
@@ -504,7 +502,7 @@ export async function runDashboard(opts: DashboardOptions) {
 			}
 		} catch (err) {
 			logError("History", err);
-			showNotification(`History: ${(err as Error).message}`, "error");
+			showNotification(`History: ${getErrorInfo(err).message}`, "error");
 		}
 	}
 
@@ -520,7 +518,7 @@ export async function runDashboard(opts: DashboardOptions) {
 			lastRestAt = Date.now();
 		} catch (err) {
 			logError("Holders", err);
-			showNotification(`Holders: ${(err as Error).message}`, "error");
+			showNotification(`Holders: ${getErrorInfo(err).message}`, "error");
 		}
 	}
 
@@ -943,7 +941,7 @@ export async function runDashboard(opts: DashboardOptions) {
 			} catch (err) {
 				logError("Resync", err);
 				showNotification(
-					`Resync failed: ${(err as Error).message ?? String(err)}`,
+					`Resync failed: ${getErrorInfo(err).message}`,
 					"warning",
 				);
 			}
@@ -1198,7 +1196,7 @@ export async function runDashboard(opts: DashboardOptions) {
 		screen.key(["s"], () => {
 			saveSnapshot().catch((err) => {
 				logError("Snapshot", err);
-				showNotification(`Snapshot: ${(err as Error).message}`, "error");
+				showNotification(`Snapshot: ${getErrorInfo(err).message}`, "error");
 			});
 		});
 
@@ -1244,7 +1242,7 @@ export async function runDashboard(opts: DashboardOptions) {
 		screen.key(["e"], () => {
 			exportHistoryCsv().catch((err) => {
 				logError("Export", err);
-				lastAlert = `Export error: ${(err as Error).message}`;
+				lastAlert = `Export error: ${getErrorInfo(err).message}`;
 				render();
 			});
 		});
