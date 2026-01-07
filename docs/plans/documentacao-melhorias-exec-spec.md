@@ -467,7 +467,7 @@ Este documento guia novos membros através dos primeiros 90 dias no projeto.
 **Dia 1:**
 - [ ] Clonar repositório
 - [ ] Rodar `bun install`
-- [ ] Executar `bun run dev`
+- [ ] Executar `bun --bun run dev`
 - [ ] Explorar estrutura de diretórios
 - [ ] Ler capítulo 00 (Introdução)
 
@@ -761,7 +761,7 @@ bun install
 
 ### Passo 2: Executar
 \`\`\`bash
-bun run dev
+bun --bun run dev
 \`\`\`
 
 ### Resultado Esperado

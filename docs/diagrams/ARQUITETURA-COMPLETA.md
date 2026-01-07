@@ -62,7 +62,7 @@ sequenceDiagram
     participant S as CLOB WebSocket
     participant T as tui.ts
 
-    U->>I: bun run dev --market <id>
+    U->>I: bun --bun run dev --market <id>
     I->>M: resolveMarket(opts, radar)
 
     alt Mercado não está no radar
@@ -280,7 +280,7 @@ classDiagram
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Initializing: bun run dev
+    [*] --> Initializing: bun --bun run dev
 
     Initializing --> Loading: parseArgs()
 

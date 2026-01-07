@@ -316,8 +316,8 @@ export async function runDashboard(opts: DashboardOptions): Promise<void> {
 
 #### 1.6 Success Criteria
 
-- [ ] `bun run dev` starts blessed TUI (existing behavior)
-- [ ] `OPENTUI=1 bun run dev` starts OpenTUI TUI with "Hello, OpenTUI!"
+- [ ] `bun --bun run dev` starts blessed TUI (existing behavior)
+- [ ] `OPENTUI=1 bun --bun run dev` starts OpenTUI TUI with "Hello, OpenTUI!"
 - [ ] `q` key exits cleanly with no terminal corruption
 - [ ] `Ctrl+C` exits cleanly
 - [ ] No TypeScript errors
@@ -1196,8 +1196,8 @@ benchmark();
 ## Testing Checklist
 
 ### Phase 1: Setup
-- [ ] `bun run dev` starts blessed (baseline)
-- [ ] `OPENTUI=1 bun run dev` starts OpenTUI
+- [ ] `bun --bun run dev` starts blessed (baseline)
+- [ ] `OPENTUI=1 bun --bun run dev` starts OpenTUI
 - [ ] `q` key exits cleanly
 - [ ] No terminal corruption
 
@@ -1236,7 +1236,7 @@ benchmark();
 
 If OpenTUI fails:
 
-1. **Stop using it:** `unset OPENTUI` or use `bun run dev` (blessed default)
+1. **Stop using it:** `unset OPENTUI` or use `bun --bun run dev` (blessed default)
 2. **Delete branch:** `git checkout main && git branch -D feature/opentui-experiment`
 3. **Clean dependencies:** `bun remove @opentui/core` (optional)
 
@@ -1257,13 +1257,13 @@ Add section:
 
 ```bash
 # Default (blessed)
-bun run dev
+bun --bun run dev
 
 # OpenTUI (experimental)
-OPENTUI=1 bun run dev
+OPENTUI=1 bun --bun run dev
 
 # Or use script
-bun run dev:opentui
+bun --bun run dev:opentui
 ```
 
 ### API Differences
@@ -1308,7 +1308,7 @@ This project supports two TUI backends:
 - Mature, stable library (last release 2018)
 - Used in production
 - ```bash
-  bun run dev
+  bun --bun run dev
   ```
 
 ### OpenTUI (Experimental)
@@ -1316,9 +1316,9 @@ This project supports two TUI backends:
 - Zig-native rendering
 - Alpha status - not production-ready
 - ```bash
-  OPENTUI=1 bun run dev
+  OPENTUI=1 bun --bun run dev
   # or
-  bun run dev:opentui
+  bun --bun run dev:opentui
   ```
 
 ### Performance Comparison

@@ -1163,5 +1163,5 @@ OPENTUI=1 bun --bun run src/index.ts --tui --no-ws
 
 1. Delete `src/opentui/tui.ts`
 2. Implement Phase 2 (Minimal Viable TUI)
-3. Test with `OPENTUI=1 bun run dev --tui`
+3. Test with `OPENTUI=1 bun --bun run dev --tui`
 4. Iterate through remaining phases

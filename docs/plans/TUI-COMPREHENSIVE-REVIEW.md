@@ -170,7 +170,7 @@ Phase 1 - Detail Screen:
     cd /Users/mneves/dev/polymarket-analyzer
 
     # After implementation, test by:
-    bun run dev
+    bun --bun run dev
     # Press Enter on any market to see detail modal
     # Press ESC or Enter again to dismiss
 
@@ -179,7 +179,7 @@ Expected behavior: Modal appears with expanded market info, full orderbook depth
 Phase 2 - Help Modal:
 
     # After implementation, test by:
-    bun run dev
+    bun --bun run dev
     # Press h to see help modal
     # Press ESC or h to dismiss
 
@@ -194,7 +194,7 @@ Phase 3 - Refactoring:
     wc -l src/tui-render.ts
     # Should be under 300 lines
 
-    bun run dev
+    bun --bun run dev
     # Verify dashboard still works correctly
 
 Phase 4 - Testing:
@@ -210,7 +210,7 @@ Phase 5 - Final Verification:
     bun test
     # All tests pass
 
-    bun run dev
+    bun --bun run dev
     # Manual verification of all keybindings
 
 ## Validation and Acceptance
