@@ -2,6 +2,29 @@
 
 ## [Unreleased] - 2026-01-07
 
+### TUI Detail Modal Performance Fixes
+
+First-principles review of detail modal loading behavior revealed 4 critical bugs affecting responsiveness and resource usage.
+
+- **Fix loading state not cleared on abort** - Loading indicators now properly clear when navigation cancels in-flight requests
+  - Previously, aborting a request would return early without resetting `loading.pricing`/`loading.orderbook`
+  - UI could get stuck showing "Loading..." indefinitely
+  - Fixed by moving state clearing before the abort check (`tui.ts:448-451`)
+
+- **Fix refreshHistory using stale/null signal** - History requests now properly use fresh AbortController
+  - Previously, `fetchAbort?.signal` could be null on initial load or stale from previous navigation
+  - Added AbortController creation if none exists and early exit if already aborted (`tui.ts:547-556`)
+
+- **Abort losing request in Promise.any race** - Price history endpoint racing now cancels the loser
+  - Previously, both `/prices-history` and `/price_history` ran to completion, wasting bandwidth
+  - Now uses internal `raceAbort` AbortController to cancel the losing request immediately
+  - Properly links external signal for parent cancellation (`api.ts:839-872`)
+
+- **Add request deduplication for same market** - Prevent redundant requests when polling overlaps with navigation
+  - Added `pendingFocusTokenId` and `pendingHistoryTokenId` tracking variables
+  - Skip redundant fetch if already fetching same token (unless forced refresh)
+  - Clear pending state in finally/cleanup blocks (`tui.ts:369-372, 412-424, 542-559`)
+
 ### ASCII Line Chart Bug Fixes (Phase 5)
 
 Critical first-principles review of the line chart implementation revealed swapped corner characters causing disconnected line visuals.

@@ -15,6 +15,8 @@ export type FetchOptions = {
 	timeoutMs?: number;
 	/** Maximum number of retry attempts (default: 2, meaning 3 total attempts) */
 	retries?: number;
+	/** AbortSignal for request cancellation */
+	signal?: AbortSignal;
 };
 
 /**
@@ -185,8 +187,16 @@ export async function fetchJson<T>(
 		body,
 		timeoutMs = 10_000,
 		retries = 2,
+		signal: externalSignal,
 	} = options;
 	const requestUrl = new URL(url);
+
+	// Check if already aborted before starting
+	if (externalSignal?.aborted) {
+		const error = new Error("Request aborted");
+		error.name = "AbortError";
+		throw error;
+	}
 
 	// Apply rate limiting if rule exists for this endpoint
 	const limitRule = matchRateLimit(requestUrl);
@@ -194,8 +204,13 @@ export async function fetchJson<T>(
 
 	let attempt = 0;
 	while (true) {
+		// Create internal abort controller for timeout, but also listen to external signal
 		const controller = new AbortController();
 		const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+		// Link external signal to internal controller
+		const abortHandler = () => controller.abort();
+		externalSignal?.addEventListener("abort", abortHandler);
 
 		try {
 			const res = await fetch(requestUrl, {
@@ -227,9 +242,15 @@ export async function fetchJson<T>(
 			return (await res.json()) as T;
 		} catch (err) {
 			// Don't retry HttpError - it was already decided not to retry based on status code.
-			// Only retry on network errors (timeouts, connection failures, AbortError).
 			if (err instanceof HttpError) {
 				throw err;
+			}
+
+			// Don't retry on external abort - propagate immediately
+			if (externalSignal?.aborted) {
+				const abortError = new Error("Request aborted");
+				abortError.name = "AbortError";
+				throw abortError;
 			}
 
 			// Retry on network errors (timeouts, connection failures)
@@ -242,6 +263,7 @@ export async function fetchJson<T>(
 			throw err;
 		} finally {
 			clearTimeout(timeout);
+			externalSignal?.removeEventListener("abort", abortHandler);
 		}
 	}
 }

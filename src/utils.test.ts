@@ -344,7 +344,9 @@ describe("asciiLineChart", () => {
 	});
 
 	test("respects width parameter", () => {
-		const series = Array(100).fill(0).map((_, i) => Math.sin(i / 10));
+		const series = Array(100)
+			.fill(0)
+			.map((_, i) => Math.sin(i / 10));
 		const result = asciiLineChart(series, { width: 20, height: 6 });
 		// Check that the chart is constrained to width
 		const chartLine = result[0] ?? "";
@@ -407,16 +409,18 @@ describe("asciiLineChart", () => {
 		expect(chartContent).toContain("╯"); // bottom corner
 
 		// Verify they're in the right positions (╭ should be above ╯)
-		const lines = result.filter(line => line.includes("╭") || line.includes("╯"));
+		const lines = result.filter(
+			(line) => line.includes("╭") || line.includes("╯"),
+		);
 		expect(lines.length).toBe(2);
 		// First line with a corner should have ╭ (top), second should have ╯ (bottom)
-		const topLine = result.find(line => line.includes("╭"));
-		const bottomLine = result.find(line => line.includes("╯"));
+		const topLine = result.find((line) => line.includes("╭"));
+		const bottomLine = result.find((line) => line.includes("╯"));
 		expect(topLine).toBeDefined();
 		expect(bottomLine).toBeDefined();
 		// Top line appears before bottom line in output (top-to-bottom)
-		const topIndex = result.findIndex(line => line.includes("╭"));
-		const bottomIndex = result.findIndex(line => line.includes("╯"));
+		const topIndex = result.findIndex((line) => line.includes("╭"));
+		const bottomIndex = result.findIndex((line) => line.includes("╯"));
 		expect(topIndex).toBeLessThan(bottomIndex);
 	});
 
@@ -434,8 +438,8 @@ describe("asciiLineChart", () => {
 		expect(chartContent).toContain("╰"); // bottom corner (end of down)
 
 		// Verify they're in the right positions (╮ should be above ╰)
-		const topIndex = result.findIndex(line => line.includes("╮"));
-		const bottomIndex = result.findIndex(line => line.includes("╰"));
+		const topIndex = result.findIndex((line) => line.includes("╮"));
+		const bottomIndex = result.findIndex((line) => line.includes("╰"));
 		expect(topIndex).toBeLessThan(bottomIndex);
 	});
 
@@ -500,7 +504,9 @@ describe("formatTimeRemaining", () => {
 	});
 
 	test("formats days and hours for long durations", () => {
-		const future = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000); // 2 days 5 hours
+		const future = new Date(
+			Date.now() + 2 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000,
+		); // 2 days 5 hours
 		const result = formatTimeRemaining(future);
 		expect(result).toMatch(/^2d 5h left$/);
 	});

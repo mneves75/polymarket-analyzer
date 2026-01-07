@@ -269,8 +269,7 @@ export function asciiChart(series: number[], width = 50, height = 8): string[] {
 		}
 
 		// Add Y-axis label only for top and bottom rows
-		const label =
-			row === height - 1 ? maxLabel : row === 0 ? minLabel : "";
+		const label = row === height - 1 ? maxLabel : row === 0 ? minLabel : "";
 		lines.push(`${label.padStart(labelWidth)} │${rowChars.join("")}`);
 	}
 
@@ -346,7 +345,9 @@ export function asciiLineChart(
 	if (sliced.length < 2) {
 		const value = sliced[0] ?? 0;
 		const suffix = removed > 0 ? ` (${removed} invalid values filtered)` : "";
-		return [`Price: ${formatPrice(value)} (insufficient data for chart)${suffix}`];
+		return [
+			`Price: ${formatPrice(value)} (insufficient data for chart)${suffix}`,
+		];
 	}
 
 	// Calculate min/max (use provided values or auto-calculate)
@@ -376,7 +377,9 @@ export function asciiLineChart(
 					: " ".repeat(sliced.length + 1);
 			lines.push(`${label.padStart(labelWidth)}${lineContent}`);
 		}
-		lines.push(`${"".padStart(labelWidth)}${LINE_CHARS.bottomLeft}${"─".repeat(sliced.length)}`);
+		lines.push(
+			`${"".padStart(labelWidth)}${LINE_CHARS.bottomLeft}${"─".repeat(sliced.length)}`,
+		);
 		return lines;
 	}
 
