@@ -361,7 +361,7 @@ Features from Blessed implementation that must be ported:
 
 ```bash
 # Type check
-bun tsc --noEmit
+bun --bun tsc --noEmit
 
 # Module load test
 bun --eval 'import("./src/opentui/tui.js")'

@@ -204,7 +204,7 @@ Update `package.json`:
     "dev": "bun --bun run src/index.ts --tui",
     "dev:opentui": "OPENTUI=1 bun --bun run src/index.ts --tui",
     "test": "bun test",
-    "typecheck": "bun tsc"
+    "typecheck": "bun --bun tsc"
   }
 }
 ```
