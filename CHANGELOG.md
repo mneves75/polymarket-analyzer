@@ -2,6 +2,25 @@
 
 ## [Unreleased] - 2026-01-07
 
+### TUI Display Fixes
+
+Three user-reported display issues fixed.
+
+- **Fix charts not showing** - Markets were ordered by `id` (newest first), returning short-term markets with 0-1 history points
+  - Changed `fetchEvents` and `fetchMarkets` to order by `volume24hr` descending
+  - High-volume markets have 90-1486 price history points for proper chart rendering
+  - Also changed `historyInterval` from `"1d"` to `"all"` for maximum history data (`config.ts:18`)
+
+- **Fix countdown timer not updating** - Market end dates were not being extracted from API responses
+  - API returns `market.endDate` but code looked for `market.endTime` and `market.end_time`
+  - Added `market.endDate` and `market.end_date` to extraction logic (`api.ts:530-536`)
+  - Countdown now shows correctly (e.g., "20d 5h left", "6h 17m left")
+
+- **Replace sparkline with multi-row line chart** - History panel was showing a single-row sparkline
+  - Changed from `asciiSparkline()` to `asciiLineChart()` in renderHistory
+  - Chart height dynamically calculated based on panel dimensions
+  - Shows proper price scale and trend visualization (`tui.ts:897-918`)
+
 ### TUI Detail Modal Performance Fixes
 
 First-principles review of detail modal loading behavior revealed 4 critical bugs affecting responsiveness and resource usage.
