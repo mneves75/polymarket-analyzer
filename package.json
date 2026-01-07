@@ -8,6 +8,7 @@
 	},
 	"scripts": {
 		"dev": "bun run src/index.ts --tui",
+		"dev:opentui": "OPENTUI=1 bun run src/index.ts --tui",
 		"snapshot": "bun run src/index.ts --once",
 		"tui": "bun run src/index.ts --tui",
 		"markets": "bun run src/index.ts --list-markets",
@@ -15,6 +16,7 @@
 		"typecheck": "bun tsc"
 	},
 	"dependencies": {
+		"@opentui/core": "^0.1.69",
 		"blessed": "^0.1.81",
 		"zod": "^4.3.5"
 	},

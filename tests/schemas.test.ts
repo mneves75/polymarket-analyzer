@@ -97,6 +97,50 @@ describe("Zod Schemas", () => {
 			const result = GammaMarketSchema.safeParse(invalidMarket);
 			expect(result.success).toBe(false);
 		});
+
+		// Regression test: passthrough() allows extra API fields without validation failure
+		it("allows extra fields via passthrough (regression: extra API fields)", () => {
+			const marketWithExtraFields = {
+				conditionId: `0x${"0".repeat(64)}`,
+				question: "Will it rain?",
+				// Extra fields that the API might return but aren't in our schema
+				extraApiField: "some value",
+				newFieldFromApiUpdate: 123,
+				nestedExtra: { key: "value" },
+			};
+			const result = GammaMarketSchema.safeParse(marketWithExtraFields);
+			expect(result.success).toBe(true);
+			// Verify extra fields are preserved in output
+			if (result.success) {
+				expect((result.data as Record<string, unknown>).extraApiField).toBe(
+					"some value",
+				);
+			}
+		});
+
+		// Regression test: nested tokens also allow extra fields
+		it("allows extra fields in nested tokens array (regression)", () => {
+			const marketWithNestedExtras = {
+				conditionId: `0x${"0".repeat(64)}`,
+				question: "Test market",
+				tokens: [
+					{
+						tokenId: `0x${"b".repeat(64)}`,
+						outcome: "YES",
+						// Extra field in token object
+						price: 0.65,
+						winner: false,
+					},
+				],
+			};
+			const result = GammaMarketSchema.safeParse(marketWithNestedExtras);
+			expect(result.success).toBe(true);
+			// Verify nested extra fields are preserved
+			if (result.success && result.data.tokens) {
+				const token = result.data.tokens[0] as Record<string, unknown>;
+				expect(token.price).toBe(0.65);
+			}
+		});
 	});
 
 	describe("validateWithSchema", () => {

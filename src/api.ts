@@ -593,10 +593,9 @@ function asNumber(value: unknown): number | undefined {
  * @returns Array of token IDs (hex strings)
  */
 function extractTokenIds(market: GammaMarket): string[] {
-	// Try direct clobTokenIds field (various naming conventions)
+	// Try direct clobTokenIds field (camelCase and snake_case variants)
 	const direct =
 		(market.clobTokenIds as string[] | string | undefined) ||
-		(market.clob_token_ids as string[] | string | undefined) ||
 		(market.clob_token_ids as string[] | string | undefined);
 	const parsed = parseMaybeJsonArray(direct);
 	if (Array.isArray(parsed) && parsed.length > 0) return parsed.map(String);

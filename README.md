@@ -25,9 +25,18 @@ bun run dev --tui
 ## Usage
 
 ### TUI Mode
+
+**Blessed (Default - Production Ready):**
 ```sh
 bun run dev --tui
 ```
+
+**OpenTUI (Experimental - NOT Production-Ready):**
+```sh
+OPENTUI=1 bun run dev --tui
+```
+
+> **WARNING:** OpenTUI is explicitly marked by its developers as **"not ready for production use"**. Use Blessed for production. OpenTUI is for experimentation only. See [OpenTUI GitHub](https://github.com/sst/opentui).
 
 ### Snapshot JSON
 ```sh
@@ -111,6 +120,8 @@ polymarket-analyzer/
 │   ├── rateLimiter.ts    # Token bucket rate limiter
 │   ├── ws.ts             # WebSocket client
 │   ├── tui.ts            # Terminal UI (Blessed)
+│   ├── opentui/
+│   │   └── tui.ts        # Terminal UI (OpenTUI, experimental)
 │   └── utils.ts          # Utility functions
 ├── docs/
 │   ├── learn/            # Learning documentation (9 chapters)
@@ -170,7 +181,7 @@ This project integrates with multiple Polymarket APIs:
 
 - **Runtime**: Bun 1.3.5+
 - **Language**: TypeScript 5.6.3
-- **UI Framework**: Blessed (Terminal UI)
+- **UI Framework**: Blessed (default) / OpenTUI (experimental)
 - **Testing**: Bun Test (built-in)
 
 ## Notes

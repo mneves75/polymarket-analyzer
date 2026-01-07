@@ -91,9 +91,12 @@ export const MarketIdSchema = z.union([
 /**
  * Zod schema for GammaEvent API response.
  * Validates the flexible API response structure.
+ *
+ * Uses passthrough() to allow extra fields from the API,
+ * matching the interface's index signature: [unknownField: string]: unknown
  */
-export const GammaEventSchema: z.ZodType<import("./api").GammaEvent> = z.object(
-	{
+export const GammaEventSchema: z.ZodType<import("./api").GammaEvent> = z
+	.object({
 		id: z.string().optional(),
 		slug: z.string().optional(),
 		title: z.string().optional(),
@@ -114,28 +117,34 @@ export const GammaEventSchema: z.ZodType<import("./api").GammaEvent> = z.object(
 		tag: z.string().optional(),
 		icon: z.string().optional(),
 		image: z.string().optional(),
-	},
-);
+	})
+	.passthrough();
 
 /**
  * Zod schema for GammaMarket API response.
+ *
+ * Uses passthrough() to allow extra fields from the API,
+ * matching the interface's index signature: [unknownField: string]: unknown
  */
-export const GammaMarketSchema: z.ZodType<import("./api").GammaMarket> =
-	z.object({
+export const GammaMarketSchema: z.ZodType<import("./api").GammaMarket> = z
+	.object({
 		conditionId: ConditionIdSchema.optional(),
 		question: z.string().optional(),
 		outcomes: z.array(z.string()).optional(),
 		slug: z.string().optional(),
 		tokens: z
 			.array(
-				z.object({
-					tokenId: TokenIdSchema.optional(),
-					outcome: z.string().optional(),
-				}),
+				z
+					.object({
+						tokenId: TokenIdSchema.optional(),
+						outcome: z.string().optional(),
+					})
+					.passthrough(),
 			)
 			.optional(),
 		clobTokenIds: z.array(TokenIdSchema).optional(),
-	});
+	})
+	.passthrough();
 
 /**
  * Zod schema for OrderbookState.
