@@ -66,9 +66,10 @@ async function shutdown(signal: string): Promise<never> {
 }
 
 function setupSignalHandlers(): void {
+  // Use once() for OS signals - auto-removes after first call, standard shutdown pattern
   const signals = ["SIGINT", "SIGTERM", "SIGQUIT"] as const;
   for (const signal of signals) {
-    process.on(signal, () => shutdown(signal));
+    process.once(signal, () => shutdown(signal));
   }
 
   process.on("uncaughtException", (error) => {
