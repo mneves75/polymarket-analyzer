@@ -9,23 +9,23 @@ Acceptance criteria: Every document in GUIDELINES_INDEX.json is listed with appl
 Verification: Manual review of the matrix in the final review packet.
 
 Task 1.2: Capture baseline verification results.
-Acceptance criteria: bun test and bun run typecheck outputs recorded in engineering-exec-spec and final review packet.
+Acceptance criteria: bun test and bun --bun run typecheck outputs recorded in engineering-exec-spec and final review packet.
 Verification:
 - bun test
-- bun run typecheck
+- bun --bun run typecheck
 
 ## Phase 2: TypeScript and Config Compliance
 
 Task 2.1: Align tsconfig.json with TYPESCRIPT-GUIDELINES baseline options.
 Acceptance criteria: tsconfig includes strict family options (noUncheckedIndexedAccess, exactOptionalPropertyTypes, noImplicitOverride, noPropertyAccessFromIndexSignature, noImplicitReturns, noUnusedLocals, noUnusedParameters, moduleDetection force, verbatimModuleSyntax) and typecheck passes.
 Verification:
-- bun run typecheck
+- bun --bun run typecheck
 
 Task 2.2: Remove unsafe casts and implicit any usage introduced by stricter config.
 Acceptance criteria: No as any casts, no @ts-ignore, no implicit any errors after enabling stricter compiler options.
 Verification:
 - rg -n "\bany\b|@ts-ignore|as any" -S src
-- bun run typecheck
+- bun --bun run typecheck
 
 ## Phase 3: Logging and Audit Coverage
 
@@ -33,7 +33,7 @@ Task 3.1: Update logger to emit required fields and event naming.
 Acceptance criteria: Log entries include event, timestamp, level, requestId, and redaction helper for sensitive fields. API boundaries log start and end events.
 Verification:
 - bun test
-- bun run typecheck
+- bun --bun run typecheck
 
 Task 3.2: Add audit logging for state-changing operations (snapshot export, CSV export).
 Acceptance criteria: Audit events emitted with category and sanitized metadata. Tests cover audit event payloads.
@@ -53,7 +53,7 @@ Acceptance criteria: src/tui.ts, src/api.ts, src/logger.ts, src/http.ts refactor
 Verification:
 - wc -l src/*.ts | sort -n
 - bun test
-- bun run typecheck
+- bun --bun run typecheck
 
 ## Phase 6: Quality Gate Enhancements
 

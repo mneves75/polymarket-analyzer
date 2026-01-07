@@ -63,7 +63,7 @@ First, compile a full applicability matrix for every GUIDELINES-REF document, li
 1. Summarize enforceable rules for every GUIDELINES-REF document and note applicability.
 2. Run baseline verification commands from repo root:
    bun test
-   bun run typecheck
+   bun --bun run typecheck
 3. Create docs/engineering-todo.md with phases, acceptance criteria, and verification commands.
 4. Implement tasks one by one, updating tests and docs, running verification per task, and committing with conventional prefixes.
 5. Run full verification suite and assemble evidence checklist.
@@ -72,7 +72,7 @@ First, compile a full applicability matrix for every GUIDELINES-REF document, li
 
 Baseline and per-task verification will use:
 - bun test
-- bun run typecheck
+- bun --bun run typecheck
 - Additional commands introduced by new tasks (for example lint or file-size checks).
 
 ## Risks

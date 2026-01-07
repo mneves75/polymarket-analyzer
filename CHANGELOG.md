@@ -50,6 +50,19 @@
 - **Fix array access safety** - Added optional chaining to test assertions for array index access (`src/tui-render.test.ts:317,323`, `src/utils.test.ts:119`)
 - **Fix HttpError override** - Added `override` keyword to `isRateLimit()` method (`src/http.ts:78`)
 
+### Documentation: Bun Runtime Flag Standardization
+- **Add `--bun` flag to all commands** - Ensures Bun runtime is used instead of Node.js fallback
+  - Updated `package.json` scripts: `dev`, `dev:opentui`, `snapshot`, `tui`, `markets`, `typecheck`
+  - Updated README.md with all `bun --bun run dev` command examples
+  - Updated CLAUDE.md with consistent command syntax
+- **Update all documentation files** - Consistent `--bun` flag across all docs
+  - `docs/diagrams/ARQUITETURA-COMPLETA.md` - Mermaid diagrams
+  - `docs/plans/*.md` - All plan and spec documents (12 files)
+  - `docs/learn/*.md` - Tutorial documentation
+  - `docs/engineering-*.md` - Engineering specs and todos
+  - `docs/TROUBLESHOOTING.md` - Already had correct syntax
+- **Why `--bun` matters for CLI tools**: Per [Bun docs](https://bun.sh/docs/cli/run), the flag forces Bun runtime for tools with Node.js shebangs (like `tsc`)
+
 ### Fresh Eyes Code Review Fixes (Phase 2)
 - **CRITICAL: Fix HTTP retry logic** - HttpError from 4xx responses was being caught and incorrectly retried; now immediately rethrows non-retryable errors (`src/http.ts:228-243`)
 - **HIGH: Fix duplicate field check** - Copy-paste bug in `extractTokenIds` checked `clobTokenIds` twice instead of checking both `clobTokenIds` and `clob_token_ids` (`src/api.ts:596-599`)
