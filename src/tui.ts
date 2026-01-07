@@ -355,6 +355,22 @@ export async function runDashboard(opts: DashboardOptions) {
 	let msgRate = 0;
 	let showDetail = false;
 	let showHelp = false;
+
+	// Loading states for responsive UI feedback
+	const loading = {
+		pricing: false,
+		orderbook: false,
+		history: false,
+	};
+
+	// AbortController for cancelling in-flight requests on navigation
+	let fetchAbort: AbortController | null = null;
+
+	// Track pending requests to prevent redundant fetches (Bug fix #4)
+	// If polling triggers while a navigation request is in-flight for the same token, skip it
+	let pendingFocusTokenId: string | null = null;
+	let pendingHistoryTokenId: string | null = null;
+
 	const lastHashByAsset = new Map<string, string>();
 	const lastSeqByAsset = new Map<string, number>();
 	const lastTsByAsset = new Map<string, number>();
@@ -393,19 +409,49 @@ export async function runDashboard(opts: DashboardOptions) {
 			return;
 		}
 
+		// Deduplication: skip if already fetching same token (Bug fix #4)
+		// Unless forced (user explicitly requested refresh)
+		if (!force && pendingFocusTokenId === tokenId) {
+			return;
+		}
+
+		// Cancel any in-flight requests from previous navigation
+		fetchAbort?.abort();
+		fetchAbort = new AbortController();
+		const signal = fetchAbort.signal;
+
+		// Track current pending request
+		pendingFocusTokenId = tokenId;
+
+		// Set loading state for responsive UI
+		loading.pricing = true;
+		loading.orderbook = true;
+		if (showDetail) {
+			renderDetailModal();
+			screen.render();
+		}
+
 		const shouldFetchMidpoint =
 			force ||
 			!noOrderbook ||
 			now - lastNoOrderbookAt > CONFIG.noOrderbookCooldownMs;
 		const midPromise = shouldFetchMidpoint
-			? getMidpoint(tokenId)
+			? getMidpoint(tokenId, { signal })
 			: Promise.resolve(null);
 
 		const [bookRes, pricesRes, midRes] = await Promise.allSettled([
-			getOrderbook(tokenId, { allowNoOrderbook: true }),
-			getPrices(tokenId, { allowNoOrderbook: true }),
+			getOrderbook(tokenId, { allowNoOrderbook: true, signal }),
+			getPrices(tokenId, { allowNoOrderbook: true, signal }),
 			midPromise,
 		]);
+
+		// Always clear loading/pending state, even on abort (Bug fix #1, #4)
+		loading.pricing = false;
+		loading.orderbook = false;
+		pendingFocusTokenId = null;
+
+		// Check if request was cancelled - exit after clearing state
+		if (signal.aborted) return;
 
 		let noOrderbookThisRefresh = false;
 
@@ -492,19 +538,55 @@ export async function runDashboard(opts: DashboardOptions) {
 		const tokenId =
 			focusMarket.clobTokenIds[outcomeIndex] ?? focusMarket.clobTokenIds[0];
 		if (!tokenId) return;
+
+		// Deduplication: skip if already fetching same token (Bug fix #4)
+		if (pendingHistoryTokenId === tokenId) {
+			return;
+		}
+
+		// Ensure we have a valid AbortController (Bug fix #2)
+		// Create one if it doesn't exist (e.g., initial load before refreshFocus)
+		if (!fetchAbort) {
+			fetchAbort = new AbortController();
+		}
+		// Capture signal reference at start - if aborted mid-flight, we'll detect it
+		const signal = fetchAbort.signal;
+
+		// Already aborted? Skip the request entirely
+		if (signal.aborted) return;
+
+		// Track current pending request
+		pendingHistoryTokenId = tokenId;
+
+		// Set loading state for responsive UI
+		loading.history = true;
+		if (showDetail) {
+			renderDetailModal();
+			screen.render();
+		}
+
 		try {
-			const history = await getPriceHistory(tokenId);
+			const history = await getPriceHistory(tokenId, { signal });
+
+			// Check if request was cancelled during fetch
+			if (signal.aborted) return;
+
 			historySeries = extractHistory(history);
 			lastHistoryAt = Date.now();
 			lastRestAt = Date.now();
-			render();
-			if (showDetail) {
-				renderDetailModal();
-				screen.render();
-			}
 		} catch (err) {
+			// Ignore abort errors
+			if (err instanceof Error && err.name === "AbortError") return;
 			logError("History", err);
 			showNotification(`History: ${getErrorInfo(err).message}`, "error");
+		} finally {
+			loading.history = false;
+			pendingHistoryTokenId = null;
+		}
+		render();
+		if (showDetail) {
+			renderDetailModal();
+			screen.render();
 		}
 	}
 
@@ -886,6 +968,7 @@ export async function runDashboard(opts: DashboardOptions) {
 			orderbook,
 			historySeries,
 			healthScore: computeHealthScore(),
+			loading,
 		});
 		detailModal.setContent(content);
 	}

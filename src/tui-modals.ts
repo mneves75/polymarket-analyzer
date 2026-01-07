@@ -1,7 +1,7 @@
 import type { MarketInfo } from "./api";
 import type { OrderbookState } from "./parsers";
 import { colorText, textCell } from "./tui-render";
-import type { HealthScore } from "./tui-types";
+import type { HealthScore, LoadingState } from "./tui-types";
 import { THEME } from "./tui-types";
 import {
 	asciiLineChart,
@@ -22,6 +22,8 @@ export interface DetailModalState {
 	orderbook: OrderbookState | null;
 	historySeries: number[];
 	healthScore: HealthScore;
+	/** Per-section loading state for responsive UI feedback */
+	loading: LoadingState;
 }
 
 export interface HelpModalState {
@@ -42,6 +44,7 @@ export function generateDetailContent(state: DetailModalState): string {
 		orderbook,
 		historySeries,
 		healthScore,
+		loading,
 	} = state;
 
 	if (!focusMarket) {
@@ -79,25 +82,52 @@ export function generateDetailContent(state: DetailModalState): string {
 		"",
 		colorText("=== PRICING ===", THEME.accent),
 		"",
-		`${colorText("Best Bid:", THEME.muted)} ${colorText(formatPrice(bestBid), THEME.success)}`,
-		`${colorText("Best Ask:", THEME.muted)} ${colorText(formatPrice(bestAsk), THEME.danger)}`,
-		`${colorText("Spread:", THEME.muted)} ${colorText(formatPrice(spread), spread && spread < 0.03 ? THEME.success : THEME.warning)}`,
-		`${colorText("Midpoint:", THEME.muted)} ${colorText(formatPrice(midpoint), THEME.accent)}`,
-		`${colorText("Last Trade:", THEME.muted)} ${colorText(formatPrice(lastTrade), THEME.accent)}`,
-		"",
-		colorText("=== MARKET HEALTH ===", THEME.accent),
-		"",
-		`${colorText("Health Grade:", THEME.muted)} ${colorText(`${healthScore.label} (${healthScore.score}/100)`, healthScore.color)}`,
-		`${colorText("24hr Volume:", THEME.muted)} ${colorText(formatNumber(focusMarket.volume24hr), THEME.text)}`,
-		`${colorText("24hr Change:", THEME.muted)} ${colorText(formatPct(focusMarket.priceChange24hr), (focusMarket.priceChange24hr ?? 0) >= 0 ? THEME.success : THEME.danger)}`,
-		`${colorText("Has Orderbook:", THEME.muted)} ${colorText(noOrderbook ? "NO" : "YES", noOrderbook ? THEME.danger : THEME.success)}`,
-		"",
 	];
 
-	if (orderbook) {
-		lines.push(colorText("=== ORDERBOOK (Full) ===", THEME.accent));
-		lines.push("");
+	// Show loading indicator or pricing data
+	if (loading.pricing) {
+		lines.push(colorText("  Loading pricing data...", THEME.warning));
+	} else {
+		lines.push(
+			`${colorText("Best Bid:", THEME.muted)} ${colorText(formatPrice(bestBid), THEME.success)}`,
+		);
+		lines.push(
+			`${colorText("Best Ask:", THEME.muted)} ${colorText(formatPrice(bestAsk), THEME.danger)}`,
+		);
+		lines.push(
+			`${colorText("Spread:", THEME.muted)} ${colorText(formatPrice(spread), spread && spread < 0.03 ? THEME.success : THEME.warning)}`,
+		);
+		lines.push(
+			`${colorText("Midpoint:", THEME.muted)} ${colorText(formatPrice(midpoint), THEME.accent)}`,
+		);
+		lines.push(
+			`${colorText("Last Trade:", THEME.muted)} ${colorText(formatPrice(lastTrade), THEME.accent)}`,
+		);
+	}
 
+	lines.push("");
+	lines.push(colorText("=== MARKET HEALTH ===", THEME.accent));
+	lines.push("");
+	lines.push(
+		`${colorText("Health Grade:", THEME.muted)} ${colorText(`${healthScore.label} (${healthScore.score}/100)`, healthScore.color)}`,
+	);
+	lines.push(
+		`${colorText("24hr Volume:", THEME.muted)} ${colorText(formatNumber(focusMarket.volume24hr), THEME.text)}`,
+	);
+	lines.push(
+		`${colorText("24hr Change:", THEME.muted)} ${colorText(formatPct(focusMarket.priceChange24hr), (focusMarket.priceChange24hr ?? 0) >= 0 ? THEME.success : THEME.danger)}`,
+	);
+	lines.push(
+		`${colorText("Has Orderbook:", THEME.muted)} ${colorText(noOrderbook ? "NO" : "YES", noOrderbook ? THEME.danger : THEME.success)}`,
+	);
+	lines.push("");
+
+	lines.push(colorText("=== ORDERBOOK (Full) ===", THEME.accent));
+	lines.push("");
+
+	if (loading.orderbook) {
+		lines.push(colorText("  Loading orderbook...", THEME.warning));
+	} else if (orderbook) {
 		const bids = orderbook.bids ?? [];
 		const asks = orderbook.asks ?? [];
 		const maxDepth = Math.max(bids.length, asks.length, 15);
@@ -141,7 +171,10 @@ export function generateDetailContent(state: DetailModalState): string {
 	lines.push("");
 	lines.push(colorText("=== PRICE HISTORY ===", THEME.accent));
 	lines.push("");
-	if (historySeries.length > 0) {
+
+	if (loading.history) {
+		lines.push(colorText("  Loading price history...", THEME.warning));
+	} else if (historySeries.length > 0) {
 		// Use line chart for cleaner Polymarket-style visualization
 		const chartLines = asciiLineChart(historySeries, {
 			width: 60,
@@ -163,7 +196,7 @@ export function generateDetailContent(state: DetailModalState): string {
 			);
 		}
 	} else {
-		lines.push(colorText("Loading history...", THEME.warning));
+		lines.push(colorText("  No history data available", THEME.muted));
 	}
 
 	lines.push("");

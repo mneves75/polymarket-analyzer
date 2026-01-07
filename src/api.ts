@@ -668,6 +668,7 @@ export async function getOrderbook(
  *
  * @param tokenId - CLOB token ID
  * @param options.allowNoOrderbook - If true, return null instead of throwing for missing orderbooks
+ * @param options.signal - AbortSignal for request cancellation
  * @returns Orderbook object or null
  *
  * @example
@@ -678,7 +679,7 @@ export async function getOrderbook(
  */
 export async function getOrderbook(
 	tokenId: string,
-	options: { allowNoOrderbook: true },
+	options: { allowNoOrderbook: true; signal?: AbortSignal },
 ): Promise<Record<string, unknown> | null>;
 
 /**
@@ -690,12 +691,13 @@ export async function getOrderbook(
  */
 export async function getOrderbook(
 	tokenId: string,
-	options: { allowNoOrderbook?: boolean } = {},
+	options: { allowNoOrderbook?: boolean; signal?: AbortSignal } = {},
 ): Promise<Record<string, unknown> | null> {
 	const url = withQuery(`${CONFIG.clobRestBase}/book`, { token_id: tokenId });
 	try {
 		return await fetchJson<Record<string, unknown>>(url, {
 			timeoutMs: CONFIG.restTimeoutMs,
+			signal: options.signal,
 		});
 	} catch (err) {
 		if (options.allowNoOrderbook && isNoOrderbookError(err)) return null;
@@ -723,11 +725,12 @@ export async function getPrices(
  *
  * @param tokenId - CLOB token ID
  * @param options.allowNoOrderbook - If true, return null instead of throwing
+ * @param options.signal - AbortSignal for request cancellation
  * @returns Price responses or null
  */
 export async function getPrices(
 	tokenId: string,
-	options: { allowNoOrderbook: true },
+	options: { allowNoOrderbook: true; signal?: AbortSignal },
 ): Promise<{
 	buy: Record<string, unknown>;
 	sell: Record<string, unknown>;
@@ -742,7 +745,7 @@ export async function getPrices(
  */
 export async function getPrices(
 	tokenId: string,
-	options: { allowNoOrderbook?: boolean } = {},
+	options: { allowNoOrderbook?: boolean; signal?: AbortSignal } = {},
 ): Promise<{
 	buy: Record<string, unknown>;
 	sell: Record<string, unknown>;
@@ -760,9 +763,11 @@ export async function getPrices(
 		const [buyRes, sellRes] = await Promise.all([
 			fetchJson<Record<string, unknown>>(buy, {
 				timeoutMs: CONFIG.restTimeoutMs,
+				signal: options.signal,
 			}),
 			fetchJson<Record<string, unknown>>(sell, {
 				timeoutMs: CONFIG.restTimeoutMs,
+				signal: options.signal,
 			}),
 		]);
 		return { buy: buyRes, sell: sellRes };
@@ -778,6 +783,7 @@ export async function getPrices(
  * The midpoint is the average of the best bid and best ask prices.
  *
  * @param tokenId - CLOB token ID
+ * @param options.signal - AbortSignal for request cancellation
  * @returns Midpoint response object
  *
  * @example
@@ -786,22 +792,25 @@ export async function getPrices(
  */
 export async function getMidpoint(
 	tokenId: string,
+	options: { signal?: AbortSignal } = {},
 ): Promise<Record<string, unknown>> {
 	const url = withQuery(`${CONFIG.clobRestBase}/midpoint`, {
 		token_id: tokenId,
 	});
 	return fetchJson<Record<string, unknown>>(url, {
 		timeoutMs: CONFIG.restTimeoutMs,
+		signal: options.signal,
 	});
 }
 
 /**
  * Fetch price history for a token.
  *
- * Attempts the primary endpoint (/prices-history) first, then falls back to
- * the alternative endpoint (/price_history) if it fails.
+ * Races both endpoints in parallel and returns the first successful response.
+ * The losing request is aborted to save bandwidth (Bug fix #3).
  *
  * @param tokenId - CLOB token ID
+ * @param options.signal - AbortSignal for request cancellation
  * @returns Price history response object
  *
  * @example
@@ -810,6 +819,7 @@ export async function getMidpoint(
  */
 export async function getPriceHistory(
 	tokenId: string,
+	options: { signal?: AbortSignal } = {},
 ): Promise<Record<string, unknown>> {
 	const baseParams = {
 		market: tokenId,
@@ -817,20 +827,48 @@ export async function getPriceHistory(
 		fidelity: CONFIG.historyFidelity,
 	};
 
-	const url = withQuery(`${CONFIG.clobRestBase}/prices-history`, baseParams);
+	const primaryUrl = withQuery(
+		`${CONFIG.clobRestBase}/prices-history`,
+		baseParams,
+	);
+	const fallbackUrl = withQuery(
+		`${CONFIG.clobRestBase}/price_history`,
+		baseParams,
+	);
+
+	// Internal abort controller to cancel the losing request (Bug fix #3)
+	const raceAbort = new AbortController();
+
+	// Link external signal to internal controller
+	const abortHandler = () => raceAbort.abort();
+	options.signal?.addEventListener("abort", abortHandler);
+
+	// Race both endpoints in parallel - first success wins
+	const primary = fetchJson<Record<string, unknown>>(primaryUrl, {
+		timeoutMs: CONFIG.restTimeoutMs,
+		signal: raceAbort.signal,
+	});
+	const fallback = fetchJson<Record<string, unknown>>(fallbackUrl, {
+		timeoutMs: CONFIG.restTimeoutMs,
+		signal: raceAbort.signal,
+	});
+
 	try {
-		return await fetchJson<Record<string, unknown>>(url, {
-			timeoutMs: CONFIG.restTimeoutMs,
-		});
-	} catch (_err) {
-		// Fallback to alternative endpoint
-		const fallback = withQuery(
-			`${CONFIG.clobRestBase}/price_history`,
-			baseParams,
-		);
-		return fetchJson<Record<string, unknown>>(fallback, {
-			timeoutMs: CONFIG.restTimeoutMs,
-		});
+		// Promise.any returns first fulfilled promise, ignoring rejections
+		const result = await Promise.any([primary, fallback]);
+		// Abort the loser to save bandwidth
+		raceAbort.abort();
+		return result;
+	} catch (err) {
+		// Clean up on error
+		raceAbort.abort();
+		// AggregateError means both failed - throw the first error
+		if (err instanceof AggregateError && err.errors.length > 0) {
+			throw err.errors[0];
+		}
+		throw err;
+	} finally {
+		options.signal?.removeEventListener("abort", abortHandler);
 	}
 }
 

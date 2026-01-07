@@ -7,6 +7,16 @@ export type DashboardOptions = ResolveOptions & {
 	ws: boolean;
 };
 
+/**
+ * Loading state for each data section in the detail modal.
+ * Enables proper skeleton/spinner display during async fetches.
+ */
+export type LoadingState = {
+	pricing: boolean;
+	orderbook: boolean;
+	history: boolean;
+};
+
 export type DashboardState = {
 	radar: MarketInfo[];
 	focusMarket: MarketInfo | null;
@@ -37,6 +47,8 @@ export type DashboardState = {
 	msgRate: number;
 	showDetail: boolean;
 	showHelp: boolean;
+	/** Per-section loading state for responsive UI feedback */
+	loading: LoadingState;
 };
 
 export const THEME = {
