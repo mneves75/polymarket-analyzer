@@ -925,7 +925,7 @@ console.log(JSON.stringify(events, null, 2));
 ```
 
 ```bash
-bun run test-api.ts
+bun --bun run test-api.ts
 ```
 
 ---
