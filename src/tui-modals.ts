@@ -3,7 +3,13 @@ import type { OrderbookState } from "./parsers";
 import { colorText, textCell } from "./tui-render";
 import type { HealthScore } from "./tui-types";
 import { THEME } from "./tui-types";
-import { asciiChart, formatNumber, formatPct, formatPrice } from "./utils";
+import {
+	asciiLineChart,
+	formatNumber,
+	formatPct,
+	formatPrice,
+	sanitizeChartData,
+} from "./utils";
 
 export interface DetailModalState {
 	focusMarket: MarketInfo | null;
@@ -136,17 +142,26 @@ export function generateDetailContent(state: DetailModalState): string {
 	lines.push(colorText("=== PRICE HISTORY ===", THEME.accent));
 	lines.push("");
 	if (historySeries.length > 0) {
-		const chartLines = asciiChart(historySeries, 50, 6);
+		// Use line chart for cleaner Polymarket-style visualization
+		const chartLines = asciiLineChart(historySeries, {
+			width: 60,
+			height: 8,
+			offset: 2,
+		});
 		for (const chartLine of chartLines) {
 			lines.push(colorText(chartLine, THEME.accent));
 		}
 		lines.push("");
-		const min = Math.min(...historySeries);
-		const max = Math.max(...historySeries);
-		const avg = historySeries.reduce((a, b) => a + b, 0) / historySeries.length;
-		lines.push(
-			`${colorText("Min:", THEME.muted)} ${formatPrice(min)}  ${colorText("Max:", THEME.muted)} ${formatPrice(max)}  ${colorText("Avg:", THEME.muted)} ${formatPrice(avg)}  ${colorText("Points:", THEME.muted)} ${historySeries.length}`,
-		);
+		// Calculate stats using sanitized data to handle any NaN values
+		const { data: cleanData } = sanitizeChartData(historySeries);
+		if (cleanData.length > 0) {
+			const min = Math.min(...cleanData);
+			const max = Math.max(...cleanData);
+			const avg = cleanData.reduce((a, b) => a + b, 0) / cleanData.length;
+			lines.push(
+				`${colorText("Min:", THEME.muted)} ${formatPrice(min)}  ${colorText("Max:", THEME.muted)} ${formatPrice(max)}  ${colorText("Avg:", THEME.muted)} ${formatPrice(avg)}  ${colorText("Points:", THEME.muted)} ${cleanData.length}`,
+			);
+		}
 	} else {
 		lines.push(colorText("Loading history...", THEME.warning));
 	}
