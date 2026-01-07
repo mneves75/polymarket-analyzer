@@ -13,7 +13,7 @@ Complete rewrite of the OpenTUI backend to match blessed implementation feature 
 ### Critical Finding
 
 OpenTUI is NOT production-ready per its developers. This implementation is for **experimentation only**.
-Use Blessed for production: `bun run dev --tui`
+Use Blessed for production: `bun --bun run dev --tui`
 
 ---
 
@@ -367,7 +367,7 @@ bun tsc --noEmit
 bun --eval 'import("./src/opentui/tui.js")'
 
 # Run TUI
-OPENTUI=1 bun run dev --tui
+OPENTUI=1 bun --bun run dev --tui
 
 # Run tests
 bun test src/opentui/

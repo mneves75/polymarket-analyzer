@@ -329,7 +329,7 @@ const backoff = Math.min(30_000, 500 * Math.pow(2, reconnectAttempts - 1));
    ## Try It Now
 
    ```bash
-   bun run dev --market 0x123...
+   bun --bun run dev --market 0x123...
    ```
 
    Expected output:
