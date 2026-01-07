@@ -2,6 +2,20 @@
 
 ## [Unreleased] - 2026-01-07
 
+### ASCII Line Chart Bug Fixes (Phase 5)
+
+Critical first-principles review of the line chart implementation revealed swapped corner characters causing disconnected line visuals.
+
+- **CRITICAL: Fix swapped corner characters** - Corner characters for line direction changes were reversed
+  - Upward transitions: Changed from `╭` at bottom/`╯` at top to correct `╯` at bottom/`╭` at top
+  - Downward transitions: Changed from `╰` at top/`╮` at bottom to correct `╮` at top/`╰` at bottom
+  - Line charts now display properly connected lines matching the [asciichart](https://github.com/kroitor/asciichart) reference implementation
+- **Remove duplicate constant** - Eliminated redundant `SPARK_BLOCKS` constant, now uses unified `BLOCK_CHARS`
+- **Update misleading comments** - Fixed comments that incorrectly described corner character placement
+- **Add 5 visual verification tests** - New tests verify exact corner character positions for upward, downward, peak, valley, and zigzag patterns
+- **Test coverage increase** - Now 75 tests with 121 assertions (up from 70 tests, 102 assertions)
+- **Updated engineering spec** - See `docs/plans/CHART-IMPROVEMENTS-SPEC.md` for full Phase 5 documentation
+
 ### TUI Dashboard Improvements
 - **Locale-aware datetime formatting** - Header and market close dates now use user's locale from `LANG`/`LC_ALL`/`LC_TIME` environment variables
   - New `getUserLocale()` and `formatDateTime()` utilities in `src/utils.ts`
