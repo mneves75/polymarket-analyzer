@@ -75,7 +75,7 @@ export class HttpError extends NetworkError {
 	/**
 	 * Check if this is a rate limit error (HTTP 429).
 	 */
-	isRateLimit(): boolean {
+	override isRateLimit(): boolean {
 		return this.status === 429;
 	}
 

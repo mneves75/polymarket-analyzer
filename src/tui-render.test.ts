@@ -314,13 +314,13 @@ describe("filterRadar", () => {
 	test("filters by question", () => {
 		const result = filterRadar(markets, "bitcoin");
 		expect(result.length).toBe(1);
-		expect(result[0].question).toContain("Bitcoin");
+		expect(result[0]?.question).toContain("Bitcoin");
 	});
 
 	test("filters by event title", () => {
 		const result = filterRadar(markets, "election");
 		expect(result.length).toBe(1);
-		expect(result[0].eventTitle).toContain("Election");
+		expect(result[0]?.eventTitle).toContain("Election");
 	});
 
 	test("is case insensitive", () => {
