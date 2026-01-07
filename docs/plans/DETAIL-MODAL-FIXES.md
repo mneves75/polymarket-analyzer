@@ -51,7 +51,7 @@ Fix the detail modal to properly update when navigating between markets (n/p key
 6. `src/tui.ts:964-967` - Added screen.render() after renderDetailModal() in p key handler
 
 **Verification**:
-- `bun run tsc --noEmit` - No errors
+- `bun --bun run tsc --noEmit` - No errors
 - `bun test` - 59 tests pass
 
 **Lessons Learned**:

@@ -204,7 +204,7 @@ Phase 4 - Testing:
 
 Phase 5 - Final Verification:
 
-    bun run tsc --noEmit
+    bun --bun run tsc --noEmit
     # No type errors
 
     bun test
@@ -239,7 +239,7 @@ Phase 5 - Final Verification:
    - All tests pass
 
 5. Type safety:
-   - `bun run tsc --noEmit` passes with no errors
+   - `bun --bun run tsc --noEmit` passes with no errors
    - No implicit `any` types
    - All function return types explicit
 
