@@ -95,7 +95,7 @@ Fix the detail modal to properly update when navigating between markets (n/p key
 
 ### High Priority (Future)
 - [ ] Extract tui-keys.ts (~150 lines) for key binding setup
-- [ ] Add `noUncheckedIndexedAccess` (requires code updates for array access safety)
+- [x] Add `noUncheckedIndexedAccess` (requires code updates for array access safety) - COMPLETED 2026-01-07
 
 ### Medium Priority
 - [ ] Add tests for modal update behavior (mock blessed)

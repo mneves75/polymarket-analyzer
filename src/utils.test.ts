@@ -116,7 +116,7 @@ describe("asciiChart", () => {
 			.map((_, i) => i / 100);
 		const result = asciiChart(series, 20, 4);
 		// Each line should have limited width based on sliced data
-		const dataLine = result[0].split("│")[1];
+		const dataLine = result[0]?.split("│")[1];
 		expect(dataLine?.length).toBeLessThanOrEqual(20);
 	});
 

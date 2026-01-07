@@ -43,6 +43,13 @@
   - Configurable cache expiry via performance config
   - Cache status monitoring
 
+### TypeScript Strict Mode Enhancements
+- **Enable `noUncheckedIndexedAccess`** - Array and object index access now returns `T | undefined`, catching potential undefined access bugs at compile time
+- **Enable `noImplicitOverride`** - Method overrides must use `override` keyword, preventing accidental override shadowing
+- **Enable `noImplicitReturns`** - All code paths in functions must explicitly return, catching missing return bugs
+- **Fix array access safety** - Added optional chaining to test assertions for array index access (`src/tui-render.test.ts:317,323`, `src/utils.test.ts:119`)
+- **Fix HttpError override** - Added `override` keyword to `isRateLimit()` method (`src/http.ts:78`)
+
 ### Fresh Eyes Code Review Fixes (Phase 2)
 - **CRITICAL: Fix HTTP retry logic** - HttpError from 4xx responses was being caught and incorrectly retried; now immediately rethrows non-retryable errors (`src/http.ts:228-243`)
 - **HIGH: Fix duplicate field check** - Copy-paste bug in `extractTokenIds` checked `clobTokenIds` twice instead of checking both `clobTokenIds` and `clob_token_ids` (`src/api.ts:596-599`)
