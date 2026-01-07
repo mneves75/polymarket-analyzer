@@ -2,6 +2,17 @@
 
 ## [Unreleased] - 2026-01-07
 
+### TUI Dashboard Improvements
+- **Locale-aware datetime formatting** - Header and market close dates now use user's locale from `LANG`/`LC_ALL`/`LC_TIME` environment variables
+  - New `getUserLocale()` and `formatDateTime()` utilities in `src/utils.ts`
+  - Converts locale formats like `pt_BR.UTF-8` to `pt-BR` for proper `toLocaleString()` display
+- **Market close date display** - Shows when market closes in the Market box (`closes: 07/01/2026, 15:00:00`)
+  - Added `endDate` field to `MarketInfo` interface
+  - Extracts from `market.endTime`, `market.end_time`, `event.end_date`, or `event.endDate`
+- **Wider radar layout** - Changed from 40%/60% to 65%/35% column split for better event text visibility
+- **Radar column reorder** - Moved Outcome column before Event text, event text now uses full remaining width
+- **Increased WebSocket stale timeout** - Changed from 15s to 60s to prevent disconnection cycling on quiet markets
+
 ### OpenTUI Implementation (Experimental)
 - **Complete OpenTUI backend** - Full-featured TUI implementation using @opentui/core
   - 8-panel layout matching blessed implementation (radar, market, pulse, orderbook, history, holders, alerts, footer)

@@ -1,3 +1,41 @@
+/**
+ * Get user locale from environment variables.
+ * Checks LANG, LC_ALL, LC_TIME in order of precedence.
+ * Returns undefined to use system default if not set.
+ */
+export function getUserLocale(): string | undefined {
+	const envLocale =
+		process.env.LC_ALL || process.env.LC_TIME || process.env.LANG;
+	if (!envLocale) return undefined;
+	// Convert format like "pt_BR.UTF-8" to "pt-BR"
+	const match = envLocale.match(/^([a-z]{2})[-_]([A-Z]{2})/i);
+	if (match && match[1] && match[2]) {
+		return `${match[1]}-${match[2].toUpperCase()}`;
+	}
+	// Simple locale like "pt" or "en"
+	const simple = envLocale.match(/^([a-z]{2})/i);
+	if (simple && simple[1]) {
+		return simple[1];
+	}
+	return undefined;
+}
+
+/**
+ * Format a date using the user's locale.
+ */
+export function formatDateTime(date: Date): string {
+	const locale = getUserLocale();
+	return date.toLocaleString(locale);
+}
+
+/**
+ * Format a date (no time) using the user's locale.
+ */
+export function formatDate(date: Date): string {
+	const locale = getUserLocale();
+	return date.toLocaleDateString(locale);
+}
+
 export function formatPct(value?: number) {
 	if (value === undefined) return "-";
 	return `${(value * 100).toFixed(1)}%`;

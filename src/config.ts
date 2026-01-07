@@ -8,7 +8,7 @@ export const CONFIG = {
 	historyMs: 30000,
 	holdersMs: 60000,
 	radarMs: 60000,
-	wsStaleMs: 15000,
+	wsStaleMs: 60000,
 	restStaleMs: 20000,
 	reconcileMs: 60000,
 	resyncCooldownMs: 15000,
