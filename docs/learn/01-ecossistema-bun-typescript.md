@@ -1320,7 +1320,7 @@ Antes de avançar, crie um arquivo `test.ts` com:
 - 3 tipos diferentes (interface, type, enum)
 - 1 função genérica
 - 1 type guard
-- Execute com `bun run test.ts` e verifique sem erros
+- Execute com `bun --bun run test.ts` e verifique sem erros
 
 ---
 
