@@ -284,7 +284,7 @@ await runDashboard({ ... });
 
 ```mermaid
 graph TD
-    A["Usuário executa:<br/>bun run src/index.ts --tui --market 123"]
+    A["Usuário executa:<br/>bun --bun run src/index.ts --tui --market 123"]
     B["parseArgs()<br/>Processa argv"]
     C["opts = {<br/>market: 123,<br/>ws: true,<br/>... }"]
     D["Verifica modo<br/>tui/snapshot/etc"]
@@ -704,7 +704,7 @@ graph LR
 
 ```mermaid
 graph TD
-    S1["1. USUÁRIO EXECUTA COMANDO<br/>bun run src/index.ts --tui --market 12345"]
+    S1["1. USUÁRIO EXECUTA COMANDO<br/>bun --bun run src/index.ts --tui --market 12345"]
     S2["2. CLI PARSE ARGUMENTOS index.ts<br/>parseArgs → opts = market: 12345, ws: true"]
     S3["3. CARREGA RADAR DE MERCADOS<br/>market.ts + api.ts<br/><br/>loadRadar 10 → fetchEvents → normalizeMarket<br/><br/>Resultado: MarketInfo 10 mercados"]
     S4["4. RESOLVE MERCADO ESPECÍFICO<br/>market.ts<br/><br/>resolveMarket { market: 12345 }, radar<br/>→ fetchMarketByConditionId 12345<br/>→ normalizeMarket<br/><br/>Resultado: MarketInfo mercado 12345"]
@@ -951,7 +951,7 @@ A responsabilidade de DEFINIR os rate limits poderia estar em config.ts.
 
 ### Pergunta 2: Fluxo de Dados
 
-**Coloque em ordem o fluxo de dados quando o usuário executa `bun run dev`:**
+**Coloque em ordem o fluxo de dados quando o usuário executa `bun --bun run dev`:**
 
 <details>
 <summary>Resposta</summary>

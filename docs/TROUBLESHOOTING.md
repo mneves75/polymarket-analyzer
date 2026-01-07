@@ -154,7 +154,7 @@ Error: No orderbook exists for the requested token id
 
 3. **Verify with market list:**
 ```bash
-bun run dev --list-markets
+bun --bun run dev --list-markets
 # Look for markets with high volume
 ```
 
@@ -225,7 +225,7 @@ assetIds: [12345]  // Wrong!
 
 3. **Test with known market:**
 ```bash
-bun run dev --slug trump-2024  # Use known active market
+bun --bun run dev --slug trump-2024  # Use known active market
 ```
 
 4. **Restart TUI:**
@@ -300,7 +300,7 @@ const RATE_LIMITS = [
 3. **Monitor rate limit usage:**
 ```bash
 # Enable debug logging
-TUI_MODE=true bun run dev --tui
+TUI_MODE=true bun --bun run dev --tui
 # Watch for "Rate limit" messages
 ```
 
@@ -332,8 +332,8 @@ gammaBase: "https://gamma-api.polymarket.com"
 
 3. **Try with different parameters:**
 ```bash
-bun run dev --list-markets
-bun run dev --list-markets --json
+bun --bun run dev --list-markets
+bun --bun run dev --list-markets --json
 ```
 
 4. **Check for API changes:**
@@ -425,7 +425,7 @@ export function midpointFrom(bid?: number, ask?: number): number | undefined {
 3. **Disable Unicode (if having issues):**
 ```bash
 export LANG=C
-bun run dev --tui
+bun --bun run dev --tui
 ```
 
 4. **Try different terminal:**
@@ -462,7 +462,7 @@ bun run dev --tui
 
 4. **Restart TUI:**
    - Press `q` to quit
-   - Run `bun run dev --tui` again
+   - Run `bun --bun run dev --tui` again
 
 ---
 
@@ -530,7 +530,7 @@ bun --profile run dev --tui
 
 4. **Enable TUI mode for better rendering:**
 ```bash
-TUI_MODE=true bun run dev --tui
+TUI_MODE=true bun --bun run dev --tui
 ```
 
 ---
@@ -672,7 +672,7 @@ curl -I https://gamma-api.polymarket.com/markets?limit=1
 bun test
 
 # Run with debug logging
-TUI_MODE=true DEBUG=* bun run dev --tui
+TUI_MODE=true DEBUG=* bun --bun run dev --tui
 ```
 
 3. **Create a detailed bug report:**
@@ -697,9 +697,9 @@ TUI_MODE=true DEBUG=* bun run dev --tui
 | `bun install` | Install dependencies |
 | `bun test` | Run all tests |
 | `bun typecheck` | Check TypeScript types |
-| `bun run dev --tui` | Start TUI interface |
-| `bun run dev --list-markets` | List all markets |
-| `bun run dev --once` | Single snapshot (no TUI) |
+| `bun --bun run dev --tui` | Start TUI interface |
+| `bun --bun run dev --list-markets` | List all markets |
+| `bun --bun run dev --once` | Single snapshot (no TUI) |
 | `curl -I https://gamma-api.polymarket.com` | Test API connectivity |
 | `ping clob.polymarket.com` | Test network connectivity |
 

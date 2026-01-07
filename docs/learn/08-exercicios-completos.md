@@ -632,7 +632,7 @@ mini-polymarket/
 {
   "name": "mini-polymarket",
   "scripts": {
-    "start": "bun run src/index.ts"
+    "start": "bun --bun run src/index.ts"
   },
   "dependencies": {}
 }
@@ -654,7 +654,7 @@ const options = {
 
 if (options.help) {
   console.log(`
-Usage: bun run src/index.ts [options]
+Usage: bun --bun run src/index.ts [options]
 
 Options:
   --market=<id>     Focus by market ID
@@ -1069,7 +1069,7 @@ Construa um **mini clone** do Polymarket Analyzer com:
 
 1. **Comece pequeno**: Implemente 1 comando por vez
 2. **Use o código do projeto** como referência (mas não copie!)
-3. **Teste localmente**: `bun run src/index.ts markets`
+3. **Teste localmente**: `bun --bun run src/index.ts markets`
 4. **Iterate**: Adicione features gradualmente
 5. **Documente**: README é tão importante quanto código
 

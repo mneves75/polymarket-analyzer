@@ -32,7 +32,7 @@
 CLI (Command Line Interface)
 ────────────────────────────────────────────────────────────
 $ npm install
-$ bun run dev
+$ bun --bun run dev
 
 Vantagens:
 - Simples de implementar

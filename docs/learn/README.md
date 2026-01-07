@@ -144,7 +144,7 @@ cd polymarket-analyzer
 bun install
 
 # 4. Execute o projeto
-bun run dev
+bun --bun run dev
 
 # 5. Execute os testes
 bun test

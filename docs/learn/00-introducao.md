@@ -280,7 +280,7 @@ npx ts-node src.ts  # Muito lento...
 
 # Bun
 bun install          # 28x mais rápido
-bun run src.ts       # 3x mais rápido, TypeScript nativo!
+bun --bun run src.ts       # 3x mais rápido, TypeScript nativo!
 ```
 
 **No projeto:** Veja o shebang na linha 1 de `src/index.ts`:
@@ -380,15 +380,15 @@ No projeto, a interface completa está em `src/tui.ts` (682 linhas!).
 bun install
 
 # Executar interface gráfica no terminal
-bun run dev
+bun --bun run dev
 # ou
-bun run src/index.ts --tui
+bun --bun run src/index.ts --tui
 
 # Exportar snapshot JSON
-bun run snapshot
+bun --bun run snapshot
 
 # Listar mercados disponíveis
-bun run markets
+bun --bun run markets
 
 # Executar testes
 bun test
@@ -407,7 +407,7 @@ cd polymarket-analyzer
 bun install
 
 # 3. Execute o dashboard
-bun run dev
+bun --bun run dev
 ```
 
 Você verá algo assim:
@@ -551,7 +551,7 @@ Tente executar o projeto você mesmo:
 bun install
 
 # 2. Execute o dashboard
-bun run dev
+bun --bun run dev
 
 # 3. Explore a interface:
 #    - Pressione 'n' para ir ao próximo mercado
@@ -742,7 +742,7 @@ Use **Slug** para buscar mercados (Gamma API).
 ### Problema: "Cannot connect to Polymarket API"
 
 **Sintoma:**
-Erro de conexão ao executar `bun run dev`
+Erro de conexão ao executar `bun --bun run dev`
 
 **Causas Possíveis:**
 1. Sem conexão com internet
