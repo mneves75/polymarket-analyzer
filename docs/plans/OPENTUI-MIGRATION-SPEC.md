@@ -201,8 +201,8 @@ Update `package.json`:
     "zod": "^4.3.5"
   },
   "scripts": {
-    "dev": "bun run src/index.ts --tui",
-    "dev:opentui": "OPENTUI=1 bun run src/index.ts --tui",
+    "dev": "bun --bun run src/index.ts --tui",
+    "dev:opentui": "OPENTUI=1 bun --bun run src/index.ts --tui",
     "test": "bun test",
     "typecheck": "bun tsc"
   }

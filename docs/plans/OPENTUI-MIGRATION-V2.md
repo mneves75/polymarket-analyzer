@@ -1119,7 +1119,7 @@ describe("OpenTUI Layout", async () => {
 
 ```bash
 # Manual test
-OPENTUI=1 bun run src/index.ts --tui --no-ws
+OPENTUI=1 bun --bun run src/index.ts --tui --no-ws
 
 # Verify:
 # 1. Layout displays correctly

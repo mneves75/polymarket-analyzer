@@ -19,8 +19,8 @@ This project supports **two TUI backends** via environment variable switching:
 
 Switch backends with `OPENTUI=1`:
 ```bash
-bun run dev --tui          # Uses Blessed (default, stable)
-OPENTUI=1 bun run dev --tui  # Uses OpenTUI (experimental, not production-ready)
+bun --bun run dev --tui          # Uses Blessed (default, stable)
+OPENTUI=1 bun --bun run dev --tui  # Uses OpenTUI (experimental, not production-ready)
 ```
 
 #### OpenTUI Lessons Learned

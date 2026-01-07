@@ -64,7 +64,7 @@ cd polymarket-analyzer
 bun install
 
 # 5. Executar projeto
-bun run dev  # Deve abrir a interface TUI
+bun --bun run dev  # Deve abrir a interface TUI
 ```
 
 **Configuração do VS Code:**
@@ -98,9 +98,9 @@ Instalar extensões:
 2. **Exercício Prático:**
    ```typescript
    // Execute o seguinte para entender o fluxo:
-   bun run markets  // Lista mercados
-   bun run snapshot  // Exporta snapshot JSON
-   bun run dev --market <id>  // Abre mercado específico
+   bun --bun run markets  // Lista mercados
+   bun --bun run snapshot  // Exporta snapshot JSON
+   bun --bun run dev --market <id>  // Abre mercado específico
    ```
 
 3. **Mapeamento de Código:**
@@ -182,7 +182,7 @@ Instalar extensões:
 
 3. **Exercício de Debug:**
    - [ ] Adicione `console.log` em `src/ws.ts`
-   - [ ] Execute `bun run dev`
+   - [ ] Execute `bun --bun run dev`
    - [ ] Observe mensagens WebSocket no terminal
 
 **Milestone:** ✅ Tempo real entendido

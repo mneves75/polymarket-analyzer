@@ -8,7 +8,7 @@ Realtime terminal interface for [Polymarket](https://polymarket.com) public APIs
 
 ```sh
 bun install
-bun run dev --tui
+bun --bun run dev --tui
 ```
 
 ## Features
@@ -28,37 +28,37 @@ bun run dev --tui
 
 **Blessed (Default - Production Ready):**
 ```sh
-bun run dev --tui
+bun --bun run dev --tui
 ```
 
 **OpenTUI (Experimental - NOT Production-Ready):**
 ```sh
-OPENTUI=1 bun run dev --tui
+OPENTUI=1 bun --bun run dev --tui
 ```
 
 > **WARNING:** OpenTUI is explicitly marked by its developers as **"not ready for production use"**. Use Blessed for production. OpenTUI is for experimentation only. See [OpenTUI GitHub](https://github.com/sst/opentui).
 
 ### Snapshot JSON
 ```sh
-bun run dev --once
+bun --bun run dev --once
 ```
 
 ### List Markets
 ```sh
-bun run dev --list-markets
-bun run dev --list-markets --json
+bun --bun run dev --list-markets
+bun --bun run dev --list-markets --json
 ```
 
 ### Focus a Market
 ```sh
-bun run dev --market <conditionId>
-bun run dev --slug <slug>
+bun --bun run dev --market <conditionId>
+bun --bun run dev --slug <slug>
 ```
 
 ### Fetch More Markets
 ```sh
-bun run dev --limit 100           # Fetch 100 markets (default: 50)
-bun run dev --list-markets --limit 200  # List 200 markets
+bun --bun run dev --limit 100           # Fetch 100 markets (default: 50)
+bun --bun run dev --list-markets --limit 200  # List 200 markets
 ```
 
 ## TUI Controls
