@@ -36,6 +36,39 @@ export function formatDate(date: Date): string {
 	return date.toLocaleDateString(locale);
 }
 
+/**
+ * Format time remaining as "X Hrs Y Mins left" or "X Days Y Hrs left".
+ * Returns null if date is in the past or invalid.
+ */
+export function formatTimeRemaining(endDate: string | Date): string | null {
+	const end = typeof endDate === "string" ? new Date(endDate) : endDate;
+	if (Number.isNaN(end.getTime())) return null;
+
+	const now = Date.now();
+	const diff = end.getTime() - now;
+
+	if (diff <= 0) return null;
+
+	const seconds = Math.floor(diff / 1000);
+	const minutes = Math.floor(seconds / 60);
+	const hours = Math.floor(minutes / 60);
+	const days = Math.floor(hours / 24);
+
+	if (days > 0) {
+		const remainingHours = hours % 24;
+		return `${days}d ${remainingHours}h left`;
+	}
+	if (hours > 0) {
+		const remainingMins = minutes % 60;
+		return `${hours}h ${remainingMins}m left`;
+	}
+	if (minutes > 0) {
+		const remainingSecs = seconds % 60;
+		return `${minutes}m ${remainingSecs}s left`;
+	}
+	return `${seconds}s left`;
+}
+
 export function formatPct(value?: number) {
 	if (value === undefined) return "-";
 	return `${(value * 100).toFixed(1)}%`;

@@ -5,6 +5,8 @@ import {
 	formatNumber,
 	formatPct,
 	formatPrice,
+	formatTimeRemaining,
+	getUserLocale,
 	midpointFrom,
 } from "./utils";
 
@@ -142,5 +144,98 @@ describe("asciiChart", () => {
 		expect(chartContent).toContain("0.5000");
 		// Should indicate stable price
 		expect(chartContent).toContain("stable price");
+	});
+});
+
+describe("formatTimeRemaining", () => {
+	test("returns null for past dates", () => {
+		const pastDate = new Date(Date.now() - 1000);
+		expect(formatTimeRemaining(pastDate)).toBeNull();
+	});
+
+	test("returns null for invalid date strings", () => {
+		expect(formatTimeRemaining("invalid-date")).toBeNull();
+	});
+
+	test("formats days and hours for long durations", () => {
+		const future = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000); // 2 days 5 hours
+		const result = formatTimeRemaining(future);
+		expect(result).toMatch(/^2d 5h left$/);
+	});
+
+	test("formats hours and minutes for medium durations", () => {
+		const future = new Date(Date.now() + 3 * 60 * 60 * 1000 + 45 * 60 * 1000); // 3 hours 45 minutes
+		const result = formatTimeRemaining(future);
+		expect(result).toMatch(/^3h 4[45]m left$/); // Allow 44-45 due to timing
+	});
+
+	test("formats minutes and seconds for short durations", () => {
+		const future = new Date(Date.now() + 5 * 60 * 1000 + 30 * 1000); // 5 minutes 30 seconds
+		const result = formatTimeRemaining(future);
+		expect(result).toMatch(/^5m \d+s left$/);
+	});
+
+	test("formats seconds for very short durations", () => {
+		const future = new Date(Date.now() + 45 * 1000); // 45 seconds
+		const result = formatTimeRemaining(future);
+		expect(result).toMatch(/^\d+s left$/);
+	});
+
+	test("accepts ISO date strings", () => {
+		const future = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+		const result = formatTimeRemaining(future.toISOString());
+		expect(result).toMatch(/^(0h 59m|1h 0m) left$/);
+	});
+});
+
+describe("getUserLocale", () => {
+	const originalEnv = { ...process.env };
+
+	test("returns undefined when no locale env vars set", () => {
+		delete process.env.LC_ALL;
+		delete process.env.LC_TIME;
+		delete process.env.LANG;
+		expect(getUserLocale()).toBeUndefined();
+	});
+
+	test("parses pt_BR.UTF-8 format", () => {
+		process.env.LANG = "pt_BR.UTF-8";
+		delete process.env.LC_ALL;
+		delete process.env.LC_TIME;
+		expect(getUserLocale()).toBe("pt-BR");
+	});
+
+	test("parses en-US format", () => {
+		process.env.LANG = "en-US";
+		delete process.env.LC_ALL;
+		delete process.env.LC_TIME;
+		expect(getUserLocale()).toBe("en-US");
+	});
+
+	test("LC_ALL takes precedence over LANG", () => {
+		process.env.LANG = "en_US.UTF-8";
+		process.env.LC_ALL = "pt_BR.UTF-8";
+		delete process.env.LC_TIME;
+		expect(getUserLocale()).toBe("pt-BR");
+	});
+
+	test("LC_TIME takes precedence over LANG but not LC_ALL", () => {
+		process.env.LANG = "en_US.UTF-8";
+		process.env.LC_TIME = "de_DE.UTF-8";
+		delete process.env.LC_ALL;
+		expect(getUserLocale()).toBe("de-DE");
+	});
+
+	test("returns simple locale for short format", () => {
+		process.env.LANG = "pt";
+		delete process.env.LC_ALL;
+		delete process.env.LC_TIME;
+		expect(getUserLocale()).toBe("pt");
+	});
+
+	// Restore original env after all tests
+	test("cleanup", () => {
+		Object.assign(process.env, originalEnv);
+		expect(true).toBe(true);
 	});
 });
