@@ -50,6 +50,12 @@
 - **Fix array access safety** - Added optional chaining to test assertions for array index access (`src/tui-render.test.ts:317,323`, `src/utils.test.ts:119`)
 - **Fix HttpError override** - Added `override` keyword to `isRateLimit()` method (`src/http.ts:78`)
 
+### Code Quality: Signal Handler Best Practice
+- **Use `process.once()` for OS signals** - Changed SIGINT/SIGTERM/SIGQUIT handlers from `process.on()` to `process.once()` in both blessed and OpenTUI implementations (`src/tui.ts:1059-1060`, `src/opentui/tui.ts:72`)
+  - Handlers auto-remove after first call, preventing potential double-execution
+  - Standard Node.js pattern for one-time shutdown signals
+  - Note: `uncaughtException` and `unhandledRejection` handlers correctly remain as `process.on()` as they may fire multiple times before process exit
+
 ### Documentation: Bun Runtime Flag Standardization
 - **Add `--bun` flag to all commands** - Ensures Bun runtime is used instead of Node.js fallback
   - Updated `package.json` scripts: `dev`, `dev:opentui`, `snapshot`, `tui`, `markets`, `typecheck`

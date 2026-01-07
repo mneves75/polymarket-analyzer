@@ -1055,8 +1055,9 @@ export async function runDashboard(opts: DashboardOptions) {
 	}
 
 	// Handle OS signals for graceful shutdown (e.g., kill, docker stop)
-	process.on("SIGTERM", shutdown);
-	process.on("SIGINT", shutdown);
+	// Use once() to auto-remove after first call - standard pattern for shutdown signals
+	process.once("SIGTERM", shutdown);
+	process.once("SIGINT", shutdown);
 
 	function bindKeys() {
 		screen.key(["q", "C-c"], shutdown);
