@@ -42,6 +42,7 @@ import {
 	formatNumber,
 	formatPct,
 	formatPrice,
+	formatTimeRemaining,
 	midpointFrom,
 } from "./utils";
 import { connectMarketWs } from "./ws";
@@ -654,11 +655,17 @@ export async function runDashboard(opts: DashboardOptions) {
 		const closeDate = focusMarket.endDate
 			? formatDateTime(new Date(focusMarket.endDate))
 			: "-";
+		const timeLeft = focusMarket.endDate
+			? formatTimeRemaining(focusMarket.endDate)
+			: null;
+		const closesDisplay = timeLeft
+			? `${closeDate} ${colorText(`(${timeLeft})`, THEME.accent)}`
+			: closeDate;
 
 		const lines = [
 			`${colorText("event:", THEME.muted)} ${textCell(focusMarket.eventTitle || "-")}`,
 			`${colorText("question:", THEME.muted)} ${textCell(focusMarket.question || "-")}`,
-			`${colorText("closes:", THEME.muted)} ${textCell(closeDate)}`,
+			`${colorText("closes:", THEME.muted)} ${closesDisplay}`,
 			`${colorText("condition:", THEME.muted)} ${textCell(focusMarket.conditionId || "-")}`,
 			`${colorText("outcome:", THEME.muted)} ${textCell(outcome)} ${colorText(`(${outcomeIndex + 1}/${focusMarket.clobTokenIds.length})`, THEME.muted)}`,
 			`${colorText("token:", THEME.muted)} ${textCell(tokenId)}`,

@@ -12,6 +12,8 @@
 - **Wider radar layout** - Changed from 40%/60% to 65%/35% column split for better event text visibility
 - **Radar column reorder** - Moved Outcome column before Event text, event text now uses full remaining width
 - **Increased WebSocket stale timeout** - Changed from 15s to 60s to prevent disconnection cycling on quiet markets
+- **Countdown timer** - Shows time remaining until market close (e.g., "2d 5h left", "3h 45m left")
+  - New `formatTimeRemaining()` utility with smart formatting for days/hours/minutes/seconds
 
 ### OpenTUI Implementation (Experimental)
 - **Complete OpenTUI backend** - Full-featured TUI implementation using @opentui/core
