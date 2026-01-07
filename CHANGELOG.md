@@ -43,7 +43,15 @@
   - Configurable cache expiry via performance config
   - Cache status monitoring
 
-### Fresh Eyes Code Review Fixes
+### Fresh Eyes Code Review Fixes (Phase 2)
+- **CRITICAL: Fix HTTP retry logic** - HttpError from 4xx responses was being caught and incorrectly retried; now immediately rethrows non-retryable errors (`src/http.ts:228-243`)
+- **HIGH: Fix duplicate field check** - Copy-paste bug in `extractTokenIds` checked `clobTokenIds` twice instead of checking both `clobTokenIds` and `clob_token_ids` (`src/api.ts:596-599`)
+- **MEDIUM: Add Zod schema passthrough** - Added `.passthrough()` to `GammaMarketSchema` and nested token objects to allow extra API fields without validation failure (`src/schemas.ts:126-147`)
+- **MEDIUM: Fix lastWsAt type safety** - Prevent potential `undefined` assignment to `lastWsAt` (type `number`) when WebSocket update lacks timestamp (`src/tui.ts:1264-1266`)
+- **LOW: Add graceful shutdown handlers** - Added SIGTERM/SIGINT signal handlers for proper cleanup on `kill` or Docker stop (`src/tui.ts:1057-1059`)
+- **LOW: Add shutdown guard** - Prevent double execution of cleanup from rapid signals using `isShuttingDown` flag (`src/tui.ts:1048-1051`)
+
+### Fresh Eyes Code Review Fixes (Phase 1)
 - **Fix test mock field name** - Changed `volume24h` to `volume24hr` to match `MarketInfo` type
 - **Remove unused parameter** - Removed dead `renderer` parameter from `clearBox()` function
 - **Fix hardcoded limit** - Refresh handler now uses validated options instead of hardcoded `50`
@@ -52,6 +60,12 @@
 - **Log cleanup errors** - Shutdown cleanup now logs errors instead of silently swallowing them
 
 ### Test Coverage
+- **5 regression tests** for Phase 2 fixes:
+  - HTTP retry: Verify 4xx errors are not retried (exact attempt count)
+  - Zod passthrough: Verify extra API fields are preserved
+  - Zod nested passthrough: Verify extra fields in nested tokens array
+  - API snake_case: Verify `clob_token_ids` field is recognized
+  - API precedence: Verify camelCase takes precedence when both exist
 - **119 OpenTUI tests** covering:
   - State manager (modal state, navigation, pricing, alerts, filters, stats)
   - Result type (ok, err, unwrap, map, fromPromise)

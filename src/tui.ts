@@ -1042,8 +1042,13 @@ export async function runDashboard(opts: DashboardOptions) {
 	/**
 	 * Graceful shutdown handler - cleans up resources before exit.
 	 * Called by quit keys (q, Ctrl+C) and OS signals (SIGTERM, SIGINT).
+	 *
+	 * Uses a guard flag to prevent double execution from rapid signals.
 	 */
+	let isShuttingDown = false;
 	function shutdown() {
+		if (isShuttingDown) return;
+		isShuttingDown = true;
 		wsConnection?.close();
 		screen.destroy();
 		process.exit(0);
