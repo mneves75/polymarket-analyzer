@@ -291,7 +291,7 @@ export async function fetchEvents(
 		offset,
 		closed: false,
 		active: true,
-		order: "id",
+		order: "volume24hr",
 		ascending: false,
 	});
 	const res = await fetchJson<unknown>(url);
@@ -327,7 +327,7 @@ export async function fetchMarkets(
 		offset,
 		closed: false,
 		active: true,
-		order: "id",
+		order: "volume24hr",
 		ascending: false,
 	});
 	const res = await fetchJson<unknown>(url);
@@ -528,10 +528,12 @@ export function normalizeMarket(
 
 	// Extract end date from market or event
 	const endDate =
+		(market.endDate as string | undefined) ||
+		(market.end_date as string | undefined) ||
 		(market.endTime as string | undefined) ||
 		(market.end_time as string | undefined) ||
-		(event?.end_date as string | undefined) ||
-		(event?.endDate as string | undefined);
+		(event?.endDate as string | undefined) ||
+		(event?.end_date as string | undefined);
 	if (endDate !== undefined) result.endDate = endDate;
 
 	return result;

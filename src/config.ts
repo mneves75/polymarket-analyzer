@@ -15,7 +15,7 @@ export const CONFIG = {
 	resyncDelayMs: 1200,
 	noOrderbookCooldownMs: 30000,
 	alertDelta: 0.05,
-	historyInterval: "1d",
+	historyInterval: "all",
 	historyFidelity: 30,
 	holdersLimit: 8,
 	orderbookDepth: 10,

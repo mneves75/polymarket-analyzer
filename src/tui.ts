@@ -37,6 +37,7 @@ import {
 } from "./tui-render";
 import { type DashboardOptions, THEME } from "./tui-types";
 import {
+	asciiLineChart,
 	asciiSparkline,
 	formatDateTime,
 	formatNumber,
@@ -899,9 +900,21 @@ export async function runDashboard(opts: DashboardOptions) {
 			historyBox.setContent(colorText("No history yet", THEME.muted));
 			return;
 		}
-		const spark = asciiSparkline(historySeries, 40);
+		// Use multi-row line chart instead of single-row sparkline
+		// Box height is 20% of screen minus 2 for borders, typically 4-6 rows
+		const chartHeight = Math.max(4, Math.floor((historyBox.height as number) - 2));
+		const chartWidth = Math.max(20, Math.floor((historyBox.width as number) - 4));
+		const chartLines = asciiLineChart(historySeries, {
+			width: chartWidth,
+			height: chartHeight,
+			offset: 1,
+		});
+		const lastPrice = historySeries.at(-1);
+		const priceInfo = lastPrice !== undefined
+			? `\n${colorText("last=", THEME.muted)}${colorText(formatPrice(lastPrice), THEME.accent)}`
+			: "";
 		historyBox.setContent(
-			`${colorText(spark, THEME.accent)}\n${colorText("last=", THEME.muted)}${colorText(formatPrice(historySeries.at(-1)), THEME.accent)}`,
+			chartLines.map((line) => colorText(line, THEME.accent)).join("\n") + priceInfo,
 		);
 	}
 
