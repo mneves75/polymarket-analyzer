@@ -1,176 +1,179 @@
-# Tutorial Polymarket Analyzer
+# Polymarket Analyzer Tutorial
 
-Documentação educacional completa do projeto **Polymarket Analyzer** para novos membros da equipe técnica.
+Complete educational documentation for the **Polymarket Analyzer** project for new technical team members.
 
-## 📚 Estrutura do Tutorial
+## Tutorial Structure
 
-Este tutorial contém **9 capítulos** que cobrem todos os aspectos do projeto, do básico ao avançado.
+This tutorial contains **9 chapters** covering all aspects of the project, from basics to advanced.
 
-### Capítulos
+### Chapters
 
-| Capítulo | Título | Descrição |
-|----------|--------|-----------|
-| [00](./00-introducao.md) | Introdução ao Projeto | Visão geral do projeto e conceitos fundamentais |
-| [01](./01-ecossistema-bun-typescript.md) | Ecossistema Bun e TypeScript | Fundamentos de Bun runtime e TypeScript avançado |
-| [02](./02-arquitetura-estrutura.md) | Arquitetura e Estrutura | Organização do códigobase e padrões de design |
-| [03](./03-apis-polymarket.md) | Integração com APIs Polymarket | APIs REST Gamma, CLOB e Data |
-| [04](./04-websockets-tempo-real.md) | WebSockets e Tempo Real | Comunicação bidirecional em tempo real |
-| [05](./05-interface-terminal.md) | Interface de Terminal (TUI) | Construção de interfaces com Blessed |
-| [06](./06-erros-rate-limiting.md) | Tratamento de Erros e Rate Limiting | Resiliência e controle de fluxo |
-| [07](./07-testes.md) | Estratégias de Teste | Testes unitários, integração e E2E |
-| [08](./08-exercicios-completos.md) | Exercícios Práticos | Exercícios completos e projeto final |
-| [09](./09-proximos-passos.md) | Próximos Passos e Melhorias | Continuação do aprendizado |
+| Chapter | Title | Description |
+|---------|-------|-------------|
+| [00](./00-introduction.md) | Introduction to the Project | Project overview and fundamental concepts |
+| [01](./01-bun-typescript-ecosystem.md) | Bun and TypeScript Ecosystem | Bun runtime and advanced TypeScript fundamentals |
+| [02](./02-architecture-structure.md) | Architecture and Structure | Codebase organization and design patterns |
+| [03](./03-polymarket-apis.md) | Polymarket API Integration | Gamma, CLOB, and Data REST APIs |
+| [04](./04-websockets-realtime.md) | WebSockets and Real-time | Bidirectional real-time communication |
+| [05](./05-terminal-interface.md) | Terminal Interface (TUI) | Building interfaces with Blessed |
+| [06](./06-errors-rate-limiting.md) | Error Handling and Rate Limiting | Resilience and flow control |
+| [07](./07-testing.md) | Testing Strategies | Unit, integration, and E2E testing |
+| [08](./08-complete-exercises.md) | Practical Exercises | Complete exercises and final project |
+| [09](./09-next-steps.md) | Next Steps and Improvements | Continued learning |
 
-## 🚀 Como Usar Este Tutorial
+## How to Use This Tutorial
 
-### Para Novos Membros da Equipe
+### For New Team Members
 
-1. **Comece pelo Capítulo 00** - Leia a introdução completa
-2. **Siga em ordem** - Cada capítulo constrói sobre o anterior
-3. **Faça os exercícios** - Prática é essencial para aprendizado
-4. **Consulte o código** - Referências diretas para o código fonte
-5. **Revise regularmente** - Retorne aos capítulos conforme necessário
+1. **Start with Chapter 00** - Read the complete introduction
+2. **Follow in order** - Each chapter builds on the previous one
+3. **Do the exercises** - Practice is essential for learning
+4. **Check the code** - Direct references to the source code
+5. **Review regularly** - Return to chapters as needed
 
-### Para Referência Rápida
+### For Quick Reference
 
-Cada capítulo inclui:
-- **Conceitos teóricos** explicados de forma simples
-- **Exemplos de código** do projeto real
-- **Diagramas** para visualização
-- **Exercícios práticos** com soluções
-- **Referências** ao código fonte (arquivo:linha)
+Each chapter includes:
+- **Theoretical concepts** explained simply
+- **Code examples** from the actual project
+- **Diagrams** for visualization
+- **Practical exercises** with solutions
+- **References** to source code (file:line)
 
-## 📊 Estatísticas
+## Statistics
 
-- **9 capítulos completos**
-- **+7000 palavras**
-- **50+ exercícios práticos**
-- **3 projetos completos**
-- **Cobertura total do stack**: Bun + TypeScript + APIs + WebSocket + TUI
+- **9 complete chapters**
+- **7000+ words**
+- **50+ practical exercises**
+- **3 complete projects**
+- **Full stack coverage**: Bun + TypeScript + APIs + WebSocket + TUI
 
-## 🎯 Objetivos de Aprendizado
+## Learning Objectives
 
-Após completar este tutorial, você será capaz de:
+After completing this tutorial, you will be able to:
 
-✅ Entender e explicar a arquitetura do projeto
-✅ Trabalhar com TypeScript avançado (generics, type guards, etc.)
-✅ Integrar APIs REST e WebSocket
-✅ Implementar rate limiting e tratamento de erros
-✅ Construir interfaces de terminal interativas
-✅ Escrever testes automatizados
-✅ Aplicar boas práticas de desenvolvimento
+- Understand and explain the project architecture
+- Work with advanced TypeScript (generics, type guards, etc.)
+- Integrate REST and WebSocket APIs
+- Implement rate limiting and error handling
+- Build interactive terminal interfaces
+- Write automated tests
+- Apply development best practices
 
-## 🛠️ Stack Tecnológico Coberto
+## Technology Stack Covered
 
-| Tecnologia | Uso no Projeto |
+| Technology | Use in Project |
 |------------|----------------|
 | **Bun 1.3+** | Runtime, package manager, test runner |
-| **TypeScript 5.6+** | Linguagem principal com tipos estritos |
-| **Blessed** | Interface de terminal (TUI) |
-| **WebSocket** | Comunicação em tempo real |
-| **Fetch API** | Requisições HTTP |
+| **TypeScript 5.6+** | Main language with strict types |
+| **Blessed** | Terminal interface (TUI) |
+| **WebSocket** | Real-time communication |
+| **Fetch API** | HTTP requests |
 | **Node.js** | File system, process, etc. |
 
-## 📖 Métodos de Ensino
+## Teaching Methods
 
-Este tutorial utiliza:
+This tutorial uses:
 
-- **Técnica Feynman** - Explicações simples como para uma criança
-- **Aprendizado prático** - Exercícios e projetos reais
-- **Referências diretas** - Links para código fonte (arquivo:linha)
-- **Progressão gradual** - Do básico ao avançado
-- **Exemplos reais** - Código do projeto Polymarket Analyzer
+- **Feynman Technique** - Simple explanations as if for a child
+- **Practical learning** - Real exercises and projects
+- **Direct references** - Links to source code (file:line)
+- **Gradual progression** - From basic to advanced
+- **Real examples** - Code from the Polymarket Analyzer project
 
-## 🤝 Contribuindo
+## Contributing
 
-Para melhorar este tutorial:
+To improve this tutorial:
 
-1. Faça um fork do projeto
-2. Crie um branch para sua melhoria
-3. Faça as mudanças
-4. Abra um Pull Request
+1. Fork the project
+2. Create a branch for your improvement
+3. Make the changes
+4. Open a Pull Request
 
-**Convenções de commit:**
+**Commit conventions:**
 ```
-Add: nova funcionalidade
-Fix: correção de bug
-Docs: documentação
+Add: new feature
+Fix: bug fix
+Docs: documentation
 ```
 
-## 📚 Recursos Adicionais
+## Additional Resources
 
-### Documentação Oficial
+### Official Documentation
 
 - [Bun Docs](https://bun.sh/docs)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Blessed](https://github.com/chjj/blessed)
-- [Polymarket (plataforma)](https://polymarket.com)
+- [Polymarket (platform)](https://polymarket.com)
 - [Polymarket API](https://docs.polymarket.com)
 
-### Livros Recomendados
+### Recommended Books
 
 - "Effective TypeScript" - Dan Vanderkam
 - "You Don't Know JS" - Kyle Simpson
 - "Clean Code" - Robert C. Martin
 - "The Pragmatic Programmer" - Andrew Hunt & David Thomas
 
-## 💡 Dicas de Estudo
+## Study Tips
 
-1. **Leia atentamente** - Não pule seções
-2. **Execute os exemplos** - Digite o código você mesmo
-3. **Resolva exercícios** - Não olhe a solução antes de tentar
-4. **Faça anotações** - Escreva o que aprendeu
-5. **Ensine outros** - A melhor forma de aprender é ensinar
+1. **Read carefully** - Don't skip sections
+2. **Run the examples** - Type the code yourself
+3. **Solve exercises** - Don't look at the solution before trying
+4. **Take notes** - Write what you learned
+5. **Teach others** - The best way to learn is to teach
 
-## ⚠️ Antes de Começar
+## Before You Start
 
-### Pré-requisitos
+### Prerequisites
 
-- Conhecimento básico de JavaScript
-- Familiaridade com terminal de comando
-- Noções de programação assíncrona (async/await)
-- Compreensão de JSON e APIs
+- Basic knowledge of JavaScript
+- Familiarity with command line terminal
+- Understanding of asynchronous programming (async/await)
+- Knowledge of JSON and APIs
 
-### Configuração do Ambiente
+### Environment Setup
 
 ```bash
-# 1. Clone o repositório
-git clone https://github.com/SEU-USUARIO/polymarket-analyzer.git
+# 1. Clone the repository
+git clone https://github.com/YOUR-USER/polymarket-analyzer.git
 
-# 2. Entre no diretório
+# 2. Enter the directory
 cd polymarket-analyzer
 
-# 3. Instale dependências
+# 3. Install dependencies
 bun install
 
-# 4. Execute o projeto
+# 4. Run the project
 bun --bun run dev
 
-# 5. Execute os testes
+# 5. Run the tests
 bun test
 ```
 
-## 🎓 Certificação
+## Certification
 
-Ao completar todos os capítulos e exercícios, você estará preparado para:
+Upon completing all chapters and exercises, you will be prepared to:
 
-- Contribuir ativamente no projeto Polymarket Analyzer
-- Construir aplicações similares com Bun + TypeScript
-- Integrar APIs REST e WebSocket
-- Criar interfaces de terminal interativas
-- Aplicar boas práticas de desenvolvimento
+- Actively contribute to the Polymarket Analyzer project
+- Build similar applications with Bun + TypeScript
+- Integrate REST and WebSocket APIs
+- Create interactive terminal interfaces
+- Apply development best practices
 
-## 📞 Suporte
+## Support
 
-Se tiver dúvidas durante o tutorial:
+If you have questions during the tutorial:
 
-1. Consulte o código fonte referenciado
-2. Revise os capítulos anteriores
-3. Abra uma issue no GitHub
-4. Particiipe das comunidades (Discord, etc.)
+1. Check the referenced source code
+2. Review previous chapters
+3. Open an issue on GitHub
+4. Join the communities (Discord, etc.)
 
 ---
 
-**Bom estudo e bons códigos!** 🚀
+*Remember: the best way to learn programming is by programming.*
 
-*Lembre-se: a melhor forma de aprender programação é programando.*
+---
+
+**Version:** 1.0.0
+**Last Updated:** January 2026

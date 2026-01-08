@@ -1,57 +1,57 @@
-# 🏗️ Mapa de Arquitetura Completa - Polymarket Analyzer
+# Complete Architecture Map - Polymarket Analyzer
 
-> **"Um bom diagrama vale mais que mil palavras."**
-> — Princípio de Documentação Visual
-
----
-
-## 📊 Visão Geral da Arquitetura
-
-Este documento contém diagramas Mermaid que mostram a arquitetura completa do Polymarket Analyzer em diferentes níveis de detalhe.
+> **"A good diagram is worth more than a thousand words."**
+> -- Visual Documentation Principle
 
 ---
 
-## 1. Arquitetura em Alto Nível
+## Architecture Overview
+
+This document contains Mermaid diagrams showing the complete architecture of Polymarket Analyzer at different levels of detail.
+
+---
+
+## 1. High-Level Architecture
 
 ```mermaid
 graph TB
-    subgraph Usuario["Usuário"]
+    subgraph User["User"]
         CLI["Terminal / CLI"]
     end
 
-    subgraph Aplicacao["Polymarket Analyzer"]
-        CamadaA["Camada de Apresentação<br/>index.ts, tui.ts"]
-        CamadaB["Camada de Domínio<br/>market.ts, parsers.ts, utils.ts"]
-        CamadaC["Camada de Dados<br/>api.ts, ws.ts, http.ts"]
+    subgraph Application["Polymarket Analyzer"]
+        LayerA["Presentation Layer<br/>index.ts, tui.ts"]
+        LayerB["Domain Layer<br/>market.ts, parsers.ts, utils.ts"]
+        LayerC["Data Layer<br/>api.ts, ws.ts, http.ts"]
     end
 
-    subgraph Externo["Serviços Externos"]
+    subgraph External["External Services"]
         Gamma["Gamma API"]
         CLOB["CLOB REST"]
         WS["CLOB WebSocket"]
         Data["Data API"]
     end
 
-    CLI --> CamadaA
-    CamadaA --> CamadaB
-    CamadaB --> CamadaC
-    CamadaC --> Gamma
-    CamadaC --> CLOB
-    CamadaC --> WS
-    CamadaC --> Data
+    CLI --> LayerA
+    LayerA --> LayerB
+    LayerB --> LayerC
+    LayerC --> Gamma
+    LayerC --> CLOB
+    LayerC --> WS
+    LayerC --> Data
 
-    style Usuario fill:#e1f5ff
-    style Aplicacao fill:#fff4e6
-    style Externo fill:#e8f5e9
+    style User fill:#e1f5ff
+    style Application fill:#fff4e6
+    style External fill:#e8f5e9
 ```
 
 ---
 
-## 2. Fluxo de Dados Completo
+## 2. Complete Data Flow
 
 ```mermaid
 sequenceDiagram
-    participant U as Usuário
+    participant U as User
     participant I as index.ts (CLI)
     participant M as market.ts
     participant A as api.ts
@@ -65,7 +65,7 @@ sequenceDiagram
     U->>I: bun --bun run dev --market <id>
     I->>M: resolveMarket(opts, radar)
 
-    alt Mercado não está no radar
+    alt Market not in radar
         M->>A: fetchMarketByConditionId(id)
         A->>H: fetchJson(url)
         H->>C: GET /markets?condition_ids={id}
@@ -77,7 +77,7 @@ sequenceDiagram
     M-->>I: MarketInfo
     I->>T: runDashboard(market)
 
-    par Fluxo REST
+    par REST Flow
         T->>A: getOrderbook(tokenId)
         A->>H: fetchJson(url)
         H->>C: GET /book?token_id={id}
@@ -86,7 +86,7 @@ sequenceDiagram
         A-->>T: normalized orderbook
     and
 
-    par Fluxo WebSocket
+    par WebSocket Flow
         T->>W: connectMarketWs(tokenIds, handlers)
         W->>S: WebSocket connect
         S-->>W: Connected
@@ -98,7 +98,7 @@ sequenceDiagram
     T->>T: Render interface
     T-->>U: TUI Display
 
-    loop A cada 3 segundos
+    loop Every 3 seconds
         T->>A: Fetch additional data
         A-->>T: Updated data
         T->>T: Re-render
@@ -107,19 +107,19 @@ sequenceDiagram
 
 ---
 
-## 3. Detalhamento dos Componentes
+## 3. Component Details
 
-### 3.1 Camada de Dados
+### 3.1 Data Layer
 
 ```mermaid
 graph TB
-    subgraph Data_Layer["Camada de Dados"]
-        subgraph APIs["Clientes de API"]
+    subgraph Data_Layer["Data Layer"]
+        subgraph APIs["API Clients"]
             api["api.ts<br/>- fetchEvents<br/>- fetchMarkets<br/>- getOrderbook<br/>- getPrices<br/>- getHistory<br/>- getHolders"]
             ws["ws.ts<br/>- connectMarketWs<br/>- subscribe<br/>- unsubscribe<br/>- reconnect"]
         end
 
-        subgraph Infra["Infraestrutura"]
+        subgraph Infra["Infrastructure"]
             http["http.ts<br/>- fetchJson<br/>- rate limiting<br/>- retry logic<br/>- timeout"]
             rate["rateLimiter.ts<br/>- Token Bucket<br/>- Jitter<br/>- Per-endpoint limits"]
         end
@@ -134,11 +134,11 @@ graph TB
     style Infra fill:#90caf9
 ```
 
-### 3.2 Camada de Domínio
+### 3.2 Domain Layer
 
 ```mermaid
 graph LR
-    subgraph Domain["Camada de Domínio"]
+    subgraph Domain["Domain Layer"]
         market["market.ts<br/>- resolveMarket<br/>- loadRadar<br/>- firstMarketFromEvent"]
 
         parsers["parsers.ts<br/>- normalizeMarket<br/>- normalizeOrderbook<br/>- extractHistory<br/>- normalizeHolders"]
@@ -155,16 +155,16 @@ graph LR
     style utils fill:#ba68c8
 ```
 
-### 3.3 Camada de Apresentação
+### 3.3 Presentation Layer
 
 ```mermaid
 graph TB
-    subgraph Presentation["Camada de Apresentação"]
+    subgraph Presentation["Presentation Layer"]
         index["index.ts<br/>- parseArgs<br/>- dispatch mode<br/>- entry point"]
 
         tui["tui.ts<br/>- createScreen<br/>- layoutComponents<br/>- render loop<br/>- key handlers"]
 
-        components["Componentes Blessed<br/>├─ Header<br/>├─ Radar Table<br/>├─ Market Box<br/>├─ Pulse Panel<br/>├─ Orderbook Table<br/>├─ History Panel<br/>├─ Holders Table<br/>└─ Status Panel"]
+        components["Blessed Components<br/>|-- Header<br/>|-- Radar Table<br/>|-- Market Box<br/>|-- Pulse Panel<br/>|-- Orderbook Table<br/>|-- History Panel<br/>|-- Holders Table<br/>+-- Status Panel"]
     end
 
     index --> tui
@@ -177,7 +177,7 @@ graph TB
 
 ---
 
-## 4. Integração com APIs Polymarket
+## 4. Polymarket API Integration
 
 ```mermaid
 graph TB
@@ -191,7 +191,7 @@ graph TB
         DataAPI["Data API<br/>data-api.polymarket.com<br/><br/>Endpoints:<br/>- GET /holders<br/>- GET /trades"]
     end
 
-    Client["Polymarket Analyzer<br/>(Cliente)"]
+    Client["Polymarket Analyzer<br/>(Client)"]
 
     Client -->|"Discover<br/>Markets"| GammaAPI
     Client -->|"Order Book<br/>History"| CLOBRest
@@ -207,7 +207,7 @@ graph TB
 
 ---
 
-## 5. Estrutura de Módulos TypeScript
+## 5. TypeScript Module Structure
 
 ```mermaid
 classDiagram
@@ -276,7 +276,7 @@ classDiagram
 
 ---
 
-## 6. Fluxo de Estados da Aplicação
+## 6. Application State Flow
 
 ```mermaid
 stateDiagram-v2
@@ -288,21 +288,21 @@ stateDiagram-v2
     FetchingRadar --> Resolving: resolveMarket()
 
     Resolving --> Connecting: connectMarketWs()
-    Resolving --> Error: Falha na API
+    Resolving --> Error: API Failure
 
     Connecting --> Connected: WebSocket open
     Connecting --> Error: Connection failed
 
-    Connected --> Streaming: Recebendo dados
+    Connected --> Streaming: Receiving data
 
-    Streaming --> Updating: Dados chegaram
-    Updating --> Rendering: Atualizar UI
-    Rendering --> Streaming: Loop contínua
+    Streaming --> Updating: Data arrived
+    Updating --> Rendering: Update UI
+    Rendering --> Streaming: Continuous loop
 
-    Streaming --> Reconnecting: WebSocket fechado
-    Reconnecting --> Connecting: Tentar reconectar
+    Streaming --> Reconnecting: WebSocket closed
+    Reconnecting --> Connecting: Retry connection
 
-    Streaming --> Stopping: Usuário saiu (q)
+    Streaming --> Stopping: User exited (q)
     Stopping --> [*]
 
     Error --> [*]: Fatal error
@@ -310,35 +310,35 @@ stateDiagram-v2
 
 ---
 
-## 7. Estratégia de Rate Limiting
+## 7. Rate Limiting Strategy
 
 ```mermaid
 graph TB
     subgraph RateLimiting["Rate Limiting Strategy"]
-        Request["Requisição HTTP"]
+        Request["HTTP Request"]
 
         subgraph Match["Match Endpoint"]
-            GammaBook["/book → 1500/10s"]
-            GammaPrice["/price → 1500/10s"]
-            GammaDefault["Default → 300/10s"]
+            GammaBook["/book -> 1500/10s"]
+            GammaPrice["/price -> 1500/10s"]
+            GammaDefault["Default -> 300/10s"]
         end
 
         Bucket["Token Bucket<br/><br/>tokens: N<br/>resetAt: timestamp"]
 
-        Decision{Tem tokens?}
+        Decision{Has tokens?}
 
-        Consume["Consome 1 token"]
+        Consume["Consume 1 token"]
 
-        Wait["Aguarda reset<br/>+ jitter 20-120ms"]
+        Wait["Wait for reset<br/>+ jitter 20-120ms"]
 
-        Proceed["Requisição permitida"]
+        Proceed["Request allowed"]
     end
 
     Request --> Match
     Match --> Bucket
     Bucket --> Decision
-    Decision -- Sim --> Consume
-    Decision -- Não --> Wait
+    Decision -- Yes --> Consume
+    Decision -- No --> Wait
     Consume --> Proceed
     Wait --> Bucket
 
@@ -350,29 +350,29 @@ graph TB
 
 ---
 
-## 8. Pipeline de Normalização de Dados
+## 8. Data Normalization Pipeline
 
 ```mermaid
 graph TD
-    subgraph Pipeline["Pipeline de Normalização"]
-        Raw["Dado Bruto da API<br/><br/>{<br/>  condition_id: 0x123,<br/>  clob_token_ids: [...],<br/>  volume_24h: 1500000<br/>}"]
+    subgraph Pipeline["Normalization Pipeline"]
+        Raw["Raw API Data<br/><br/>{<br/>  condition_id: 0x123,<br/>  clob_token_ids: [...],<br/>  volume_24h: 1500000<br/>}"]
 
-        Step1["Passo 1: Extração<br/><br/>extractConditionId<br/>extractTokenIds<br/>extractOutcomes"]
+        Step1["Step 1: Extraction<br/><br/>extractConditionId<br/>extractTokenIds<br/>extractOutcomes"]
 
-        Step2["Passo 2: Conversão<br/><br/>asNumber para valores<br/>String para arrays"]
+        Step2["Step 2: Conversion<br/><br/>asNumber for values<br/>String for arrays"]
 
-        Step3["Passo 3: Validação<br/><br/>Verifica campos obrigatórios:<br/>- conditionId ✅<br/>- clobTokenIds ✅"]
+        Step3["Step 3: Validation<br/><br/>Check required fields:<br/>- conditionId<br/>- clobTokenIds"]
 
-        Step4["Passo 4: Formatação<br/><br/>Formata para tipos TS:<br/>MarketInfo"]
+        Step4["Step 4: Formatting<br/><br/>Format to TS types:<br/>MarketInfo"]
 
-        Normalized["Dado Normalizado<br/><br/>interface MarketInfo {<br/>  conditionId: string<br/>  clobTokenIds: string[]<br/>  volume24hr: number<br/>}"]
+        Normalized["Normalized Data<br/><br/>interface MarketInfo {<br/>  conditionId: string<br/>  clobTokenIds: string[]<br/>  volume24hr: number<br/>}"]
     end
 
     Raw --> Step1
     Step1 --> Step2
     Step2 --> Step3
     Step3 -->|Valid| Step4
-    Step3 -->|Inválido| Null["null"]
+    Step3 -->|Invalid| Null["null"]
     Step4 --> Normalized
 
     style Pipeline fill:#e1bee7
@@ -383,16 +383,16 @@ graph TD
 
 ---
 
-## 9. Layout da Interface TUI
+## 9. TUI Interface Layout
 
 ```mermaid
 graph TB
     subgraph Screen["TUI Screen Layout"]
-        Header["┌─ Header ─────────────────────────────────────┐<br/>│ 12:34:56  Polymarket Analyzer  [WS: ●]      │<br/>└────────────────────────────────────────────┘"]
+        Header["+-- Header ------------------------------------------+<br/>| 12:34:56  Polymarket Analyzer  [WS: *]            |<br/>+---------------------------------------------------+"]
 
-        Main["┌─ Main Content ─────────────────────────────┐<br/>│                                              │<br/>│  ┌── Radar ─────────┐  ┌─ Market ──────┐  │<br/>│  │ • Market 1       │  │ Question:     │  │<br/>│  │ • Market 2       │  │ Trump 2024?  │  │<br/>│  │ • Market 3       │  │               │  │<br/>│  └──────────────────┘  │ Price: 65¢    │  │<br/>│                         │ Bid: 64 Ask: 66│  │<br/>│  ┌── Order Book ────┐  └───────────────┘  │<br/>│  │ BIDS    ASKS      │                      │<br/>│  │ 65¢     67¢       │  ┌── Pulse ────┐    │<br/>│  │ 64¢     68¢       │  │ ▁▃▄▅▆▇█   │    │<br/>│  │ 63¢     69¢       │  │ Sparkline  │    │<br/>│  └───────────────────┘  └────────────┘    │<br/>│                                              │<br/>│  ┌── History ─────────┐  ┌─ Holders ────┐   │<br/>│  │ 30d chart          │  │ 1. User: 10K │   │<br/>│  │ ▁▂▃▅▆▇            │  │ 2. User: 8K  │   │<br/>│  └───────────────────┘  │ 3. User: 5K  │   │<br/>│                         └──────────────┘   │<br/>└────────────────────────────────────────────┘"]
+        Main["+-- Main Content ------------------------------------+<br/>|                                                    |<br/>|  +-- Radar --------+  +-- Market --------+        |<br/>|  | * Market 1      |  | Question:        |        |<br/>|  | * Market 2      |  | Trump 2024?      |        |<br/>|  | * Market 3      |  |                  |        |<br/>|  +-----------------+  | Price: 65c       |        |<br/>|                       | Bid: 64 Ask: 66  |        |<br/>|  +-- Order Book ---+  +------------------+        |<br/>|  | BIDS    ASKS    |                             |<br/>|  | 65c     67c     |  +-- Pulse ------+          |<br/>|  | 64c     68c     |  | Sparkline     |          |<br/>|  | 63c     69c     |  +---------------+          |<br/>|  +-----------------+                             |<br/>|                                                    |<br/>|  +-- History ------+  +-- Holders ----+           |<br/>|  | 30d chart       |  | 1. User: 10K  |           |<br/>|  |                 |  | 2. User: 8K   |           |<br/>|  +-----------------+  | 3. User: 5K   |           |<br/>|                       +---------------+           |<br/>+---------------------------------------------------+"]
 
-        Footer["┌─ Footer ──────────────────────────────────────┐<br/>│ [n]ext [p]rev [o]utcome [s]napshot [q]uit │<br/>└────────────────────────────────────────────┘"]
+        Footer["+-- Footer ------------------------------------------+<br/>| [n]ext [p]rev [o]utcome [s]napshot [q]uit         |<br/>+---------------------------------------------------+"]
     end
 
     Header --> Main
@@ -406,7 +406,7 @@ graph TB
 
 ---
 
-## 10. Relacionamentos Entre Arquivos
+## 10. File Relationships
 
 ```mermaid
 graph LR
@@ -441,20 +441,20 @@ graph LR
 
 ---
 
-## 📚 Como Usar Este Documento
+## How to Use This Document
 
-1. **Para entender arquitetura geral:** Veja o diagrama 1
-2. **Para entender fluxo de dados:** Veja o diagrama 2
-3. **Para entender componentes:** Veja o diagrama 3
-4. **Para entender integração:** Veja o diagrama 4
-5. **Para entender código:** Veja o diagrama 5
-6. **Para entender estados:** Veja o diagrama 6
-7. **Para entender rate limiting:** Veja o diagrama 7
-8. **Para entender normalização:** Veja o diagrama 8
-9. **Para entender interface:** Veja o diagrama 9
-10. **Para entender dependências:** Veja o diagrama 10
+1. **To understand overall architecture:** See diagram 1
+2. **To understand data flow:** See diagram 2
+3. **To understand components:** See diagram 3
+4. **To understand integration:** See diagram 4
+5. **To understand code:** See diagram 5
+6. **To understand states:** See diagram 6
+7. **To understand rate limiting:** See diagram 7
+8. **To understand normalization:** See diagram 8
+9. **To understand interface:** See diagram 9
+10. **To understand dependencies:** See diagram 10
 
 ---
 
-**Última Atualização:** Janeiro 2026
-**Versão:** 1.0
+**Version:** 1.0.0
+**Last Updated:** January 2026

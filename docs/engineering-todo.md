@@ -65,3 +65,9 @@ Verification:
 Task 6.2: Ensure lint/format guidance is documented if no tooling is added.
 Acceptance criteria: docs note lint/format status and any future recommendations.
 Verification: Manual review of docs/engineering-exec-spec.md and README.md.
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** January 2026
+

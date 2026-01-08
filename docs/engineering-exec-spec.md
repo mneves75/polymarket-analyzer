@@ -94,3 +94,9 @@ Baseline verification output will be captured in the final review packet. Additi
 ## Interfaces and Dependencies
 
 No new runtime dependencies should be added unless required for guideline compliance (for example, a lint tool). Any added dependency must be justified in the todo plan, and its configuration must be documented.
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** January 2026
+

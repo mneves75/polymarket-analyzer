@@ -1165,3 +1165,9 @@ OPENTUI=1 bun --bun run src/index.ts --tui --no-ws
 2. Implement Phase 2 (Minimal Viable TUI)
 3. Test with `OPENTUI=1 bun --bun run dev --tui`
 4. Iterate through remaining phases
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** January 2026
+

@@ -5,10 +5,10 @@
  * and ensure compile-time type safety for identifiers.
  *
  * @example
- * // ❌ WRONG - Any string can be passed
+ * // WRONG - Any string can be passed
  * function getToken(tokenId: string) { }
  *
- * // ✅ CORRECT - Only valid TokenId accepted
+ * // CORRECT - Only valid TokenId accepted
  * function getToken(tokenId: TokenId) { }
  */
 

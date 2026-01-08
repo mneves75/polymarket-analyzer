@@ -1152,3 +1152,9 @@ Use **Ink** instead:
 - [TypeScript Best Practices 2025](https://dev.to/mitu_mariam/typescript-best-practices-in-2025-57hb)
 - [Error Handling in TypeScript](https://medium.com/@arreyetta/error-handling-in-typescript-best-practices-80cdfe6d06db)
 - [Node.js Process Exit Strategies](https://leapcell.org/blog/nodejs-process-exit-strategies)
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** January 2026
+

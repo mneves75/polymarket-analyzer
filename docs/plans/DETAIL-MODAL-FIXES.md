@@ -109,3 +109,9 @@ Fix the detail modal to properly update when navigating between markets (n/p key
 
 Revision Notes:
 - 2026-01-06: Created exec plan for detail modal navigation fixes
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** January 2026
+
