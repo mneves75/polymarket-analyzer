@@ -43,16 +43,16 @@ This document represents a brutal self-critique of the polymarket-analyzer proje
 
 | Chapter | Checkpoints | Common Pitfalls | Troubleshooting | Design Decisions | External Links | Status |
 |---------|------------|-----------------|-----------------|------------------|----------------|--------|
-| 00 - Introdução | ✅ | ✅ | ✅ | ✅ | ✅ | COMPLETE |
-| 01 - Bun/TS | ✅ | ✅ | ✅ | ✅ | ✅ | COMPLETE |
-| 02 - Arquitetura | ✅ | ✅ | ✅ | ✅ | ✅ | COMPLETE |
-| 03 - APIs | ✅ | ✅ | ✅ | ✅ | ✅ | COMPLETE |
-| 04 - WebSockets | ✅ | ✅ | ✅ | ✅ | ✅ | COMPLETE |
-| 05 - TUI | ❌ | ❌ | ❌ | ❌ | ❌ | **INCOMPLETE** |
-| 06 - Erros/Rate Limit | ❌ | ❌ | ❌ | ❌ | ❌ | **INCOMPLETE** |
-| 07 - Testes | ❌ | ❌ | ❌ | ❌ | ❌ | **INCOMPLETE** |
-| 08 - Exercícios | ✅ | ✅ | ✅ | N/A | ✅ | COMPLETE |
-| 09 - Próximos Passos | N/A | N/A | N/A | N/A | ✅ | COMPLETE |
+| 00 - Introduction | [PASS] | [PASS] | [PASS] | [PASS] | [PASS] | COMPLETE |
+| 01 - Bun/TS | [PASS] | [PASS] | [PASS] | [PASS] | [PASS] | COMPLETE |
+| 02 - Architecture | [PASS] | [PASS] | [PASS] | [PASS] | [PASS] | COMPLETE |
+| 03 - APIs | [PASS] | [PASS] | [PASS] | [PASS] | [PASS] | COMPLETE |
+| 04 - WebSockets | [PASS] | [PASS] | [PASS] | [PASS] | [PASS] | COMPLETE |
+| 05 - TUI | [FAIL] | [FAIL] | [FAIL] | [FAIL] | [FAIL] | **INCOMPLETE** |
+| 06 - Errors/Rate Limit | [FAIL] | [FAIL] | [FAIL] | [FAIL] | [FAIL] | **INCOMPLETE** |
+| 07 - Tests | [FAIL] | [FAIL] | [FAIL] | [FAIL] | [FAIL] | **INCOMPLETE** |
+| 08 - Exercises | [PASS] | [PASS] | [PASS] | N/A | [PASS] | COMPLETE |
+| 09 - Next Steps | N/A | N/A | N/A | N/A | [PASS] | COMPLETE |
 
 ### 1.2 Critical Missing Elements in Chapters 05-07
 
@@ -63,14 +63,14 @@ This document represents a brutal self-critique of the polymarket-analyzer proje
 - No Design Decisions section
 - No external links for Blessed library
 
-**Chapter 06 (Erros/Rate Limit) Missing:**
+**Chapter 06 (Errors/Rate Limit) Missing:**
 - No checkpoints/quizzes
-- No Common Pitfalls (e.g., "engolindo erros")
+- No Common Pitfalls (e.g., "swallowing errors")
 - No Troubleshooting guide for common failures
 - No Design Decisions (why exponential backoff? why token bucket?)
 - No links to Polymarket rate limit documentation
 
-**Chapter 07 (Testes) Missing:**
+**Chapter 07 (Tests) Missing:**
 - No checkpoints
 - No Common Pitfalls (brittle tests, slow tests)
 - No Troubleshooting (flaky tests, CI failures)
@@ -84,13 +84,13 @@ This document represents a brutal self-critique of the polymarket-analyzer proje
 
 | Rule | Status | Evidence |
 |------|--------|----------|
-| Bun as default package manager | ✅ PASS | package.json uses Bun |
-| Never cast to `any` | ✅ PASS | Zero `any` types found |
+| Bun as default package manager | [PASS] | package.json uses Bun |
+| Never cast to `any` | [PASS] | Zero `any` types found |
 | Never hard delete | N/A | No database operations |
 | No unnecessary `useEffect` | N/A | Not a React project |
-| Proper error handling | ✅ PASS | Exponential backoff in http.ts |
-| Type safety | ✅ PASS | Strict TypeScript, proper types |
-| Atomic commits | ⚠️ CHECK | Need to verify git history |
+| Proper error handling | [PASS] | Exponential backoff in http.ts |
+| Type safety | [PASS] | Strict TypeScript, proper types |
+| Atomic commits | [WARN] | Need to verify git history |
 
 ### 2.2 Code Quality Issues Found
 
@@ -142,10 +142,10 @@ The project has LOG-GUIDELINES requirements but no structured logging implementa
 
 | Reference | Documentation | Actual Code | Status |
 |-----------|--------------|-------------|--------|
-| `src/config.ts:7` | Chapter 01 | Line 7 exists ✅ | PASS |
-| `src/http.ts:42-77` | Chapter 06 | Lines 42-95 ✅ | PASS |
-| `src/rateLimiter.ts:12-33` | Chapter 06 | Lines 12-33 ✅ | PASS |
-| `src/tui.ts:46-170` | Chapter 05 | Lines 46-170 ✅ | PASS |
+| `src/config.ts:7` | Chapter 01 | Line 7 exists [PASS] | PASS |
+| `src/http.ts:42-77` | Chapter 06 | Lines 42-95 [PASS] | PASS |
+| `src/rateLimiter.ts:12-33` | Chapter 06 | Lines 12-33 [PASS] | PASS |
+| `src/tui.ts:46-170` | Chapter 05 | Lines 46-170 [PASS] | PASS |
 | `src/utils.ts:18-31` | Chapter 05 | File not found | **FAIL** |
 
 **Critical Finding:** Chapter 05 references `src/utils.ts:18-31` for `asciiSparkline` but this function is defined elsewhere or the line numbers are wrong.
@@ -153,18 +153,18 @@ The project has LOG-GUIDELINES requirements but no structured logging implementa
 ### 3.2 API Documentation Alignment
 
 **Documentation Claims:**
-- "Gamma API para descoberta de mercados"
-- "CLOB REST para preços e order book"
-- "CLOB WebSocket para tempo real"
-- "Data API para holders e trades"
+- "Gamma API for market discovery"
+- "CLOB REST for prices and order book"
+- "CLOB WebSocket for real-time data"
+- "Data API for holders and trades"
 
-**Code Reality:** ✅ All APIs implemented as documented.
+**Code Reality:** [PASS] All APIs implemented as documented.
 
 ### 3.3 Configuration Documentation
 
 **Documentation:**
 ```typescript
-const REFRESH_MS = CONFIG.refreshMs;  // 3000ms (3 segundos)
+const REFRESH_MS = CONFIG.refreshMs;  // 3000ms (3 seconds)
 ```
 
 **Code Reality (config.ts:7):**
@@ -172,7 +172,7 @@ const REFRESH_MS = CONFIG.refreshMs;  // 3000ms (3 segundos)
 refreshMs: 3000,
 ```
 
-Status: ✅ PASS
+Status: [PASS]
 
 ---
 
@@ -184,14 +184,14 @@ Based on web research of industry leaders (Stripe, Google, Microsoft, Vercel doc
 
 | Practice | Status | Gap |
 |----------|--------|-----|
-| Interactive code blocks | ❌ FAIL | Static code only |
-| Live execution examples | ❌ FAIL | No "try this" buttons |
-| Version pinning | ⚠️ PARTIAL | No API version docs |
+| Interactive code blocks | [FAIL] | Static code only |
+| Live execution examples | [FAIL] | No "try this" buttons |
+| Version pinning | [WARN] | No API version docs |
 | Dark mode support | N/A | Not web-based |
-| Search functionality | ❌ FAIL | No search in docs |
-| Analytics/Usage tracking | ❌ FAIL | No observability |
-| Feedback mechanisms | ❌ FAIL | No "was this helpful?" |
-| Multi-language support | ❌ FAIL | Portuguese only |
+| Search functionality | [FAIL] | No search in docs |
+| Analytics/Usage tracking | [FAIL] | No observability |
+| Feedback mechanisms | [FAIL] | No "was this helpful?" |
+| Multi-language support | [FAIL] | Portuguese only |
 
 ### 4.2 Learning Path Design
 
@@ -199,23 +199,23 @@ Based on 2025/2026 developer onboarding research:
 
 | Best Practice | Implementation | Gap |
 |---------------|----------------|-----|
-| Progressive disclosure | ✅ GOOD | Chapters build on each other |
-| Hands-on exercises | ✅ GOOD | 50+ exercises |
-| Immediate feedback | ❌ FAIL | No automated validation |
-| Real-world projects | ✅ GOOD | Uses real Polymarket APIs |
-| Social learning | ❌ FAIL | No community features |
-- **Gamification** ✅ Implemented in PROGRESSO.md
-- **90-day onboarding** ✅ Implemented in ONBOARDING.md
+| Progressive disclosure | [PASS] | Chapters build on each other |
+| Hands-on exercises | [PASS] | 50+ exercises |
+| Immediate feedback | [FAIL] | No automated validation |
+| Real-world projects | [PASS] | Uses real Polymarket APIs |
+| Social learning | [FAIL] | No community features |
+- **Gamification** [PASS] Implemented in PROGRESS.md
+- **90-day onboarding** [PASS] Implemented in ONBOARDING.md
 
 ### 4.3 Accessibility & Inclusivity
 
 | Practice | Status | Notes |
 |----------|--------|-------|
 | WCAG 2.2 compliance | N/A | Terminal UI, not web |
-| Screen reader support | ❌ FAIL | TUI not accessible |
-| Keyboard navigation | ✅ PASS | Full keyboard support |
-| Color contrast | ✅ PASS | High contrast colors |
-| Dyslexia-friendly fonts | ⚠️ CHECK | Using terminal fonts |
+| Screen reader support | [FAIL] | TUI not accessible |
+| Keyboard navigation | [PASS] | Full keyboard support |
+| Color contrast | [PASS] | High contrast colors |
+| Dyslexia-friendly fonts | [WARN] | Using terminal fonts |
 
 ---
 
@@ -292,31 +292,31 @@ const backoff = Math.min(30_000, 500 * Math.pow(2, reconnectAttempts - 1));
 
 | Feature | Stripe | Polymarket Analyzer | Gap |
 |---------|--------|---------------------|-----|
-| Copy-paste examples | ✅ | ⚠️ | Some, not all |
-| Error handling docs | ✅ | ✅ | Good coverage |
-| Rate limit docs | ✅ | ✅ | Implemented |
-| Webhook guides | ✅ | ❌ | Missing |
-| API versioning | ✅ | ❌ | Not documented |
-| Changelog | ✅ | ❌ | Not tracked |
+| Copy-paste examples | [PASS] | [WARN] | Some, not all |
+| Error handling docs | [PASS] | [PASS] | Good coverage |
+| Rate limit docs | [PASS] | [PASS] | Implemented |
+| Webhook guides | [PASS] | [FAIL] | Missing |
+| API versioning | [PASS] | [FAIL] | Not documented |
+| Changelog | [PASS] | [FAIL] | Not tracked |
 
 ### 7.2 Vercel Documentation (Modern)
 
 | Feature | Vercel | Polymarket Analyzer | Gap |
 |---------|-------|---------------------|-----|
-| Next.js examples | ✅ | N/A | Different stack |
-| Dark mode | ✅ | N/A | Terminal UI |
-| Search | ✅ | ❌ | Missing |
-| Feedback buttons | ✅ | ❌ | Missing |
-| Video tutorials | ✅ | ❌ | Missing |
+| Next.js examples | [PASS] | N/A | Different stack |
+| Dark mode | [PASS] | N/A | Terminal UI |
+| Search | [PASS] | [FAIL] | Missing |
+| Feedback buttons | [PASS] | [FAIL] | Missing |
+| Video tutorials | [PASS] | [FAIL] | Missing |
 
 ### 7.3 Google Developer Documentation
 
 | Feature | Google | Polymarket Analyzer | Gap |
 |---------|--------|---------------------|-----|
-| Codelabs | ✅ | ⚠️ | Partial (exercises) |
-| Sandboxes | ✅ | ❌ | Missing |
-| Samples | ✅ | ⚠️ | Code only |
-| Tutorials | ✅ | ✅ | Complete |
+| Codelabs | [PASS] | [WARN] | Partial (exercises) |
+| Sandboxes | [PASS] | [FAIL] | Missing |
+| Samples | [PASS] | [WARN] | Code only |
+| Tutorials | [PASS] | [PASS] | Complete |
 
 ---
 
@@ -374,8 +374,8 @@ const backoff = Math.min(30_000, 500 * Math.pow(2, reconnectAttempts - 1));
     * Why jitter? Distributes retry requests to avoid synchronized storms.
     *
     * Timeline example:
-    * - Attempt 1: fails → wait 200ms + jitter
-    * - Attempt 2: fails → wait 400ms + jitter
+    * - Attempt 1: fails -> wait 200ms + jitter
+    * - Attempt 2: fails -> wait 400ms + jitter
     * - Attempt 3: succeeds
     */
    async function backoff(attempt: number) {
@@ -432,12 +432,12 @@ Based on package.json and code analysis:
 
 | Component | Test File | Coverage | Status |
 |-----------|-----------|----------|--------|
-| TUI Render | tui-render.test.ts | Partial | ⚠️ |
-| API Layer | api.test.ts | Missing | ❌ |
-| HTTP Client | http.test.ts | Missing | ❌ |
-| Rate Limiter | rateLimiter.test.ts | Missing | ❌ |
-| WebSocket | ws.test.ts | Missing | ❌ |
-| Utils | utils.test.ts | Missing | ❌ |
+| TUI Render | tui-render.test.ts | Partial | [WARN] |
+| API Layer | api.test.ts | Missing | [FAIL] |
+| HTTP Client | http.test.ts | Missing | [FAIL] |
+| Rate Limiter | rateLimiter.test.ts | Missing | [FAIL] |
+| WebSocket | ws.test.ts | Missing | [FAIL] |
+| Utils | utils.test.ts | Missing | [FAIL] |
 
 **Critical Gap:** Only one test file exists (tui-render.test.ts).
 
@@ -483,11 +483,11 @@ describe("WebSocket Client", () => {
 
 ### Current State
 
-- ✅ Basic console.log in some places
-- ❌ No structured logging
-- ❌ No error tracking
-- ❌ No performance monitoring
-- ❌ No metrics collection
+- [PASS] Basic console.log in some places
+- [FAIL] No structured logging
+- [FAIL] No error tracking
+- [FAIL] No performance monitoring
+- [FAIL] No metrics collection
 
 ### Required Implementation
 
@@ -531,12 +531,12 @@ logger.error("API request failed", {
 
 ### Current State
 
-- ✅ No hardcoded secrets
-- ✅ Proper timeout handling
-- ✅ Input validation on CLI args
-- ⚠️ No API key authentication (uses public APIs)
-- ❌ No request signing
-- ❌ No certificate pinning
+- [PASS] No hardcoded secrets
+- [PASS] Proper timeout handling
+- [PASS] Input validation on CLI args
+- [WARN] No API key authentication (uses public APIs)
+- [FAIL] No request signing
+- [FAIL] No certificate pinning
 
 ### Recommendations
 
@@ -568,11 +568,11 @@ logger.error("API request failed", {
 
 | Operation | Expected | Actual | Status |
 |-----------|----------|--------|--------|
-| Cold start | <2s | ~1.5s | ✅ |
-| Radar refresh | <1s | ~500ms | ✅ |
-| Orderbook fetch | <500ms | ~200ms | ✅ |
-| WebSocket connect | <2s | ~1s | ✅ |
-| TUI render | <100ms | ~50ms | ✅ |
+| Cold start | <2s | ~1.5s | [PASS] |
+| Radar refresh | <1s | ~500ms | [PASS] |
+| Orderbook fetch | <500ms | ~200ms | [PASS] |
+| WebSocket connect | <2s | ~1s | [PASS] |
+| TUI render | <100ms | ~50ms | [PASS] |
 
 ### Optimization Opportunities
 
@@ -604,26 +604,26 @@ logger.error("API request failed", {
 
 ### Strengths to Maintain
 
-1. ✅ **Solid Architecture** - Clean separation of concerns
-2. ✅ **Type Safety** - Proper TypeScript usage throughout
-3. ✅ **Real-time Features** - WebSocket integration works well
-4. ✅ **Comprehensive Documentation** - 9 chapters covering all topics
-5. ✅ **Practical Examples** - Real Polymarket API usage
+1. [PASS] **Solid Architecture** - Clean separation of concerns
+2. [PASS] **Type Safety** - Proper TypeScript usage throughout
+3. [PASS] **Real-time Features** - WebSocket integration works well
+4. [PASS] **Comprehensive Documentation** - 9 chapters covering all topics
+5. [PASS] **Practical Examples** - Real Polymarket API usage
 
 ### Critical Gaps to Close
 
-1. ❌ **Complete Chapters 05-07** - Missing checkpoints, pitfalls, troubleshooting
-2. ❌ **Add Code Comments** - Complex algorithms need explanations
-3. ❌ **Implement Testing** - Only 1 test file exists
-4. ❌ **Add Structured Logging** - LOG-GUIDELINES compliance
-5. ❌ **Fix Documentation Errors** - Wrong file references
+1. [FAIL] **Complete Chapters 05-07** - Missing checkpoints, pitfalls, troubleshooting
+2. [FAIL] **Add Code Comments** - Complex algorithms need explanations
+3. [FAIL] **Implement Testing** - Only 1 test file exists
+4. [FAIL] **Add Structured Logging** - LOG-GUIDELINES compliance
+5. [FAIL] **Fix Documentation Errors** - Wrong file references
 
 ### Priority Actions (Next 7 Days)
 
 **Week 1: Documentation Completion**
 - [ ] Complete Chapter 05 (TUI) missing sections
-- [ ] Complete Chapter 06 (Erros) missing sections
-- [ ] Complete Chapter 07 (Testes) missing sections
+- [ ] Complete Chapter 06 (Errors) missing sections
+- [ ] Complete Chapter 07 (Tests) missing sections
 - [ ] Fix all code reference errors
 - [ ] Add "Run This" sections to all code examples
 
@@ -711,3 +711,8 @@ John Carmack would say: "Ship it, but keep improving. The code works. Make it ma
 
 Generated: 2026-01-06
 Next Review: After Priority Actions completion
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** January 2026

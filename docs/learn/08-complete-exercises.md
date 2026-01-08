@@ -1,58 +1,58 @@
-# Capítulo 08: Exercícios Práticos Completos
+# Chapter 08: Complete Practical Exercises
 
-> **"A única maneira de aprender uma nova linguagem de programação é escrevendo programas nela."**
+> **"The only way to learn a new programming language is by writing programs in it."**
 > — Dennis Ritchie
 
 ---
 
-## 📊 Sistema de Níveis
+## Level System
 
-Os exercícios são classificados em 4 níveis de dificuldade:
+Exercises are classified into 4 difficulty levels:
 
-| Nível | Badge | Descrição | Tempo Estimado |
-|-------|-------|-----------|----------------|
-| 🟢 **Iniciante** | Fácil | Conceitos básicos, bem guiado | 15-30 min |
-| 🟡 **Intermediário** | Médio | Requer pensamento, múltiplos passos | 30-60 min |
-| 🟠 **Avançado** | Difícil | Problemas complexos, menos guiado | 1-2 horas |
-| 🔴 **Mestre** | Desafiador | Requer pesquisa, arquitetura própria | 2+ horas |
-
----
-
-## Introdução
-
-Este capítulo contém **exercícios práticos completos** que cobrem todos os conceitos aprendidos. Cada exercício inclui:
-
-1. **Nível de dificuldade** (ver tabela acima)
-2. **Pré-requisitos** (conhecimentos necessários)
-3. **Descrição** do que deve ser implementado
-4. **Dicas** para guiar sua solução
-5. **Solução exemplo** (não olhe antes de tentar!)
+| Level | Badge | Description | Estimated Time |
+|-------|-------|-------------|----------------|
+| [BEGINNER] **Beginner** | Easy | Basic concepts, well guided | 15-30 min |
+| [INTERMEDIATE] **Intermediate** | Medium | Requires thinking, multiple steps | 30-60 min |
+| [ADVANCED] **Advanced** | Hard | Complex problems, less guided | 1-2 hours |
+| [MASTER] **Master** | Challenging | Requires research, own architecture | 2+ hours |
 
 ---
 
-## 🟢 Módulo 1: TypeScript Básico (Iniciante)
+## Introduction
 
-### Exercício 1.1: Tipos e Interfaces
+This chapter contains **complete practical exercises** covering all concepts learned. Each exercise includes:
 
-**Nível:** 🟢 Iniciante
-**Pré-requisitos:** Capítulo 01
-**Tempo estimado:** 20 minutos
+1. **Difficulty level** (see table above)
+2. **Prerequisites** (required knowledge)
+3. **Description** of what to implement
+4. **Hints** to guide your solution
+5. **Example solution** (don't look before trying!)
 
-Implemente tipos TypeScript para um sistema de pedidos:
+---
+
+## [BEGINNER] Module 1: Basic TypeScript
+
+### Exercise 1.1: Types and Interfaces
+
+**Level:** [BEGINNER] Beginner
+**Prerequisites:** Chapter 01
+**Estimated time:** 20 minutes
+
+Implement TypeScript types for an order system:
 
 ```typescript
-// TODO: Defina os tipos
+// TODO: Define the types
 type Order = unknown;
 type Product = unknown;
 type Customer = unknown;
 
-// TODO: Implemente a função
+// TODO: Implement the function
 function calculateOrderTotal(order: Order): number {
-  // Soma (preço * quantidade) de cada produto
-  return 0; // Implemente
+  // Sum (price * quantity) for each product
+  return 0; // Implement
 }
 
-// Teste
+// Test
 const order = {
   id: "ORD-001",
   customer: { name: "Maria", email: "maria@example.com" },
@@ -63,11 +63,11 @@ const order = {
   status: "pending"
 };
 
-console.log(calculateOrderTotal(order)); // Esperado: 2600
+console.log(calculateOrderTotal(order)); // Expected: 2600
 ```
 
 <details>
-<summary>Solução</summary>
+<summary>Solution</summary>
 
 ```typescript
 type Product = {
@@ -100,17 +100,17 @@ function calculateOrderTotal(order: Order): number {
 
 </details>
 
-### Exercício 1.2: Generics
+### Exercise 1.2: Generics
 
-Implemente uma função genérica de busca:
+Implement a generic search function:
 
 ```typescript
-// TODO: Implemente função genérica que busca em array
+// TODO: Implement generic function that searches in array
 function findItem<T>(items: T[], predicate: (item: T) => boolean): T | null {
-  return null; // Implemente
+  return null; // Implement
 }
 
-// Teste
+// Test
 interface User {
   id: number;
   name: string;
@@ -124,11 +124,11 @@ const users: User[] = [
 ];
 
 const user = findItem(users, u => u.id === 2);
-console.log(user?.name); // Esperado: "Bob"
+console.log(user?.name); // Expected: "Bob"
 ```
 
 <details>
-<summary>Solução</summary>
+<summary>Solution</summary>
 
 ```typescript
 function findItem<T>(items: T[], predicate: (item: T) => boolean): T | null {
@@ -145,20 +145,20 @@ function findItem<T>(items: T[], predicate: (item: T) => boolean): T | null {
 
 ---
 
-## Módulo 2: Integração de APIs
+## Module 2: API Integration
 
-### Exercício 2.1: Cliente HTTP Simples
+### Exercise 2.1: Simple HTTP Client
 
-Implemente um cliente HTTP com retry:
+Implement an HTTP client with retry:
 
 ```typescript
-// TODO: Implemente cliente HTTP com retry
+// TODO: Implement HTTP client with retry
 class HttpClient {
   async get<T>(url: string, retries = 3): Promise<T> {
-    // 1. Tenta fetch
-    // 2. Se falhar e ainda tem retries, espera e tenta de novo
+    // 1. Try fetch
+    // 2. If fails and still has retries, wait and try again
     // 3. Use exponential backoff: 100ms, 200ms, 400ms...
-    throw new Error("Implemente");
+    throw new Error("Implement");
   }
 
   private async sleep(ms: number): Promise<void> {
@@ -166,14 +166,14 @@ class HttpClient {
   }
 }
 
-// Teste
+// Test
 const client = new HttpClient();
 const data = await client.get("https://api.github.com/users/github");
-console.log(data.login); // Esperado: "github"
+console.log(data.login); // Expected: "github"
 ```
 
 <details>
-<summary>Solução</summary>
+<summary>Solution</summary>
 
 ```typescript
 class HttpClient {
@@ -187,7 +187,7 @@ class HttpClient {
         return await response.json();
       } catch (error) {
         if (attempt === retries - 1) {
-          throw error; // Última tentativa falhou
+          throw error; // Last attempt failed
         }
         const backoffMs = 100 * Math.pow(2, attempt);
         await this.sleep(backoffMs);
@@ -204,31 +204,31 @@ class HttpClient {
 
 </details>
 
-### Exercício 2.2: Parser de Dados
+### Exercise 2.2: Data Parser
 
-Implemente parser para múltiplos formatos de data:
+Implement a parser for multiple date formats:
 
 ```typescript
-// TODO: Implemente parser que aceita múltiplos formatos
+// TODO: Implement parser that accepts multiple formats
 function parseDate(input: unknown): Date | null {
-  // Aceita:
+  // Accepts:
   // 1. ISO string: "2024-01-15T10:30:00Z"
-  // 2. Timestamp em ms: 1705316400000
-  // 3. Objeto { year, month, day }: { year: 2024, month: 1, day: 15 }
-  // 4. null ou undefined → retorna null
-  return null; // Implemente
+  // 2. Timestamp in ms: 1705316400000
+  // 3. Object { year, month, day }: { year: 2024, month: 1, day: 15 }
+  // 4. null or undefined -> returns null
+  return null; // Implement
 }
 
-// Testes
-console.log(parseDate("2024-01-15T10:30:00Z")); // Date válida
-console.log(parseDate(1705316400000)); // Date válida
-console.log(parseDate({ year: 2024, month: 1, day: 15 })); // Date válida
+// Tests
+console.log(parseDate("2024-01-15T10:30:00Z")); // Valid Date
+console.log(parseDate(1705316400000)); // Valid Date
+console.log(parseDate({ year: 2024, month: 1, day: 15 })); // Valid Date
 console.log(parseDate(null)); // null
-console.log(parseDate("inválido")); // null
+console.log(parseDate("invalid")); // null
 ```
 
 <details>
-<summary>Solução</summary>
+<summary>Solution</summary>
 
 ```typescript
 function parseDate(input: unknown): Date | null {
@@ -242,13 +242,13 @@ function parseDate(input: unknown): Date | null {
     return isNaN(date.getTime()) ? null : date;
   }
 
-  // Timestamp em ms
+  // Timestamp in ms
   if (typeof input === "number") {
     const date = new Date(input);
     return isNaN(date.getTime()) ? null : date;
   }
 
-  // Objeto { year, month, day }
+  // Object { year, month, day }
   if (typeof input === "object" && input !== null) {
     const obj = input as Record<string, unknown>;
     if ("year" in obj && "month" in obj && "day" in obj) {
@@ -268,37 +268,37 @@ function parseDate(input: unknown): Date | null {
 
 ---
 
-## Módulo 3: WebSocket
+## Module 3: WebSocket
 
-### Exercício 3.1: Cliente WebSocket com Reconexão
+### Exercise 3.1: WebSocket Client with Reconnection
 
-Implemente cliente WebSocket com reconexão automática:
+Implement a WebSocket client with automatic reconnection:
 
 ```typescript
-// TODO: Implemente cliente WS com reconexão
+// TODO: Implement WS client with reconnection
 class ReconnectingWebSocket {
   private ws: WebSocket | null = null;
   private reconnectAttempts = 0;
   private maxAttempts = 5;
 
   connect(url: string) {
-    // 1. Cria conexão WebSocket
-    // 2. Se fechar, reconecta com exponential backoff
-    // 3. Para após maxAttempts
+    // 1. Create WebSocket connection
+    // 2. If closes, reconnect with exponential backoff
+    // 3. Stop after maxAttempts
   }
 
   send(data: string) {
-    // Envia se conectado, senão lança erro
+    // Send if connected, otherwise throw error
   }
 
   close() {
-    // Fecha conexão e para reconexões
+    // Close connection and stop reconnections
   }
 }
 ```
 
 <details>
-<summary>Solução</summary>
+<summary>Solution</summary>
 
 ```typescript
 class ReconnectingWebSocket {
@@ -316,7 +316,7 @@ class ReconnectingWebSocket {
     this.ws = new WebSocket(url);
 
     this.ws.addEventListener("open", () => {
-      console.log("Conectado!");
+      console.log("Connected!");
       this.reconnectAttempts = 0;
     });
 
@@ -326,17 +326,17 @@ class ReconnectingWebSocket {
       this.reconnectAttempts++;
       if (this.reconnectAttempts <= this.maxAttempts) {
         const backoff = 1000 * Math.pow(2, this.reconnectAttempts - 1);
-        console.log(`Reconectando em ${backoff}ms...`);
+        console.log(`Reconnecting in ${backoff}ms...`);
         setTimeout(() => this.doConnect(url), backoff);
       } else {
-        console.error("Max reconexões atingido");
+        console.error("Max reconnections reached");
       }
     });
   }
 
   send(data: string) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      throw new Error("WebSocket não conectado");
+      throw new Error("WebSocket not connected");
     }
     this.ws.send(data);
   }
@@ -352,19 +352,19 @@ class ReconnectingWebSocket {
 
 ---
 
-## Módulo 4: Rate Limiting
+## Module 4: Rate Limiting
 
-### Exercício 4.1: Implemente Token Bucket
+### Exercise 4.1: Implement Token Bucket
 
 ```typescript
-// TODO: Implemente algoritmo Token Bucket
+// TODO: Implement Token Bucket algorithm
 class TokenBucket {
   private tokens: number;
   private lastRefill: number;
 
   constructor(
     private capacity: number,
-    private refillRate: number, // tokens por segundo
+    private refillRate: number, // tokens per second
     private refillInterval: number // ms
   ) {
     this.tokens = capacity;
@@ -372,20 +372,20 @@ class TokenBucket {
   }
 
   async consume(tokens = 1): Promise<boolean> {
-    // 1. Refill tokens baseado no tempo passado
-    // 2. Se tem tokens suficientes, consome e retorna true
-    // 3. Senão, retorna false
-    return false; // Implemente
+    // 1. Refill tokens based on elapsed time
+    // 2. If has enough tokens, consume and return true
+    // 3. Otherwise, return false
+    return false; // Implement
   }
 
   private refill() {
-    // Calcula tokens para adicionar baseado no tempo
+    // Calculate tokens to add based on time
   }
 }
 ```
 
 <details>
-<summary>Solução</summary>
+<summary>Solution</summary>
 
 ```typescript
 class TokenBucket {
@@ -431,47 +431,47 @@ class TokenBucket {
 
 ---
 
-## Módulo 5: Interface de Terminal
+## Module 5: Terminal Interface
 
-### Exercício 5.1: Tabela Formatada
+### Exercise 5.1: Formatted Table
 
-Implemente função que formata tabela em ASCII:
+Implement a function that formats a table in ASCII:
 
 ```typescript
-// TODO: Formata array de objetos em tabela ASCII
+// TODO: Format array of objects as ASCII table
 function formatTable<T extends Record<string, unknown>>(
   data: T[],
   columns: (keyof T)[]
 ): string {
-  // 1. Calcula largura de cada coluna
-  // 2. Cria linha de cabeçalho
-  // 3. Cria linhas de dados
-  // 4. Retorna tabela completa
-  return ""; // Implemente
+  // 1. Calculate width of each column
+  // 2. Create header row
+  // 3. Create data rows
+  // 4. Return complete table
+  return ""; // Implement
 }
 
-// Teste
+// Test
 const users = [
   { name: "Alice", age: 30, city: "SP" },
   { name: "Bob", age: 25, city: "RJ" }
 ];
 
 console.log(formatTable(users, ["name", "age", "city"]));
-// Esperado:
+// Expected:
 // NAME  | AGE | CITY |
 // Alice | 30  | SP   |
 // Bob   | 25  | RJ   |
 ```
 
 <details>
-<summary>Solução</summary>
+<summary>Solution</summary>
 
 ```typescript
 function formatTable<T extends Record<string, unknown>>(
   data: T[],
   columns: (keyof T)[]
 ): string {
-  // Calcula larguras
+  // Calculate widths
   const widths = columns.map(col => {
     const header = String(col).length;
     const maxData = Math.max(...data.map(row =>
@@ -480,19 +480,19 @@ function formatTable<T extends Record<string, unknown>>(
     return Math.max(header, maxData);
   });
 
-  // Linha de separador
-  const separator = widths.map(w => "─".repeat(w + 2)).join("┼");
+  // Separator line
+  const separator = widths.map(w => "-".repeat(w + 2)).join("+");
 
-  // Cabeçalho
+  // Header
   const header = columns.map((col, i) =>
     ` ${String(col).padEnd(widths[i])} `
-  ).join("│");
+  ).join("|");
 
-  // Linhas de dados
+  // Data rows
   const rows = data.map(row =>
     columns.map((col, i) =>
       ` ${String(row[col] ?? "").padEnd(widths[i])} `
-    ).join("│")
+    ).join("|")
   );
 
   return [header, separator, ...rows].join("\n");
@@ -503,44 +503,44 @@ function formatTable<T extends Record<string, unknown>>(
 
 ---
 
-## Módulo 6: Testes
+## Module 6: Tests
 
-### Exercício 6.1: Teste com Mock
+### Exercise 6.1: Test with Mock
 
-Escreva testes para uma função que depende de API externa:
+Write tests for a function that depends on an external API:
 
 ```typescript
-// Código para testar
+// Code to test
 async function getUserScore(userId: string): Promise<number> {
   const user = await fetchUser(userId);
   return calculateScore(user);
 }
 
 function fetchUser(id: string): Promise<User> {
-  // Busca de API externa
+  // Fetch from external API
 }
 
 function calculateScore(user: User): number {
   return user.posts.length * 10 + user.followers.length;
 }
 
-// TODO: Escreva teste
+// TODO: Write test
 describe("getUserScore", () => {
-  it("deve calcular score corretamente", async () => {
-    // Use mock para fetchUser
+  it("should calculate score correctly", async () => {
+    // Use mock for fetchUser
   });
 });
 ```
 
 <details>
-<summary>Solução</summary>
+<summary>Solution</summary>
 
 ```typescript
 import { describe, it, expect, mock } from "bun:test";
 
 describe("getUserScore", () => {
-  it("deve calcular score corretamente", async () => {
-    // Mock de fetchUser
+  it("should calculate score correctly", async () => {
+    // Mock fetchUser
     const mockFetchUser = mock(async (id: string) => ({
       id,
       name: "Test User",
@@ -548,8 +548,8 @@ describe("getUserScore", () => {
       followers: [{ id: "a" }, { id: "b" }, { id: "c" }]
     }));
 
-    // Substitui função original
-    // (em código real, usaria dependency injection)
+    // Replace original function
+    // (in real code, would use dependency injection)
 
     const score = await getUserScore("user-123");
 
@@ -564,43 +564,43 @@ describe("getUserScore", () => {
 
 ---
 
-## Projeto Final: Mini Polymarket
+## Final Project: Mini Polymarket
 
-### Objetivo
+### Objective
 
-Crie uma versão simplificada do Polymarket Analyzer com:
+Create a simplified version of Polymarket Analyzer with:
 
-1. **CLI** que aceita argumentos
-2. **API client** para buscar dados
-3. **Rate limiting** para respeitar limites
-4. **Output formatado** em tabela
+1. **CLI** that accepts arguments
+2. **API client** to fetch data
+3. **Rate limiting** to respect limits
+4. **Formatted output** in table
 
-### Requisitos
+### Requirements
 
 ```typescript
-// 1. Parse de argumentos CLI
-//    --market <id>     Especifica market ID
-//    --limit <n>       Limite de markets (default: 10)
-//    --json            Output em JSON
-//    --help            Mostra ajuda
+// 1. CLI argument parsing
+//    --market <id>     Specify market ID
+//    --limit <n>       Limit markets (default: 10)
+//    --json            Output as JSON
+//    --help            Show help
 
-// 2. Buscar mercados da API
+// 2. Fetch markets from API
 //    GET https://gamma-api.polymarket.com/markets
 
-// 3. Implementar rate limiting
-//    Max 10 requisições por 10 segundos
+// 3. Implement rate limiting
+//    Max 10 requests per 10 seconds
 
-// 4. Output formatado
-//    Se --json: JSON string
-//    Senão: Tabela ASCII com nome, preço, volume
+// 4. Formatted output
+//    If --json: JSON string
+//    Otherwise: ASCII table with name, price, volume
 
-// 5. Tratamento de erros
-//    Retry com exponential backoff
-//    Timeout de 10 segundos
-//    Mensagens amigáveis
+// 5. Error handling
+//    Retry with exponential backoff
+//    10 second timeout
+//    Friendly messages
 ```
 
-### Estrutura Sugerida
+### Suggested Structure
 
 ```
 mini-polymarket/
@@ -613,19 +613,19 @@ mini-polymarket/
 └── tsconfig.json
 ```
 
-### Dicas
+### Hints
 
-1. **Comece simples** - Primeiro faça funcionar, depois refatore
-2. **Use os módulos do projeto** - `http.ts`, `parsers.ts` como referência
-3. **Teste incrementalmente** - Teste cada módulo separadamente
-4. **Adicione logging** - Para debugar problemas
+1. **Start simple** - First make it work, then refactor
+2. **Use project modules** - `http.ts`, `parsers.ts` as reference
+3. **Test incrementally** - Test each module separately
+4. **Add logging** - To debug problems
 
 ---
 
-## Solução do Projeto Final
+## Final Project Solution
 
 <details>
-<summary>Código Completo</summary>
+<summary>Complete Code</summary>
 
 ```typescript
 // package.json
@@ -694,7 +694,7 @@ main();
 // src/api.ts
 import { RateLimiter } from "./rateLimiter";
 
-const limiter = new RateLimiter(10, 10000); // 10 req por 10s
+const limiter = new RateLimiter(10, 10000); // 10 req per 10s
 
 export type MarketInfo = {
   marketId?: string;
@@ -749,7 +749,7 @@ export class RateLimiter {
       return;
     }
 
-    // Aguarda próximo refill
+    // Wait for next refill
     const waitMs = Math.max(0, this.lastRefill + this.windowMs - Date.now());
     await new Promise(resolve => setTimeout(resolve, waitMs));
     return this.consume();
@@ -789,18 +789,18 @@ export function formatMarketsAsJSON(markets: MarketInfo[]): string {
 
 ---
 
-## 🟠 Módulo 7: Exercícios Avançados
+## [ADVANCED] Module 7: Advanced Exercises
 
-### Exercício 7.1: Cliente WebSocket com Reconexão Inteligente
+### Exercise 7.1: WebSocket Client with Intelligent Reconnection
 
-**Nível:** 🟠 Avançado
-**Pré-requisitos:** Capítulos 03, 04
-**Tempo estimado:** 1-2 horas
+**Level:** [ADVANCED] Advanced
+**Prerequisites:** Chapters 03, 04
+**Estimated time:** 1-2 hours
 
-Implemente um cliente WebSocket com reconexão adaptativa baseada em taxa de sucesso:
+Implement a WebSocket client with adaptive reconnection based on success rate:
 
 ```typescript
-// TODO: Implemente AdaptiveWebSocketClient
+// TODO: Implement AdaptiveWebSocketClient
 interface ReconnectStrategy {
   getDelay(attempt: number): number;
   onSuccess(): void;
@@ -808,21 +808,21 @@ interface ReconnectStrategy {
 }
 
 class AdaptiveReconnect implements ReconnectStrategy {
-  // Exponential backoff adaptado ao histórico de sucesso/falha
-  // - Se muitas falhas: aumenta o delay mais agressivamente
-  // - Se muitos sucessos: reduz o baseline delay
-  // - Sempre com jitter para evitar thundering herd
+  // Exponential backoff adapted to success/failure history
+  // - If many failures: increase delay more aggressively
+  // - If many successes: reduce baseline delay
+  // - Always with jitter to avoid thundering herd
 
   getDelay(attempt: number): number {
-    // Implemente
+    // Implement
   }
 
   onSuccess(): void {
-    // Reduz baseline delay se tiver muitos sucessos consecutivos
+    // Reduce baseline delay if many consecutive successes
   }
 
   onFailure(): void {
-    // Aumenta baseline delay se tiver muitas falhas consecutivas
+    // Increase baseline delay if many consecutive failures
   }
 }
 
@@ -831,26 +831,26 @@ class WebSocketClient {
   private reconnectAttempts = 0;
 
   async connect(url: string, strategy: ReconnectStrategy): Promise<void> {
-    // 1. Conecta ao WebSocket
-    // 2. Em caso de falha, usa strategy.getDelay() para esperar
-    // 3. Tenta reconectar com backoff
-    // 4. Reporta sucesso/falha para a estratégia
+    // 1. Connect to WebSocket
+    // 2. On failure, use strategy.getDelay() to wait
+    // 3. Try to reconnect with backoff
+    // 4. Report success/failure to strategy
   }
 }
 
-// Teste
+// Test
 const strategy = new AdaptiveReconnect();
 const client = new WebSocketClient();
 await client.connect("wss://ws.example.com", strategy);
 ```
 
-**Dicas:**
-- Mantenha histórico de últimos N resultados (sucesso/falha)
-- Use média móvel para calcular taxa de sucesso
-- Ajuste base delay dinamicamente
+**Hints:**
+- Keep history of last N results (success/failure)
+- Use moving average to calculate success rate
+- Adjust base delay dynamically
 
 <details>
-<summary>Solução Parcial</summary>
+<summary>Partial Solution</summary>
 
 ```typescript
 class AdaptiveReconnect implements ReconnectStrategy {
@@ -860,10 +860,10 @@ class AdaptiveReconnect implements ReconnectStrategy {
   private history: boolean[] = [];
 
   getDelay(attempt: number): number {
-    // Backoff exponencial
+    // Exponential backoff
     const backoff = Math.min(30000, 500 * Math.pow(2, attempt));
 
-    // Ajuste baseado em taxa de sucesso recente
+    // Adjust based on recent success rate
     const recentSuccessRate = this.getRecentSuccessRate();
     const multiplier = recentSuccessRate > 0.8 ? 0.5 : recentSuccessRate < 0.3 ? 2 : 1;
 
@@ -895,22 +895,22 @@ class AdaptiveReconnect implements ReconnectStrategy {
 
 ---
 
-### Exercício 7.2: Normalizador de Dados Resiliente
+### Exercise 7.2: Resilient Data Normalizer
 
-**Nível:** 🟠 Avançado
-**Pré-requisitos:** Capítulo 03
-**Tempo estimado:** 1-2 horas
+**Level:** [ADVANCED] Advanced
+**Prerequisites:** Chapter 03
+**Estimated time:** 1-2 hours
 
-Implemente um normalizador de dados que lida com múltiplos formatos de API evolutiva:
+Implement a data normalizer that handles multiple evolving API formats:
 
 ```typescript
-// TODO: Implemente normalizador resiliente
+// TODO: Implement resilient normalizer
 interface RawMarket {
   [key: string]: unknown;
 }
 
 type MarketField = {
-  names: string[];  // Todos os nomes possíveis do campo
+  names: string[];  // All possible field names
   transform?: (value: unknown) => unknown;
   required: boolean;
   defaultValue?: unknown;
@@ -924,8 +924,8 @@ const MARKET_SCHEMA: Record<string, MarketField> = {
   clobTokenIds: {
     names: ["clobTokenIds", "clob_token_ids", "tokenIds", "tokens"],
     transform: (value) => {
-      // Pode ser array, string JSON, ou aninhado
-      // Implemente extração resiliente
+      // Can be array, JSON string, or nested
+      // Implement resilient extraction
     },
     required: true,
     defaultValue: []
@@ -935,32 +935,32 @@ const MARKET_SCHEMA: Record<string, MarketField> = {
     transform: (value) => typeof value === "string" ? parseFloat(value) : value,
     required: false
   },
-  // ... adicione outros campos
+  // ... add other fields
 };
 
 function normalizeMarket(raw: RawMarket): Record<string, unknown> | null {
-  // 1. Para cada campo em MARKET_SCHEMA
-  // 2. Tenta encontrar valor usando qualquer um dos nomes
-  // 3. Aplica transformação se existir
-  // 4. Valida campos required
-  // 5. Retorna objeto normalizado ou null se inválido
+  // 1. For each field in MARKET_SCHEMA
+  // 2. Try to find value using any of the names
+  // 3. Apply transformation if exists
+  // 4. Validate required fields
+  // 5. Return normalized object or null if invalid
 }
 ```
 
-**Dica:** Use função genérica que tenta múltiplas chaves no objeto.
+**Hint:** Use generic function that tries multiple keys on the object.
 
 ---
 
-### Exercício 7.3: Sistema de Cache com Invalidação
+### Exercise 7.3: Cache System with Invalidation
 
-**Nível:** 🟠 Avançado
-**Pré-requisitos:** Capítulos 02, 03
-**Tempo estimado:** 1-2 horas
+**Level:** [ADVANCED] Advanced
+**Prerequisites:** Chapters 02, 03
+**Estimated time:** 1-2 hours
 
-Implemente um sistema de cache com múltiplas estratégias de invalidação:
+Implement a cache system with multiple invalidation strategies:
 
 ```typescript
-// TODO: Implemente sistema de cache
+// TODO: Implement cache system
 type CacheEntry<T> = {
   data: T;
   expiresAt: number;
@@ -972,24 +972,24 @@ class SmartCache<T> {
   private cache = new Map<string, CacheEntry<T>>();
 
   set(key: string, data: T, ttl: number, tags: string[]): void {
-    // Implemente com:
+    // Implement with:
     // - TTL (time to live)
-    // - Tags para invalidação em grupo
-    // - Versioning para stale-while-revalidate
+    // - Tags for group invalidation
+    // - Versioning for stale-while-revalidate
   }
 
   get(key: string): T | null {
-    // Implemente:
-    // - Retorna null se expirado
-    // - Marca como stale se próximo de expirar (< 10% TTL)
+    // Implement:
+    // - Return null if expired
+    // - Mark as stale if close to expiring (< 10% TTL)
   }
 
   invalidate(tags: string[]): void {
-    // Invalida todos os entries com qualquer das tags
+    // Invalidate all entries with any of the tags
   }
 
   getStaleEntries(): CacheEntry<T>[] {
-    // Retorna entries que estão stale mas ainda não expirados
+    // Return entries that are stale but not yet expired
   }
 
   async getOrFetch(
@@ -998,101 +998,101 @@ class SmartCache<T> {
     ttl: number,
     tags: string[]
   ): Promise<T> {
-    // Implemente padrão stale-while-revalidate:
-    // 1. Se cache fresco, retorna
-    // 2. Se stale, retorna stale MAS async refresca
-    // 3. Se miss, busca e cacheia
+    // Implement stale-while-revalidate pattern:
+    // 1. If cache fresh, return
+    // 2. If stale, return stale BUT async refresh
+    // 3. If miss, fetch and cache
   }
 }
 
-// Uso prático
+// Practical usage
 const cache = new SmartCache<MarketInfo[]>();
 
-// Busca (com stale-while-revalidate)
+// Fetch (with stale-while-revalidate)
 const markets = await cache.getOrFetch(
   "markets:active",
   () => fetchMarkets(10),
-  60_000,  // 1 minuto TTL
+  60_000,  // 1 minute TTL
   ["markets", "gamma"]
 );
 
-// Invalidação por tag
-cache.invalidate(["gamma"]);  // Invalida tudo taggeado com "gamma"
+// Invalidation by tag
+cache.invalidate(["gamma"]);  // Invalidate everything tagged with "gamma"
 ```
 
 ---
 
-## 🔴 Módulo 8: Desafios Mestre
+## [MASTER] Module 8: Master Challenges
 
-### Exercício 8.1: Mini Polymarket Completo
+### Exercise 8.1: Complete Mini Polymarket
 
-**Nível:** 🔴 Mestre
-**Pré-requisitos:** Todos os capítulos
-**Tempo estimado:** 3-5 horas
+**Level:** [MASTER] Master
+**Prerequisites:** All chapters
+**Estimated time:** 3-5 hours
 
-Construa um **mini clone** do Polymarket Analyzer com:
+Build a **mini clone** of Polymarket Analyzer with:
 
-1. **CLI completa** com múltiplos comandos:
-   - `markets` - Lista mercados
-   - `market <id>` - Detalhes de um mercado
-   - `watch <id>` - Modo watch em tempo real (WebSocket)
-   - `export <id>` - Exporta snapshot JSON
+1. **Complete CLI** with multiple commands:
+   - `markets` - List markets
+   - `market <id>` - Details of a market
+   - `watch <id>` - Real-time watch mode (WebSocket)
+   - `export <id>` - Export JSON snapshot
 
-2. **Rate limiting** configurável por endpoint
+2. **Rate limiting** configurable per endpoint
 
-3. **WebSocket** com reconexão automática
+3. **WebSocket** with automatic reconnection
 
-4. **TUI** (opcional) ou output formatado em tabela
+4. **TUI** (optional) or formatted table output
 
-5. **Configuração** via arquivo de config
+5. **Configuration** via config file
 
-6. **Logs** estruturados
+6. **Structured logs**
 
-**Requisitos mínimos:**
-- [ ] Pelo menos 3 comandos funcionais
-- [ ] Tratamento de erros robusto
-- [ ] Testes para funções críticas
-- [ ] README com instruções de uso
+**Minimum requirements:**
+- [ ] At least 3 functional commands
+- [ ] Robust error handling
+- [ ] Tests for critical functions
+- [ ] README with usage instructions
 
-**Critérios de sucesso:**
-- Funciona sem crash por 10 minutos
-- Recupera de falhas de rede
-- Respeita rate limits da Polymarket
+**Success criteria:**
+- Runs without crash for 10 minutes
+- Recovers from network failures
+- Respects Polymarket rate limits
 
-**Entrega:**
-- Código em repositório Git
-- README documentando
-- 1 exemplo de uso de cada comando
+**Deliverables:**
+- Code in Git repository
+- Documented README
+- 1 usage example for each command
 
 <details>
-<summary>Dicas de Implementação</summary>
+<summary>Implementation Hints</summary>
 
-1. **Comece pequeno**: Implemente 1 comando por vez
-2. **Use o código do projeto** como referência (mas não copie!)
-3. **Teste localmente**: `bun --bun run src/index.ts markets`
-4. **Iterate**: Adicione features gradualmente
-5. **Documente**: README é tão importante quanto código
+1. **Start small**: Implement 1 command at a time
+2. **Use project code** as reference (but don't copy!)
+3. **Test locally**: `bun --bun run src/index.ts markets`
+4. **Iterate**: Add features gradually
+5. **Document**: README is as important as code
 
 </details>
 
 ---
 
-### Exercício 8.2: Sistema de Alertas em Tempo Real
+### Exercise 8.2: Real-Time Alert System
 
-**Nível:** 🔴 Mestre
-**Pré-requisitos:** Capítulos 04, 05
-**Tempo estimado:** 2-4 horas
+**Level:** [MASTER] Master
+**Prerequisites:** Chapters 04, 05
+**Estimated time:** 2-4 hours
 
-Implemente um sistema de alertas que notifica o usuário sobre eventos significativos:
+Implement an alert system that notifies users about significant events:
 
 ```typescript
-// TODO: Implemente sistema de alertas
+// TODO: Implement alert system
 interface AlertRule {
   id: string;
   name: string;
   condition: (update: MarketUpdate) => boolean;
   message: (update: MarketUpdate) => string;
-  cooldown: number;  // ms entre notificações
+  cooldown: number;  // ms between notifications
   enabled: boolean;
 }
 
@@ -1105,130 +1105,135 @@ class AlertSystem {
   }
 
   onUpdate(update: MarketUpdate): void {
-    // Para cada regra habilitada:
-    // 1. Testa condição
-    // 2. Verifica cooldown
-    // 3. Dispara alerta se aplicável
-    // 4. Registra timestamp do alerta
+    // For each enabled rule:
+    // 1. Test condition
+    // 2. Check cooldown
+    // 3. Fire alert if applicable
+    // 4. Record alert timestamp
   }
 }
 
-// Exemplos de regras:
+// Example rules:
 const priceChangeAlert: AlertRule = {
   id: "price-spike",
-  name: "Mudança Brusca de Preço",
+  name: "Sudden Price Change",
   condition: (update) => {
-    // Alerta se preço mudou > 5% em 1 minuto
+    // Alert if price changed > 5% in 1 minute
   },
-  message: (update) => `🚨 ${update.question}: ${update.priceChange}%`,
-  cooldown: 60_000,  // 1 minuto entre alertas
+  message: (update) => `ALERT: ${update.question}: ${update.priceChange}%`,
+  cooldown: 60_000,  // 1 minute between alerts
   enabled: true
 };
 
 const volumeAlert: AlertRule = {
   id: "volume-surge",
-  name: "Aumento de Volume",
+  name: "Volume Increase",
   condition: (update) => {
-    // Alerta se volume 24h aumentou > 50%
+    // Alert if 24h volume increased > 50%
   },
-  message: (update) => `📊 ${update.question}: Volume ${update.volumeChange}%`,
-  cooldown: 300_000,  // 5 minutos
+  message: (update) => `VOLUME: ${update.question}: Volume ${update.volumeChange}%`,
+  cooldown: 300_000,  // 5 minutes
   enabled: true
 };
 ```
 
-**Features extras (mestre):**
-- [ ] Persistência de regras (JSON/YAML)
-- [ ] UI para criar/editar regras
-- [ ] Notificações multi-canal (console, email, Slack)
-- [ ] Histórico de alertas disparados
-- [ ] Estatísticas de falsos positivos
+**Extra features (master):**
+- [ ] Rule persistence (JSON/YAML)
+- [ ] UI to create/edit rules
+- [ ] Multi-channel notifications (console, email, Slack)
+- [ ] History of triggered alerts
+- [ ] False positive statistics
 
 ---
 
-### Exercício 8.3: Otimizador de Performance
+### Exercise 8.3: Performance Optimizer
 
-**Nível:** 🔴 Mestre
-**Pré-requisitos:** Todos os capítulos + profiling
-**Tempo estimado:** 2-4 horas
+**Level:** [MASTER] Master
+**Prerequisites:** All chapters + profiling
+**Estimated time:** 2-4 hours
 
-Analise e otimize o Polymarket Analyzer para:
+Analyze and optimize Polymarket Analyzer for:
 
-**Objetivos:**
-1. Tempo de inicialização < 2 segundos
-2. Uso de memória < 80MB
-3. Renderização TUI < 100ms
+**Goals:**
+1. Startup time < 2 seconds
+2. Memory usage < 80MB
+3. TUI rendering < 100ms
 4. Zero memory leaks
 
-**Ferramentas:**
+**Tools:**
 ```bash
-# Profile de CPU
+# CPU Profile
 bun --prof run src/index.js
 
-# Profile de memória
+# Memory Profile
 node --heap-prof run src/index.js
 
-# Análise de bundle
+# Bundle analysis
 bun build src/index.ts --analyze
 ```
 
-**Otimizações típicas:**
-- Deferir carregamento de módulos pesados
-- Pool de conexões HTTP reutilizáveis
-- Debounce/throttle de atualizações TUI
-- Lazy loading de dados não críticos
-- Cache de resultados de parsing
+**Typical optimizations:**
+- Defer loading of heavy modules
+- Pool of reusable HTTP connections
+- Debounce/throttle TUI updates
+- Lazy loading of non-critical data
+- Cache parsing results
 
-**Entrega:**
-1. Relatório de antes/depois
-2. Benchmarks medindo melhorias
-3. PR com otimizações aplicadas
+**Deliverables:**
+1. Before/after report
+2. Benchmarks measuring improvements
+3. PR with applied optimizations
 
 <details>
-<summary>Dicas de Otimização</summary>
+<summary>Optimization Hints</summary>
 
 **CPU Profile:**
-- Funções "quentes" em vermelho = candidatos a otimização
-- Procure por loops aninhados, JSON.parse de dados grandes
+- "Hot" functions in red = optimization candidates
+- Look for nested loops, JSON.parse of large data
 
 **Memory Profile:**
-- Heap crescendo constantemente = memory leak
-- Procure por event listeners não removidos, caches infinitos
+- Constantly growing heap = memory leak
+- Look for unremoved event listeners, infinite caches
 
 **TUI Performance:**
-- Renderizar apenas o que mudou (não tela toda)
-- Usar `screen.render()` apenas quando necessário
-- Evitar alocações em hot path de renderização
+- Render only what changed (not entire screen)
+- Use `screen.render()` only when necessary
+- Avoid allocations in rendering hot path
 
 </details>
 
 ---
 
-## Próximos Passos Após Completar
+## Next Steps After Completion
 
-1. **Refatore** - Aplique princípios DRY, SRP
-2. **Adicione testes** - Cobertura >80%
-3. **Melhore output** - Cores, progress bars
-4. **Adicione features** - WebSocket, histórico
-5. **Documente** - README, API docs
-
----
-
-**Parabéns por chegar até aqui!** 🎉
-
-Você agora tem conhecimento prático de:
-- ✅ TypeScript avançado
-- ✅ Integração de APIs
-- ✅ WebSocket e tempo real
-- ✅ Rate limiting
-- ✅ Interface de terminal
-- ✅ Tratamento de erros
-- ✅ Estratégias de teste
-
-Continue praticando e construindo!
+1. **Refactor** - Apply DRY, SRP principles
+2. **Add tests** - >80% coverage
+3. **Improve output** - Colors, progress bars
+4. **Add features** - WebSocket, history
+5. **Document** - README, API docs
 
 ---
 
-**Próximo Capítulo:** Próximos Passos e Melhorias
+**Congratulations for making it this far!**
 
-[Continue para o Capítulo 9](./09-proximos-passos.md)
+You now have practical knowledge of:
+- [DONE] Advanced TypeScript
+- [DONE] API Integration
+- [DONE] WebSocket and real-time
+- [DONE] Rate limiting
+- [DONE] Terminal interface
+- [DONE] Error handling
+- [DONE] Testing strategies
+
+Keep practicing and building!
+
+---
+
+**Next Chapter:** Next Steps and Improvements
+
+[Continue to Chapter 9](./09-next-steps.md)
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** January 2026

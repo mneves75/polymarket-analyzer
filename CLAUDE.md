@@ -83,7 +83,7 @@ screen.key(["j", "down"], () => {
 ### Code Style Reminders
 
 - **No emojis** in code, comments, alerts, or logs (per PRAGMATIC-RULES.md)
-- Use text labels instead: `ALERT HIGH:` not `⚠ PRICE HIGH:`
+- Use text labels instead: `ALERT HIGH:` not `[warning emoji] PRICE HIGH:`
 
 ### URLs
 

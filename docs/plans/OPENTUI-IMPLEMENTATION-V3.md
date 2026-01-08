@@ -392,3 +392,9 @@ bun test src/opentui/
 - DEV-GUIDELINES.md - Code quality standards
 - PRAGMATIC-RULES.md - Daily defaults
 - Blessed implementation: src/tui.ts
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** January 2026
+

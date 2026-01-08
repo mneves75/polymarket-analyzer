@@ -137,7 +137,7 @@ Critical first-principles review of the line chart implementation revealed swapp
   - Updated README.md with all `bun --bun run dev` command examples
   - Updated CLAUDE.md with consistent command syntax
 - **Update all documentation files** - Consistent `--bun` flag across all docs
-  - `docs/diagrams/ARQUITETURA-COMPLETA.md` - Mermaid diagrams
+  - `docs/diagrams/ARCHITECTURE.md` - Mermaid diagrams
   - `docs/plans/*.md` - All plan and spec documents (12 files)
   - `docs/learn/*.md` - Tutorial documentation
   - `docs/engineering-*.md` - Engineering specs and todos
@@ -217,16 +217,16 @@ Critical first-principles review of the line chart implementation revealed swapp
 
 ### Documentation Improvements
 - Add prominent [Polymarket](https://polymarket.com) link to README with note about real/live data
-- Add Polymarket platform link to docs/learn/00-introducao.md, docs/learn/03-apis-polymarket.md, docs/learn/README.md
+- Add Polymarket platform link to docs/learn/00-introduction.md, docs/learn/03-polymarket-apis.md, docs/learn/README.md
 - Update code examples in docs to reflect new default limit of 50
 - Add "Fetch More Markets" section to README with `--limit` usage examples
 
 ### Documentation Improvements (Major Update)
 
 #### Completed Chapters 05-07
-- **Chapter 05 (TUI)**: Added ✅ Checkpoints, ⚠️ Common Pitfalls, 🔧 Troubleshooting, 🎓 Design Decisions, 📚 External Resources
-- **Chapter 06 (Erros & Rate Limiting)**: Added ✅ Checkpoints, ⚠️ Common Pitfalls, 🔧 Troubleshooting, 🎓 Design Decisions, 📚 External Resources
-- **Chapter 07 (Testes)**: Added ✅ Checkpoints, ⚠️ Common Pitfalls, 🔧 Troubleshooting, 🎓 Design Decisions, 📚 External Resources
+- **Chapter 05 (TUI)**: Added Checkpoints, Common Pitfalls, Troubleshooting, Design Decisions, External Resources
+- **Chapter 06 (Errors & Rate Limiting)**: Added Checkpoints, Common Pitfalls, Troubleshooting, Design Decisions, External Resources
+- **Chapter 07 (Testing)**: Added Checkpoints, Common Pitfalls, Troubleshooting, Design Decisions, External Resources
 
 #### New Documentation Assets
 - **SELF-CRITIQUE-2026-01-06.md**: Comprehensive self-critique against 2025/2026 best practices

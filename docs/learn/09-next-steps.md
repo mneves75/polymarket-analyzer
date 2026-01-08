@@ -1,30 +1,30 @@
-# Capítulo 09: Próximos Passos e Melhorias
+# Chapter 09: Next Steps and Improvements
 
-> **"O aprendizado é um tesouro que seguirá seu dono para onde quer que vá."**
-> — Provérbio Chinês
-
----
-
-## Parabéns! 🎉
-
-Você completou o tutorial do **Polymarket Analyzer**. Neste ponto, você:
-
-✅ Entende a arquitetura do projeto
-✅ Conhece TypeScript em profundidade
-✅ Sabe integrar APIs REST e WebSocket
-✅ Implementou rate limiting e tratamento de erros
-✅ Construiu interfaces de terminal
-✅ Escreveu testes automatizados
-
-Mas a jornada não termina aqui! Este capítulo mostra **próximos passos** e **melhorias futuras** para você continuar evoluindo.
+> **"Learning is a treasure that will follow its owner everywhere."**
+> — Chinese Proverb
 
 ---
 
-## 1. Melhorias Imediatas no Projeto
+## Congratulations!
+
+You have completed the **Polymarket Analyzer** tutorial. At this point, you:
+
+[DONE] Understand the project architecture
+[DONE] Know TypeScript in depth
+[DONE] Know how to integrate REST and WebSocket APIs
+[DONE] Implemented rate limiting and error handling
+[DONE] Built terminal interfaces
+[DONE] Wrote automated tests
+
+But the journey doesn't end here! This chapter shows **next steps** and **future improvements** for you to continue evolving.
+
+---
+
+## 1. Immediate Project Improvements
 
 ### 1.1 Performance
 
-**Adicionar Cache**
+**Add Cache**
 
 ```typescript
 // src/cache.ts
@@ -51,7 +51,7 @@ class SimpleCache<T> {
   }
 }
 
-// Uso
+// Usage
 const cache = new SimpleCache<MarketInfo[]>();
 
 export async function fetchMarketsCached(limit: number): Promise<MarketInfo[]> {
@@ -65,20 +65,20 @@ export async function fetchMarketsCached(limit: number): Promise<MarketInfo[]> {
 
   console.log("Cache MISS - fetching...");
   const markets = await fetchMarkets(limit);
-  cache.set(cacheKey, markets, 60000); // Cache por 1 minuto
+  cache.set(cacheKey, markets, 60000); // Cache for 1 minute
 
   return markets;
 }
 ```
 
-### 1.2 Features Faltantes
+### 1.2 Missing Features
 
-**Adicionar Indicadores Técnicos**
+**Add Technical Indicators**
 
 ```typescript
 // src/indicators.ts
 
-// Média Móvel
+// Moving Average
 export function movingAverage(prices: number[], period: number): number[] {
   const result: number[] = [];
 
@@ -91,7 +91,7 @@ export function movingAverage(prices: number[], period: number): number[] {
   return result;
 }
 
-// Volatilidade
+// Volatility
 export function volatility(prices: number[]): number {
   const returns = [];
   for (let i = 1; i < prices.length; i++) {
@@ -135,7 +135,7 @@ export function rsi(prices: number[], period: number = 14): number[] {
 }
 ```
 
-**Adicionar Alertas**
+**Add Alerts**
 
 ```typescript
 // src/alerts.ts
@@ -158,17 +158,17 @@ export function checkAlerts(market: MarketInfo, currentPrice: number): string[] 
     switch (alert.type) {
       case "price_above":
         if (currentPrice > alert.threshold) {
-          triggered.push(`⚠️ ${market.question}: Price ${currentPrice}¢ > ${alert.threshold}¢`);
+          triggered.push(`ALERT: ${market.question}: Price ${currentPrice}c > ${alert.threshold}c`);
         }
         break;
 
       case "price_below":
         if (currentPrice < alert.threshold) {
-          triggered.push(`⚠️ ${market.question}: Price ${currentPrice}¢ < ${alert.threshold}¢`);
+          triggered.push(`ALERT: ${market.question}: Price ${currentPrice}c < ${alert.threshold}c`);
         }
         break;
 
-      // ... outros tipos
+      // ... other types
     }
   }
 
@@ -179,20 +179,20 @@ export function addAlert(alert: Alert) {
   activeAlerts.push(alert);
 }
 
-// Uso na TUI
+// Usage in TUI
 addAlert({
   type: "price_above",
   conditionId: "0x123...",
   threshold: 0.70,
-  message: "Trump wins acima de 70¢"
+  message: "Trump wins above 70c"
 });
 ```
 
 ---
 
-## 2. Novas Funcionalidades
+## 2. New Features
 
-### 2.1 Modo Backtesting
+### 2.1 Backtesting Mode
 
 ```typescript
 // src/backtest.ts
@@ -213,35 +213,35 @@ export interface BacktestResult {
 }
 
 export async function runBacktest(config: BacktestConfig): Promise<BacktestResult> {
-  // 1. Busca histórico de preços
+  // 1. Fetch price history
   const history = await getPriceHistory(config.conditionId);
 
-  // 2. Simula trades baseado na estratégia
+  // 2. Simulate trades based on strategy
   const trades: Array<{ price: number; timestamp: number }> = [];
 
   switch (config.strategy) {
     case "buy_hold":
-      // Compra no início, segura até o fim
+      // Buy at start, hold until end
       break;
 
     case "mean_reversion":
-      // Compra quando preço está baixo, vende quando alto
+      // Buy when price is low, sell when high
       for (let i = 1; i < history.length; i++) {
         const current = history[i];
         const ma20 = movingAverage(history.slice(0, i), 20).slice(-1)[0];
 
         if (current < ma20 * 0.95) {
-          // Compra (2% abaixo da média)
+          // Buy (2% below average)
           trades.push({ price: current, timestamp: Date.now() });
         } else if (current > ma20 * 1.05) {
-          // Vende (2% acima da média)
+          // Sell (2% above average)
           trades.push({ price: current, timestamp: Date.now() });
         }
       }
       break;
   }
 
-  // 3. Calcula métricas
+  // 3. Calculate metrics
   const totalReturn = calculateReturn(trades);
   const maxDrawdown = calculateMaxDrawdown(history);
   const sharpeRatio = calculateSharpeRatio(history);
@@ -256,7 +256,7 @@ export async function runBacktest(config: BacktestConfig): Promise<BacktestResul
   };
 }
 
-// Uso
+// Usage
 const result = await runBacktest({
   conditionId: "0x123...",
   startDate: new Date("2024-01-01"),
@@ -268,7 +268,7 @@ console.log(`Total Return: ${(result.totalReturn * 100).toFixed(2)}%`);
 console.log(`Sharpe Ratio: ${result.sharpeRatio.toFixed(2)}`);
 ```
 
-### 2.2 Export para CSV
+### 2.2 Export to CSV
 
 ```typescript
 // src/export.ts
@@ -289,14 +289,14 @@ export function exportToCSV(markets: MarketInfo[], filename: string) {
   ].join("\n");
 
   await Deno.writeTextFile(filename, csv);
-  console.log(`Exportado para ${filename}`);
+  console.log(`Exported to ${filename}`);
 }
 
-// Uso
+// Usage
 await exportToCSV(radar, "markets.csv");
 ```
 
-### 2.3 Gráficos no Terminal
+### 2.3 Terminal Charts
 
 ```typescript
 // src/charts.ts
@@ -306,7 +306,7 @@ export function renderCandlestickChart(
   width: number = 60,
   height: number = 20
 ): string {
-  // Normaliza dados para height
+  // Normalize data to height
   const allPrices = candles.flatMap(c => [c.open, c.high, c.low, c.close]);
   const min = Math.min(...allPrices);
   const max = Math.max(...allPrices);
@@ -315,7 +315,7 @@ export function renderCandlestickChart(
   const normalize = (price: number) =>
     Math.round(((price - min) / range) * (height - 1));
 
-  // Renderiza candlesticks
+  // Render candlesticks
   const lines: string[] = [];
   for (let y = height - 1; y >= 0; y--) {
     const line: string[] = [];
@@ -329,13 +329,13 @@ export function renderCandlestickChart(
       const isGreen = candle.close >= candle.open;
 
       if (y === highY) {
-        line.push("│"); // Topo do pavio
+        line.push("|"); // Top wick
       } else if (y === lowY) {
-        line.push("│"); // Fundo do pavio
+        line.push("|"); // Bottom wick
       } else if (y >= Math.min(openY, closeY) && y <= Math.max(openY, closeY)) {
-        line.push(isGreen ? "█" : "▓"); // Corpo da vela
+        line.push(isGreen ? "#" : "="); // Candle body
       } else {
-        line.push(" "); // Espaço vazio
+        line.push(" "); // Empty space
       }
     }
 
@@ -345,7 +345,7 @@ export function renderCandlestickChart(
   return lines.join("\n");
 }
 
-// Uso
+// Usage
 const candles = [
   { open: 0.60, high: 0.65, low: 0.58, close: 0.63 },
   { open: 0.63, high: 0.68, low: 0.62, close: 0.66 },
@@ -359,9 +359,9 @@ console.log(renderCandlestickChart(candles));
 
 ---
 
-## 3. Projetos Relacionados
+## 3. Related Projects
 
-### 3.1 Bot de Trading Automatizado
+### 3.1 Automated Trading Bot
 
 ```typescript
 // src/bot.ts
@@ -371,28 +371,28 @@ export class TradingBot {
   private entryPrice: number | null = null;
 
   async tick(market: MarketInfo, currentPrice: number) {
-    // Estratégia simples de mean reversion
+    // Simple mean reversion strategy
     const ma20 = await this.getMovingAverage(market.conditionId!, 20);
 
     if (!this.position) {
-      // Sem posição
+      // No position
       if (currentPrice < ma20 * 0.95) {
-        // Preço 5% abaixo da média → COMPRA
+        // Price 5% below average -> BUY
         await this.placeBuyOrder(market, currentPrice);
         this.position = "LONG";
         this.entryPrice = currentPrice;
       }
     } else if (this.position === "LONG") {
-      // Posição comprada
+      // Long position
       const pnl = (currentPrice - this.entryPrice!) / this.entryPrice!;
 
       if (pnl > 0.10) {
-        // +10% → Vende com lucro
+        // +10% -> Sell with profit
         await this.placeSellOrder(market, currentPrice);
         this.position = null;
         this.entryPrice = null;
       } else if (pnl < -0.05) {
-        // -5% → Stop loss
+        // -5% -> Stop loss
         await this.placeSellOrder(market, currentPrice);
         this.position = null;
         this.entryPrice = null;
@@ -401,13 +401,13 @@ export class TradingBot {
   }
 
   private async placeBuyOrder(market: MarketInfo, price: number) {
-    console.log(`🟢 BUY ${market.question} @ ${price}¢`);
-    // Implementa ordem real
+    console.log(`BUY ${market.question} @ ${price}c`);
+    // Implement real order
   }
 
   private async placeSellOrder(market: MarketInfo, price: number) {
-    console.log(`🔴 SELL ${market.question} @ ${price}¢`);
-    // Implementa ordem real
+    console.log(`SELL ${market.question} @ ${price}c`);
+    // Implement real order
   }
 
   private async getMovingAverage(conditionId: string, period: number): Promise<number> {
@@ -417,14 +417,14 @@ export class TradingBot {
   }
 }
 
-// Uso
+// Usage
 const bot = new TradingBot();
 
 setInterval(async () => {
   const market = await fetchMarketByConditionId("0x123...");
   const price = await getCurrentPrice("0x123...");
   await bot.tick(market, price);
-}, 60000); // Checa a cada minuto
+}, 60000); // Check every minute
 ```
 
 ### 3.2 API Server
@@ -472,11 +472,11 @@ console.log("Server running on http://localhost:3000");
 
 ---
 
-## 4. Caminhos de Aprendizado
+## 4. Learning Paths
 
-### 4.1 Aprofundar TypeScript
+### 4.1 Deepen TypeScript Knowledge
 
-**Tópicos para estudar:**
+**Topics to study:**
 
 1. **Advanced Types**
    - Conditional types
@@ -487,109 +487,109 @@ console.log("Server running on http://localhost:3000");
 2. **Type-level Programming**
    - Type arithmetic
    - Type parsers
-   - Type guards avançados
+   - Advanced type guards
 
 3. **Decorators**
    - Class decorators
    - Method decorators
    - Property decorators
 
-**Recursos:**
-- TypeScript Handbook (oficial)
+**Resources:**
+- TypeScript Handbook (official)
 - "Effective TypeScript" (Dan Vanderkam)
 - "TypeScript Deep Dive" (Basarat Ali Syed)
 
-### 4.2 Aprofundar Web3/Blockchain
+### 4.2 Deepen Web3/Blockchain Knowledge
 
-**Tópicos para estudar:**
+**Topics to study:**
 
-1. **Solidity** - Linguagem do Ethereum
-2. **Ethers.js / Web3.js** - Bibliotecas para interagir com blockchains
-3. **Smart Contracts** - Contratos autônomos
-4. **DEX** - Exchanges descentralizadas (Uniswap, etc.)
+1. **Solidity** - Ethereum's language
+2. **Ethers.js / Web3.js** - Libraries to interact with blockchains
+3. **Smart Contracts** - Autonomous contracts
+4. **DEX** - Decentralized exchanges (Uniswap, etc.)
 
-**Projetos:**
-- Conectar com carteira MetaMask
-- Ler dados da blockchain diretamente
-- Enviar transações
+**Projects:**
+- Connect with MetaMask wallet
+- Read blockchain data directly
+- Send transactions
 
-### 4.3 Aprofundar Finance Quant
+### 4.3 Deepen Quant Finance Knowledge
 
-**Tópicos para estudar:**
+**Topics to study:**
 
-1. **Estatística** - Média, desvio padrão, correlação
-2. **Séries Temporais** - ARIMA, GARCH
-3. **Machine Learning** - Regressão, classificação
-4. **Backtesting** - Simulação de estratégias
+1. **Statistics** - Mean, standard deviation, correlation
+2. **Time Series** - ARIMA, GARCH
+3. **Machine Learning** - Regression, classification
+4. **Backtesting** - Strategy simulation
 
-**Livros:**
+**Books:**
 - "Options, Futures, and Other Derivatives" (John Hull)
 - "Python for Finance" (Yves Hilpisch)
 - "Algorithmic Trading" (Ernie Chan)
 
 ---
 
-## 5. Contribuindo para o Projeto
+## 5. Contributing to the Project
 
 ### 5.1 Git Workflow
 
 ```bash
-# 1. Fork o projeto no GitHub
-# 2. Clone seu fork
-git clone https://github.com/SEU-USUARIO/polymarket-analyzer.git
+# 1. Fork the project on GitHub
+# 2. Clone your fork
+git clone https://github.com/YOUR-USERNAME/polymarket-analyzer.git
 
-# 3. Cria branch para sua feature
-git checkout -b feature/nova-funcionalidade
+# 3. Create branch for your feature
+git checkout -b feature/new-feature
 
-# 4. Faz as mudanças
+# 4. Make changes
 git add .
-git commit -m "Add: nova funcionalidade X"
+git commit -m "Add: new feature X"
 
-# 5. Push para seu fork
-git push origin feature/nova-funcionalidade
+# 5. Push to your fork
+git push origin feature/new-feature
 
-# 6. Abre Pull Request no GitHub
+# 6. Open Pull Request on GitHub
 ```
 
-### 5.2 Convenções de Commit
+### 5.2 Commit Conventions
 
 ```
-Add: nova funcionalidade
-Fix: correção de bug
-Refactor: refatoração de código
-Docs: documentação
-Test: adiciona testes
-Chore: manutenção geral
-Perf: melhoria de performance
-Style: formatação/código limpo
+Add: new feature
+Fix: bug fix
+Refactor: code refactoring
+Docs: documentation
+Test: add tests
+Chore: general maintenance
+Perf: performance improvement
+Style: formatting/clean code
 ```
 
 ### 5.3 Code Review Checklist
 
-- [ ] Código segue padrões do projeto
-- [ ] TypeScript sem erros (`bun typecheck`)
-- [ ] Testes passando (`bun test`)
-- [ ] Sem `any` types
-- [ ] Documentação atualizada
-- [ ] Sem segredos hard-coded
+- [ ] Code follows project standards
+- [ ] TypeScript without errors (`bun typecheck`)
+- [ ] Tests passing (`bun test`)
+- [ ] No `any` types
+- [ ] Documentation updated
+- [ ] No hard-coded secrets
 
 ---
 
-## 6. Comunidade e Recursos
+## 6. Community and Resources
 
-### 6.1 Comunidade Polymarket
+### 6.1 Polymarket Community
 
 - **Discord**: discord.gg/polymarket
 - **Twitter**: @polyMarkets
 - **Docs**: https://docs.polymarket.com
 
-### 6.2 Comunidade TypeScript
+### 6.2 TypeScript Community
 
 - **Discord TypeScript**: https://discord.gg/typescript
 - **Reddit**: r/typescript
 - **Stack Overflow**: tag typescript
 
-### 6.3 Comunidade Bun
+### 6.3 Bun Community
 
 - **Discord**: https://bun.sh/discord
 - **GitHub**: https://github.com/oven-sh/bun
@@ -597,47 +597,52 @@ Style: formatação/código limpo
 
 ---
 
-## 7. Conclusão
+## 7. Conclusion
 
-Você chegou ao fim deste tutorial, mas é apenas o começo da sua jornada como desenvolvedor.
+You've reached the end of this tutorial, but it's only the beginning of your journey as a developer.
 
-**Lembre-se:**
-- ✅ **Prática é tudo** - Código todos os dias
-- ✅ **Construa projetos** - A melhor forma de aprender
-- ✅ **Compartilhe conhecimento** - Ensinar é aprender duas vezes
-- ✅ **Nunca pare de estudar** - Tecnologia muda constantemente
+**Remember:**
+[GOOD] **Practice is everything** - Code every day
+[GOOD] **Build projects** - The best way to learn
+[GOOD] **Share knowledge** - Teaching is learning twice
+[GOOD] **Never stop studying** - Technology changes constantly
 
-**Próximos passos sugeridos:**
-1. Complete todos os exercícios do Capítulo 8
-2. Construa o projeto final (Mini Polymarket)
-3. Implemente pelo menos uma melhoria do Capítulo 9
-4. Contribua com um projeto open source
-5. Ensine alguém o que você aprendeu
-
----
-
-## Obrigado!
-
-Obrigado por dedicar seu tempo a aprender. Espero que este tutorial tenha sido útil para sua jornada como desenvolvedor.
-
-**Se você tiver dúvidas ou quiser conversar:**
-- Abra uma issue no GitHub
-- Particiipe das comunidades
-- Nunca tenha medo de perguntar
-
-**Boa sorte e bons códigos!** 🚀
+**Suggested next steps:**
+1. Complete all exercises from Chapter 8
+2. Build the final project (Mini Polymarket)
+3. Implement at least one improvement from Chapter 9
+4. Contribute to an open source project
+5. Teach someone what you learned
 
 ---
 
-**Fim do Tutorial**
+## Thank You!
 
-Você completou todos os 9 capítulos do tutorial Polymarket Analyzer!
+Thank you for dedicating your time to learning. I hope this tutorial has been useful for your journey as a developer.
 
-**Estatísticas:**
-- 9 capítulos completos
-- +7000 palavras
-- 50+ exercícios
-- 3 projetos práticos
-- Cobertura completa do stack: Bun + TypeScript + APIs + WebSocket + TUI
+**If you have questions or want to chat:**
+- Open an issue on GitHub
+- Participate in communities
+- Never be afraid to ask
 
-**Continue codando!** 💻
+**Good luck and happy coding!**
+
+---
+
+**End of Tutorial**
+
+You completed all 9 chapters of the Polymarket Analyzer tutorial!
+
+**Statistics:**
+- 9 complete chapters
+- +7000 words
+- 50+ exercises
+- 3 practical projects
+- Complete stack coverage: Bun + TypeScript + APIs + WebSocket + TUI
+
+**Keep coding!**
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** January 2026

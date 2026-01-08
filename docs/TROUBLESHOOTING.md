@@ -150,7 +150,7 @@ Error: No orderbook exists for the requested token id
 
 2. **Select a different market:**
    - Press `n`/`p` to find markets with active orderbooks
-   - Markets with `(○)` indicator have no orderbook
+   - Markets with `(O)` indicator have no orderbook
 
 3. **Verify with market list:**
 ```bash
@@ -253,7 +253,7 @@ ping -i 1 clob.polymarket.com
 
 2. **Verify backoff is working:**
    - Application uses exponential backoff
-   - Wait times: 500ms → 1000ms → 2000ms → max 30000ms
+   - Wait times: 500ms -> 1000ms -> 2000ms -> max 30000ms
    - If reconnecting too fast, backoff may not be working
 
 3. **Check for rate limiting:**
@@ -415,8 +415,8 @@ export function midpointFrom(bid?: number, ask?: number): number | undefined {
 **Solutions:**
 
 1. **Increase terminal size:**
-   - Minimum: 80 columns × 24 rows
-   - Recommended: 120 columns × 40 rows
+   - Minimum: 80 columns x 24 rows
+   - Recommended: 120 columns x 40 rows
 
 2. **Use monospace font:**
    - Terminal must use monospace font
@@ -586,11 +586,11 @@ fail: TypeError: undefined is not an object (evaluating 'error.status')
 
 **Solution:**
 ```typescript
-// ❌ WRONG (Bun doesn't return error from expect().rejects.toThrow())
+// WRONG (Bun doesn't return error from expect().rejects.toThrow())
 const error = await expect(fetchJson(url)).rejects.toThrow(HttpError);
 expect(error.status).toBe(404);
 
-// ✅ CORRECT (Use try-catch instead)
+// CORRECT (Use try-catch instead)
 let caughtError: unknown;
 try {
   await fetchJson(url);
@@ -623,7 +623,7 @@ const rule: RateLimitRule = {
 };
 
 // Avoid 10-second windows in tests
-// ❌ WRONG: windowMs: 10000  // Will timeout!
+// WRONG: windowMs: 10000  // Will timeout!
 ```
 
 ---
@@ -718,12 +718,12 @@ TUI_MODE=true DEBUG=* bun --bun run dev --tui
 ## Additional Resources
 
 - **Documentation:** `docs/learn/` - Comprehensive learning guide
-- **Architecture:** `docs/diagrams/ARQUITETURA-COMPLETA.md` - System architecture
-- **API Reference:** `docs/learn/03-apis-polymarket.md` - API integration guide
+- **Architecture:** `docs/diagrams/ARCHITECTURE.md` - System architecture
+- **API Reference:** `docs/learn/03-polymarket-apis.md` - API integration guide
 - **Logging:** `src/logger.ts` - Structured logging implementation
 - **Error Handling:** `src/http.ts` - HTTP error handling
 
 ---
 
-*Last Updated: 2026-01-06*
-*Version: 1.0.0*
+**Version:** 1.0.0
+**Last Updated:** January 2026

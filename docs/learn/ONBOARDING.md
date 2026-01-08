@@ -1,357 +1,357 @@
-# Guia de Onboarding - Polymarket Analyzer
+# Onboarding Guide - Polymarket Analyzer
 
-> **"O primeiro dia é o mais importante. Um bom onboarding define o sucesso."**
-> — Princípio de Gestão de Talentos
-
----
-
-## 📋 Visão Geral
-
-Este guia fornece um plano estruturado de 90 dias para novos desenvolvedores entrando na equipe do Polymarket Analyzer. O objetivo é transformar você de iniciante a contribuidor produtivo de forma progressiva e sustentável.
+> **"The first day is the most important. Good onboarding defines success."**
+> -- Talent Management Principle
 
 ---
 
-## 🎯 Objetivos do Onboarding
+## Overview
 
-### 30 Dias (Primeiro Mês)
-- ✅ Entender a arquitetura básica do projeto
-- ✅ Configurar ambiente de desenvolvimento
-- ✅ Executar o projeto localmente
-- ✅ Compreender o fluxo de dados principal
-- ✅ Fazer primeira contribuição (bug fix ou documentação)
-
-### 60 Dias (Segundo Mês)
-- ✅ Dominar as APIs Polymarket (Gamma, CLOB, Data)
-- ✅ Entender WebSocket e tempo real
-- ✅ Contribuir com features pequenas
-- ✅ Escrever testes para código existente
-- ✅ Participar de code reviews
-
-### 90 Dias (Terceiro Mês)
-- ✅ Desenvolver features completas de forma independente
-- ✅ Otimizar performance
-- ✅ Entender estratégias de rate limiting e caching
-- ✅ Contribuir com arquitetura e design decisions
-- ✅ Mentoring de novos membros
+This guide provides a structured 90-day plan for new developers joining the Polymarket Analyzer team. The goal is to transform you from a beginner to a productive contributor in a progressive and sustainable manner.
 
 ---
 
-## 📅 Semana 1: Fundamentos e Setup
+## Onboarding Objectives
 
-### Dia 1: Configuração do Ambiente
+### 30 Days (First Month)
+- [ ] Understand the basic project architecture
+- [ ] Set up the development environment
+- [ ] Run the project locally
+- [ ] Comprehend the main data flow
+- [ ] Make first contribution (bug fix or documentation)
 
-**Objetivos:**
-- [ ] Instalar Bun 1.3.5+
-- [ ] Instalar VS Code (ou IDE preferido)
-- [ ] Clonar repositório
-- [ ] Executar projeto pela primeira vez
-- [ ] Entender estrutura de diretórios
+### 60 Days (Second Month)
+- [ ] Master the Polymarket APIs (Gamma, CLOB, Data)
+- [ ] Understand WebSocket and real-time communication
+- [ ] Contribute small features
+- [ ] Write tests for existing code
+- [ ] Participate in code reviews
 
-**Tarefas:**
+### 90 Days (Third Month)
+- [ ] Develop complete features independently
+- [ ] Optimize performance
+- [ ] Understand rate limiting and caching strategies
+- [ ] Contribute to architecture and design decisions
+- [ ] Mentor new team members
+
+---
+
+## Week 1: Fundamentals and Setup
+
+### Day 1: Environment Setup
+
+**Objectives:**
+- [ ] Install Bun 1.3.5+
+- [ ] Install VS Code (or preferred IDE)
+- [ ] Clone repository
+- [ ] Run project for the first time
+- [ ] Understand directory structure
+
+**Tasks:**
 
 ```bash
-# 1. Instalar Bun
+# 1. Install Bun
 curl -fsSL https://bun.sh/install | bash
 
-# 2. Verificar instalação
-bun --version  # Deve ser 1.3.5+
+# 2. Verify installation
+bun --version  # Should be 1.3.5+
 
-# 3. Clonar repositório
-git clone <repositorio-url>
+# 3. Clone repository
+git clone <repository-url>
 cd polymarket-analyzer
 
-# 4. Instalar dependências
+# 4. Install dependencies
 bun install
 
-# 5. Executar projeto
-bun --bun run dev  # Deve abrir a interface TUI
+# 5. Run project
+bun --bun run dev  # Should open the TUI interface
 ```
 
-**Configuração do VS Code:**
+**VS Code Configuration:**
 
-Instalar extensões:
+Install extensions:
 - TypeScript extension
-- Error Lens (mostra erros inline)
-- GitLens (histórico git)
+- Error Lens (shows errors inline)
+- GitLens (git history)
 - Markdown Preview Enhanced
 
-**Leitura Obrigatória:**
-- [ ] `docs/learn/00-introducao.md`
-- [ ] `docs/learn/01-ecossistema-bun-typescript.md`
+**Required Reading:**
+- [ ] `docs/learn/00-introduction.md`
+- [ ] `docs/learn/01-bun-typescript-ecosystem.md`
 
-**Milestone:** ✅ Projeto executando localmente
+**Milestone:** DONE - Project running locally
 
 ---
 
-### Dia 2: Arquitetura e Estrutura
+### Day 2: Architecture and Structure
 
-**Objetivos:**
-- [ ] Entender camadas da arquitetura
-- [ ] Mapear arquivos principais
-- [ ] Compreender fluxo de dados
+**Objectives:**
+- [ ] Understand architecture layers
+- [ ] Map main files
+- [ ] Comprehend data flow
 
-**Tarefas:**
+**Tasks:**
 
-1. **Leitura:**
-   - [ ] `docs/learn/02-arquitetura-estrutura.md` (completo)
+1. **Reading:**
+   - [ ] `docs/learn/02-architecture-structure.md` (complete)
 
-2. **Exercício Prático:**
+2. **Practical Exercise:**
    ```typescript
-   // Execute o seguinte para entender o fluxo:
-   bun --bun run markets  // Lista mercados
-   bun --bun run snapshot  // Exporta snapshot JSON
-   bun --bun run dev --market <id>  // Abre mercado específico
+   // Execute the following to understand the flow:
+   bun --bun run markets  // List markets
+   bun --bun run snapshot  // Export JSON snapshot
+   bun --bun run dev --market <id>  // Open specific market
    ```
 
-3. **Mapeamento de Código:**
-   - [ ] Abra cada arquivo em `src/`
-   - [ ] Entenda o que cada arquivo faz
-   - [ ] Desenhe em papel o fluxo de dados
+3. **Code Mapping:**
+   - [ ] Open each file in `src/`
+   - [ ] Understand what each file does
+   - [ ] Draw the data flow on paper
 
-**Quiz de Validação:**
+**Validation Quiz:**
 ```markdown
-1. Qual é a responsabilidade de `api.ts`?
-2. Como `rateLimiter.ts` funciona?
-3. Qual é a diferença entre WebSocket e REST?
+1. What is the responsibility of `api.ts`?
+2. How does `rateLimiter.ts` work?
+3. What is the difference between WebSocket and REST?
 ```
 
-**Milestone:** ✅ Arquitetura entendida
+**Milestone:** DONE - Architecture understood
 
 ---
 
-### Dia 3: APIs Polymarket
+### Day 3: Polymarket APIs
 
-**Objetivos:**
-- [ ] Entender Gamma API
-- [ ] Entender CLOB API
-- [ ] Entender Data API
+**Objectives:**
+- [ ] Understand Gamma API
+- [ ] Understand CLOB API
+- [ ] Understand Data API
 
-**Tarefas:**
+**Tasks:**
 
-1. **Leitura:**
-   - [ ] `docs/learn/03-apis-polymarket.md` (completo)
+1. **Reading:**
+   - [ ] `docs/learn/03-apis-polymarket.md` (complete)
 
-2. **Exploração Manual:**
+2. **Manual Exploration:**
    ```bash
-   # Teste Gamma API
+   # Test Gamma API
    curl "https://gamma-api.polymarket.com/events?limit=5"
 
-   # Teste CLOB API (precisa de token ID primeiro)
+   # Test CLOB API (needs token ID first)
    curl "https://clob.polymarket.com/book?token_id=<ID>"
    ```
 
-3. **Exercício Prático:**
+3. **Practical Exercise:**
    ```typescript
-   // Crie um arquivo test-apis.ts:
+   // Create a test-apis.ts file:
    import { fetchEvents, fetchMarkets } from "./src/api";
 
    const events = await fetchEvents(5);
-   console.log("Eventos:", events);
+   console.log("Events:", events);
 
    const markets = await fetchMarkets(10);
-   console.log("Mercados:", markets);
+   console.log("Markets:", markets);
    ```
 
-**Milestone:** ✅ APIs compreendidas
+**Milestone:** DONE - APIs understood
 
 ---
 
-### Dia 4-5: WebSocket e Tempo Real
+### Days 4-5: WebSocket and Real-Time
 
-**Objetivos:**
-- [ ] Entender protocolo WebSocket
-- [ ] Compreender estratégia de reconexão
-- [ ] Ver heartbeat e stale detection
+**Objectives:**
+- [ ] Understand WebSocket protocol
+- [ ] Comprehend reconnection strategy
+- [ ] See heartbeat and stale detection
 
-**Tarefas:**
+**Tasks:**
 
-1. **Leitura:**
-   - [ ] `docs/learn/04-websockets-tempo-real.md` (completo)
+1. **Reading:**
+   - [ ] `docs/learn/04-websockets-realtime.md` (complete)
 
-2. **Teste WebSocket:**
+2. **WebSocket Test:**
    ```bash
-   # Instale wscat para testar WS manualmente
+   # Install wscat to test WS manually
    bun install -g wscat
 
-   # Conecte ao WebSocket Polymarket
+   # Connect to Polymarket WebSocket
    wscat -c wss://ws-subscriptions-clob.polymarket.com/ws/
 
-   # Envie mensagem de subscrição
+   # Send subscription message
    {"type":"MARKET","assets_ids":["<token_id>"],"custom_feature_enabled":true}
    ```
 
-3. **Exercício de Debug:**
-   - [ ] Adicione `console.log` em `src/ws.ts`
-   - [ ] Execute `bun --bun run dev`
-   - [ ] Observe mensagens WebSocket no terminal
+3. **Debug Exercise:**
+   - [ ] Add `console.log` in `src/ws.ts`
+   - [ ] Run `bun --bun run dev`
+   - [ ] Observe WebSocket messages in the terminal
 
-**Milestone:** ✅ Tempo real entendido
-
----
-
-## 📅 Semana 2-4: Profundização Técnica
-
-### Semana 2: Camada de Dados
-
-**Objetivos:**
-- [ ] Dominar `api.ts` (todos endpoints)
-- [ ] Entender `parsers.ts` (normalização)
-- [ ] Aprender `http.ts` (rate limiting)
-
-**Tarefas Diárias:**
-
-**Dia 6-7: Normalização de Dados**
-```typescript
-// Exercício: Adicione novo parser
-// 1. Leia src/parsers.ts
-// 2. Entenda normalizeOrderbook()
-// 3. Crie normalizeMarketStats()
-```
-
-**Dia 8-9: Rate Limiting**
-```typescript
-// Exercício: Teste rate limiting
-// 1. Crie script que faz 1000 requisições
-// 2. Observe como token bucket funciona
-// 3. Ajuste limites em src/config.ts
-```
-
-**Dia 10: Testes**
-- [ ] `bun test` (todos devem passar)
-- [ ] Entenda testes existentes
-- [ ] Adicione um teste novo
-
-**Milestone:** ✅ Camada de dados dominada
+**Milestone:** DONE - Real-time understood
 
 ---
 
-### Semana 3: Camada de Domínio
+## Weeks 2-4: Technical Deep Dive
 
-**Objetivos:**
-- [ ] Dominar `market.ts` (resolução)
-- [ ] Entender `utils.ts` (formatação)
-- [ ] Aprender `parsers.ts` (normalização)
+### Week 2: Data Layer
 
-**Tarefas Diárias:**
+**Objectives:**
+- [ ] Master `api.ts` (all endpoints)
+- [ ] Understand `parsers.ts` (normalization)
+- [ ] Learn `http.ts` (rate limiting)
 
-**Dia 11-12: Resolução de Mercados**
+**Daily Tasks:**
+
+**Days 6-7: Data Normalization**
 ```typescript
-// Exercício: Estratégias de resolução
-// 1. Leia src/market.ts
-// 2. Teste resolveMarket() com diferentes inputs
-// 3. Adicione nova estratégia de fallback
+// Exercise: Add new parser
+// 1. Read src/parsers.ts
+// 2. Understand normalizeOrderbook()
+// 3. Create normalizeMarketStats()
 ```
 
-**Dia 13-14: Formatação e Sparklines**
+**Days 8-9: Rate Limiting**
 ```typescript
-// Exercício: Crie nova função de formatação
-// 1. Leia src/utils.ts
-// 2. Entenda sparkline()
-// 3. Crie função para formatar volume
+// Exercise: Test rate limiting
+// 1. Create script that makes 1000 requests
+// 2. Observe how token bucket works
+// 3. Adjust limits in src/config.ts
 ```
 
-**Dia 15: Integração**
-- [ ] Execute fluxo completo (CLI → API → TUI)
-- [ ] Debug passo a passo
-- [ ] Documente aprendizados
+**Day 10: Tests**
+- [ ] `bun test` (all should pass)
+- [ ] Understand existing tests
+- [ ] Add a new test
 
-**Milestone:** ✅ Camada de domínio dominada
+**Milestone:** DONE - Data layer mastered
 
 ---
 
-### Semana 4: Camada de Apresentação
+### Week 3: Domain Layer
 
-**Objetivos:**
-- [ ] Entender `tui.ts` (interface)
-- [ ] Aprender Blessed (biblioteca TUI)
-- [ ] Criar componente visual novo
+**Objectives:**
+- [ ] Master `market.ts` (resolution)
+- [ ] Understand `utils.ts` (formatting)
+- [ ] Learn `parsers.ts` (normalization)
 
-**Tarefas Diárias:**
+**Daily Tasks:**
 
-**Dia 16-17: Explorando TUI**
+**Days 11-12: Market Resolution**
 ```typescript
-// Exercício: Entenda interface
-// 1. Leia src/tui.ts (682 linhas!)
-// 2. Mapeie todos os componentes
-// 3. Entenda ciclo de renderização
+// Exercise: Resolution strategies
+// 1. Read src/market.ts
+// 2. Test resolveMarket() with different inputs
+// 3. Add new fallback strategy
 ```
 
-**Dia 18-19: Criando Componente**
+**Days 13-14: Formatting and Sparklines**
 ```typescript
-// Exercício: Adicione novo painel
-// 1. Crie "Painel de Estatísticas"
-// 2. Mostre volume 24h, variação, etc.
-// 3. Integre com loop de refresh
+// Exercise: Create new formatting function
+// 1. Read src/utils.ts
+// 2. Understand sparkline()
+// 3. Create function to format volume
 ```
 
-**Dia 20: Testes de UI**
-- [ ] Teste interatividade (teclas n, p, o, s, q)
-- [ ] Verifique responsividade
-- [ ] Teste com diferentes tamanhos de terminal
+**Day 15: Integration**
+- [ ] Run complete flow (CLI -> API -> TUI)
+- [ ] Debug step by step
+- [ ] Document learnings
 
-**Milestone:** ✅ Camada de apresentação dominada
+**Milestone:** DONE - Domain layer mastered
 
 ---
 
-## 📅 Mês 2: Contribuição Ativa
+### Week 4: Presentation Layer
 
-### Semana 5-6: Features Pequenas
+**Objectives:**
+- [ ] Understand `tui.ts` (interface)
+- [ ] Learn Blessed (TUI library)
+- [ ] Create new visual component
 
-**Objetivos:**
-- [ ] Primeira contribuição aceita
-- [ ] Entender processo de pull request
-- [ ] Participar de code review
+**Daily Tasks:**
 
-**Tarefas Semanais:**
+**Days 16-17: Exploring TUI**
+```typescript
+// Exercise: Understand interface
+// 1. Read src/tui.ts (682 lines!)
+// 2. Map all components
+// 3. Understand render cycle
+```
 
-**Semana 5:**
-1. **Escolha uma issue:**
-   - Bug: "TUI não atualiza quando WebSocket reconecta"
-   - Feature: "Adicionar flag --json para markets"
-   - Docs: "Melhorar README"
+**Days 18-19: Creating Component**
+```typescript
+// Exercise: Add new panel
+// 1. Create "Statistics Panel"
+// 2. Show 24h volume, variation, etc.
+// 3. Integrate with refresh loop
+```
 
-2. **Implementação:**
+**Day 20: UI Tests**
+- [ ] Test interactivity (keys n, p, o, s, q)
+- [ ] Verify responsiveness
+- [ ] Test with different terminal sizes
+
+**Milestone:** DONE - Presentation layer mastered
+
+---
+
+## Month 2: Active Contribution
+
+### Weeks 5-6: Small Features
+
+**Objectives:**
+- [ ] First contribution accepted
+- [ ] Understand pull request process
+- [ ] Participate in code review
+
+**Weekly Tasks:**
+
+**Week 5:**
+1. **Choose an issue:**
+   - Bug: "TUI doesn't update when WebSocket reconnects"
+   - Feature: "Add --json flag for markets"
+   - Docs: "Improve README"
+
+2. **Implementation:**
    ```bash
    git checkout -b fix/tui-reconnect
-   # Faça alterações
+   # Make changes
    git commit -m "Fix: TUI update on WS reconnect"
    git push origin fix/tui-reconnect
    ```
 
 3. **Pull Request:**
-   - [ ] Descreva mudança
-   - [ ] Referencie issue
-   - [ ] Solicite review
+   - [ ] Describe change
+   - [ ] Reference issue
+   - [ ] Request review
 
-**Semana 6:**
-1. **Code Review de Others:**
-   - [ ] Revise 1 PR de outro desenvolvedor
-   - [ ] Aprenda com código alheio
-   - [ ] Dê feedback construtivo
+**Week 6:**
+1. **Code Review of Others:**
+   - [ ] Review 1 PR from another developer
+   - [ ] Learn from others' code
+   - [ ] Give constructive feedback
 
-2. **Segunda Contribuição:**
-   - [ ] Escolha issue mais complexa
-   - [ ] Implemente com testes
-   - [ ] Documente mudanças
+2. **Second Contribution:**
+   - [ ] Choose more complex issue
+   - [ ] Implement with tests
+   - [ ] Document changes
 
-**Milestone:** ✅ 2 contribuições aceitas
+**Milestone:** DONE - 2 contributions accepted
 
 ---
 
-### Semana 7-8: Testes e Qualidade
+### Weeks 7-8: Testing and Quality
 
-**Objetivos:**
-- [ ] Escrever testes unitários
-- [ ] Escrever testes de integração
-- [ ] Alcançar 80% de cobertura
+**Objectives:**
+- [ ] Write unit tests
+- [ ] Write integration tests
+- [ ] Achieve 80% coverage
 
-**Tarefas Semanais:**
+**Weekly Tasks:**
 
-**Semana 7: Testes Unitários**
+**Week 7: Unit Tests**
 ```typescript
-// Exercício: Testes para api.ts
+// Exercise: Tests for api.ts
 describe("fetchEvents", () => {
-  it("deve retornar eventos ativos", async () => {
+  it("should return active events", async () => {
     const events = await fetchEvents(5);
     expect(Array.isArray(events)).toBe(true);
     expect(events.length).toBeLessThanOrEqual(5);
@@ -359,11 +359,11 @@ describe("fetchEvents", () => {
 });
 ```
 
-**Semana 8: Testes de Integração**
+**Week 8: Integration Tests**
 ```typescript
-// Exercício: Testes de fluxo completo
+// Exercise: Complete flow tests
 describe("loadRadar", () => {
-  it("deve carregar e normalizar mercados", async () => {
+  it("should load and normalize markets", async () => {
     const radar = await loadRadar(10);
     expect(radar).toHaveLength(10);
     expect(radar[0].conditionId).toBeDefined();
@@ -371,52 +371,52 @@ describe("loadRadar", () => {
 });
 ```
 
-**Milestone:** ✅ Testes dominados
+**Milestone:** DONE - Testing mastered
 
 ---
 
-## 📅 Mês 3: Autonomia e Liderança
+## Month 3: Autonomy and Leadership
 
-### Semana 9-10: Features Complexas
+### Weeks 9-10: Complex Features
 
-**Objetivos:**
-- [ ] Desenvolver feature completa
-- [ ] Arquitetar solução
-- [ ] Documentar decisões
+**Objectives:**
+- [ ] Develop complete feature
+- [ ] Architect solution
+- [ ] Document decisions
 
-**Exemplo de Feature:**
+**Feature Example:**
 ```markdown
-## Feature: Sistema de Alertas
+## Feature: Alert System
 
-### Descrição
-Notificar usuário quando:
-- Preço muda > X%
-- Volume aumenta anormalmente
-- WebSocket desconecta
+### Description
+Notify user when:
+- Price changes > X%
+- Volume increases abnormally
+- WebSocket disconnects
 
-### Arquitetura
-- Novo arquivo: src/alerts.ts
-- Integrar com: ws.ts (receber updates)
-- Renderizar em: tui.ts (painel de alerts)
+### Architecture
+- New file: src/alerts.ts
+- Integrate with: ws.ts (receive updates)
+- Render in: tui.ts (alerts panel)
 
-### Decisões de Design
-- Alertas visuais vs sonoros? → Visuais
-- Limite de alertas simultâneos? → 5
-- Histórico de alertas? → Sim, últimos 50
+### Design Decisions
+- Visual vs audio alerts? -> Visual
+- Limit of simultaneous alerts? -> 5
+- Alert history? -> Yes, last 50
 ```
 
-**Milestone:** ✅ Feature complexa entregue
+**Milestone:** DONE - Complex feature delivered
 
 ---
 
-### Semana 11-12: Otimização e Performance
+### Weeks 11-12: Optimization and Performance
 
-**Objetivos:**
-- [ ] Identificar gargalos
-- [ ] Implementar cache
-- [ ] Otimizar queries
+**Objectives:**
+- [ ] Identify bottlenecks
+- [ ] Implement cache
+- [ ] Optimize queries
 
-**Tarefas:**
+**Tasks:**
 
 1. **Profiling:**
    ```bash
@@ -424,125 +424,125 @@ Notificar usuário quando:
    bun --prof run src/index.ts
    ```
 
-2. **Otimizações:**
-   - [ ] Cache de mercados (1 minuto TTL)
-   - [ ] Debounce de atualizações TUI
-   - [ ] Lazy loading de dados
+2. **Optimizations:**
+   - [ ] Market cache (1 minute TTL)
+   - [ ] TUI update debounce
+   - [ ] Lazy loading of data
 
-3. **Métricas:**
-   - [ ] Tempo de inicialização: < 3s
-   - [ ] Tamanho do bundle: < 500KB
-   - [ ] Uso de memória: < 100MB
+3. **Metrics:**
+   - [ ] Startup time: < 3s
+   - [ ] Bundle size: < 500KB
+   - [ ] Memory usage: < 100MB
 
-**Milestone:** ✅ Performance otimizada
+**Milestone:** DONE - Performance optimized
 
 ---
 
-## 🎓 Plano de Aprendizagem Contínuo
+## Continuous Learning Plan
 
-### Recursos Obrigatórios
+### Required Resources
 
-**Ferramentas:**
+**Tools:**
 - [ ] Bun: https://bun.sh/docs
 - [ ] TypeScript: https://www.typescriptlang.org/docs/
 - [ ] Blessed: https://github.com/chjj/blessed
 
-**Conceitos:**
+**Concepts:**
 - [ ] Rate Limiting: Token Bucket Algorithm
 - [ ] WebSocket: RFC 6455
 - [ ] TUI: ncurses, terminal escape codes
 
-**Boas Práticas:**
+**Best Practices:**
 - [ ] Clean Code: Robert C. Martin
 - [ ] Refactoring: Martin Fowler
 - [ ] Design Patterns: Gang of Four
 
 ---
 
-## 📊 Sistema de Progresso
+## Progress System
 
-### Checkpoints Mensais
+### Monthly Checkpoints
 
-**Mês 1 - Fundamentos:**
-- [ ] 4 checkpoints dos capítulos
-- [ ] 5 exercícios práticos
-- [ ] 1 contribuição
+**Month 1 - Fundamentals:**
+- [ ] 4 chapter checkpoints
+- [ ] 5 practical exercises
+- [ ] 1 contribution
 
-**Mês 2 - Profundização:**
-- [ ] 3 features pequenas
-- [ ] 10 testes escritos
+**Month 2 - Deep Dive:**
+- [ ] 3 small features
+- [ ] 10 tests written
 - [ ] 2 code reviews
 
-**Mês 3 - Autonomia:**
-- [ ] 1 feature complexa
-- [ ] 3 otimizações
+**Month 3 - Autonomy:**
+- [ ] 1 complex feature
+- [ ] 3 optimizations
 - [ ] 1 design document
 
-### Badges de Conquista
+### Achievement Badges
 
 ```
-🏅 NOVICE       - Completou Mês 1
-🏅 APPRENTICE   - Primeira contribuição
-🏅 CONTRIBUTOR  - 5 contribuições
-🏅 EXPERT       - Completou Mês 2
-🏅 MASTER       - Completou Mês 3
-🏅 ARCHITECT    - Design document aprovado
-🏅 MENTOR       - Mentorou novo membro
+BADGE NOVICE       - Completed Month 1
+BADGE APPRENTICE   - First contribution
+BADGE CONTRIBUTOR  - 5 contributions
+BADGE EXPERT       - Completed Month 2
+BADGE MASTER       - Completed Month 3
+BADGE ARCHITECT    - Design document approved
+BADGE MENTOR       - Mentored new member
 ```
 
 ---
 
-## 🤝 Suporte e Mentoria
+## Support and Mentorship
 
-### Canais de Ajuda
+### Help Channels
 
-1. **Dúvidas Técnicas:**
+1. **Technical Questions:**
    - Slack #engineering-support
-   - Issue tracker no GitHub
+   - Issue tracker on GitHub
 
 2. **Pair Programming:**
-   - 2h/semana com mentor
-   - Screenshare de problemas complexos
+   - 2h/week with mentor
+   - Screen share for complex problems
 
 3. **Code Review:**
-   - Toda PR revisada por senior
-   - Feedback detalhado
+   - Every PR reviewed by senior
+   - Detailed feedback
 
-### Sinais de Alerta
+### Warning Signs
 
-**Se você sentir:**
-- 😰 "Estou muito atrasado" → Fale com manager
-- 😵 "Não entendo NADA" → Agende pair programming
-- 🤔 "Isso não faz sentido" → Questione arquitetura
+**If you feel:**
+- "I'm way behind" -> Talk to manager
+- "I don't understand ANYTHING" -> Schedule pair programming
+- "This doesn't make sense" -> Question the architecture
 
-**NÃO sofra em silêncio!**
-
----
-
-## ✅ Checklist Final
-
-### Dia 90: Você deve ser capaz de:
-
-- [ ] Explicar a arquitetura completa para alguém novo
-- [ ] Desenvolver feature sem ajuda significativa
-- [ ] Revisar código de outros construtivamente
-- [ ] Sugerir melhorias arquiteturais
-- [ ] Mentorar novo desenvolvedor
-- [ ] Contribuir com decisões técnicas
-- [ ] Escrever código production-ready
-- [ ] Debugar problemas complexos
-
-**Parabéns! Você é oficialmente um contribuidor pleno do Polymarket Analyzer! 🎉**
+**Do NOT suffer in silence!**
 
 ---
 
-## 📚 Recursos Adicionais
+## Final Checklist
 
-- **Playground:** `docs/learn/08-exercicios-completos.md`
-- **Referência Rápida:** `docs/learn/README.md`
-- **FAQ:** (a ser criado)
+### Day 90: You should be able to:
+
+- [ ] Explain the complete architecture to someone new
+- [ ] Develop features without significant help
+- [ ] Review others' code constructively
+- [ ] Suggest architectural improvements
+- [ ] Mentor a new developer
+- [ ] Contribute to technical decisions
+- [ ] Write production-ready code
+- [ ] Debug complex problems
+
+**Congratulations! You are officially a full contributor to Polymarket Analyzer!**
 
 ---
 
-**Última Atualização:** Janeiro 2026
-**Versão:** 1.0
+## Additional Resources
+
+- **Playground:** `docs/learn/08-complete-exercises.md`
+- **Quick Reference:** `docs/learn/README.md`
+- **FAQ:** (to be created)
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** January 2026

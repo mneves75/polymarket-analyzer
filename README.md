@@ -1,5 +1,7 @@
 # Polymarket Analyzer - Realtime CLI/TUI Demo
 
+> **Version 1.0.0**
+
 Realtime terminal interface for [Polymarket](https://polymarket.com) public APIs (Gamma discovery + CLOB REST/WS + Data API).
 
 > **Note**: All data is **real and live** from Polymarket's production APIs. This is not mock/demo data.
@@ -81,30 +83,30 @@ bun --bun run dev --list-markets --limit 200  # List 200 markets
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      index.ts (CLI)                      │
-│  - Parses args, selects market, starts TUI or snapshot  │
-└────────────────────┬────────────────────────────────────┘
-                     │
-        ┌────────────┴────────────┐
-        │                         │
-┌───────▼────────┐      ┌────────▼─────────┐
-│  market.ts     │      │    tui.ts        │
-│  - Resolves    │      │  - Blessed UI    │
-│    market      │      │  - 8 panels      │
-└───────┬────────┘      │  - Keyboard      │
-        │               │  - Refresh loop  │
-        │               └────────┬─────────┘
-┌───────▼────────┐               │
-│  api.ts        │      ┌────────▼─────────┐
-│  - fetchJson   │◄─────┤  ws.ts           │
-│  - withQuery   │      │  - WebSocket     │
-└───────┬────────┘      │  - Auto-reconnect│
-        │               │  - Subscription  │
-┌───────▼────────┐      └──────────────────┘
-│  rateLimiter   │
-│  - Token bucket│
-└────────────────┘
++----------------------------------------------------------+
+|                      index.ts (CLI)                       |
+|  - Parses args, selects market, starts TUI or snapshot   |
++-----------------------------+----------------------------+
+                              |
+           +------------------+------------------+
+           |                                     |
++----------v---------+              +-----------v----------+
+|  market.ts         |              |    tui.ts            |
+|  - Resolves        |              |  - Blessed UI        |
+|    market          |              |  - 8 panels          |
++----------+---------+              |  - Keyboard          |
+           |                        |  - Refresh loop      |
+           |                        +-----------+----------+
++----------v---------+                          |
+|  api.ts            |              +-----------v----------+
+|  - fetchJson       |<-------------+  ws.ts               |
+|  - withQuery       |              |  - WebSocket         |
++----------+---------+              |  - Auto-reconnect    |
+           |                        |  - Subscription      |
++----------v---------+              +----------------------+
+|  rateLimiter       |
+|  - Token bucket    |
++--------------------+
 ```
 
 ## Project Structure
@@ -132,24 +134,25 @@ polymarket-analyzer/
 
 ## Documentation
 
-Comprehensive Portuguese documentation available in `docs/learn/`:
+Comprehensive documentation available in `docs/learn/`:
 
-- **[00 - Introdução](docs/learn/00-introducao.md)** - Project overview and getting started
-- **[01 - Bun + TypeScript](docs/learn/01-ecossistema-bun-typescript.md)** - Development environment
-- **[02 - Arquitetura](docs/learn/02-arquitetura-estrutura.md)** - Project structure
-- **[03 - APIs Polymarket](docs/learn/03-apis-polymarket.md)** - API integration
-- **[04 - WebSockets](docs/learn/04-websockets-tempo-real.md)** - Real-time data
-- **[05 - Interface Terminal](docs/learn/05-interface-terminal.md)** - TUI implementation
-- **[06 - Erros & Rate Limiting](docs/learn/06-erros-rate-limiting.md)** - Error handling
-- **[07 - Testes](docs/learn/07-testes.md)** - Testing strategies
-- **[08 - Exercícios](docs/learn/08-exercicios-completos.md)** - Practice exercises
-- **[09 - Próximos Passos](docs/learn/09-proximos-passos.md)** - Further learning
+- **[00 - Introduction](docs/learn/00-introduction.md)** - Project overview and getting started
+- **[01 - Bun + TypeScript](docs/learn/01-bun-typescript-ecosystem.md)** - Development environment
+- **[02 - Architecture](docs/learn/02-architecture-structure.md)** - Project structure
+- **[03 - Polymarket APIs](docs/learn/03-polymarket-apis.md)** - API integration
+- **[04 - WebSockets](docs/learn/04-websockets-realtime.md)** - Real-time data
+- **[05 - Terminal Interface](docs/learn/05-terminal-interface.md)** - TUI implementation
+- **[06 - Errors and Rate Limiting](docs/learn/06-errors-rate-limiting.md)** - Error handling
+- **[07 - Testing](docs/learn/07-testing.md)** - Testing strategies
+- **[08 - Exercises](docs/learn/08-complete-exercises.md)** - Practice exercises
+- **[09 - Next Steps](docs/learn/09-next-steps.md)** - Further learning
 
 ### Additional Resources
 
 - **[ONBOARDING.md](docs/learn/ONBOARDING.md)** - 90-day onboarding plan
-- **[PROGRESSO.md](docs/learn/PROGRESSO.md)** - Progress tracking system
-- **[ARQUITETURA-COMPLETA.md](docs/diagrams/ARQUITETURA-COMPLETA.md)** - Architecture diagrams
+- **[PROGRESS.md](docs/learn/PROGRESS.md)** - Progress tracking system
+- **[ARCHITECTURE.md](docs/diagrams/ARCHITECTURE.md)** - Architecture diagrams
+- **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Troubleshooting guide
 
 ## Testing
 
@@ -173,7 +176,7 @@ This project integrates with multiple Polymarket APIs:
 ## Error Handling
 
 - **Automatic retry** on rate limits (429) and server errors (5xx)
-- **Exponential backoff** with jitter (200ms → 400ms → 800ms...)
+- **Exponential backoff** with jitter (200ms -> 400ms -> 800ms...)
 - **Graceful degradation** for missing orderbooks
 - **Structured HTTP errors** with detailed context
 
@@ -195,3 +198,8 @@ This project integrates with multiple Polymarket APIs:
 ## License
 
 MIT
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** January 2026
